@@ -1,0 +1,6 @@
+# Local dev only. Copy to .dev.vars (gitignored). Real values are Worker
+# secrets set at interactive `wrangler secret put` prompts, never here.
+INFRA_REPORT_KEY=dev-only-infra-key
+RAG_REPORT_KEY=dev-only-rag-key
+NOTIFY_TOKEN=
+# NOTIFY_URL=http://127.0.0.1:8787/notify

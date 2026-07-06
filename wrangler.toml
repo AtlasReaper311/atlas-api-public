@@ -1,0 +1,78 @@
+# atlas-api-public :: the versioned public surface of the estate.
+#
+# Route layering: /v1* is more specific than atlas-notify's /* wildcard
+# on the same hostname, so this Worker takes /v1 traffic without
+# unwiring anything (decisions.md :: Worker naming and route layering).
+# Versioning lives in the path, not the Worker name; a future /v2 is a
+# new router branch in this same deployable, not a new Worker.
+#
+# zone_id, never zone_name: scoped CI tokens cannot perform zone
+# membership lookups (decisions.md :: wrangler.toml rule).
+
+name = "atlas-api-public"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+account_id = "49e221b7e55a9e5c45b88d08efca5771"
+
+routes = [
+  { pattern = "api.atlas-systems.uk/v1*", zone_id = "8ba6350a78c988447c111048b125f917" }
+]
+
+[triggers]
+# One cron, three jobs: staleness dead-man's switch on sentinel reports,
+# estate component probes, uptime accumulation. Ten minutes is the Plus
+# era answer; the old free-tier cron thrift is documented as revisitable.
+crons = ["*/10 * * * *"]
+
+[vars]
+CORPUS_ORIGIN = "https://corpus.atlas-systems.uk"
+STALE_AFTER_SECONDS = "1200"
+UPTIME_WINDOW_DAYS = "30"
+
+# ATLAS_PUBLIC_KV is created by the build instruction file with
+#   npx wrangler kv namespace create ATLAS_PUBLIC_KV --config /dev/null
+# and the returned id is injected below before any deploy. Shipping
+# id = "" would block every wrangler command against this config
+# (decisions.md :: wrangler KV creation gotcha).
+[[kv_namespaces]]
+binding = "ATLAS_PUBLIC_KV"
+id = "33fa7cbf66fc495ea0304a5f95ffc9a8"
+
+# Worker-to-Worker calls stay inside Cloudflare's network; service
+# bindings are the estate default over public self-fetches.
+[[services]]
+binding = "ATLAS_NOTIFY"
+service = "atlas-notify"
+
+[[services]]
+binding = "REGISTRY"
+service = "atlas-api-index"
+
+[[services]]
+binding = "GITHUB_PULSE"
+service = "github-pulse"
+
+[[services]]
+binding = "SPECULAR_EDGE"
+service = "specular-edge"
+
+# The Workers rate limiting binding: per-colo counters, which is the
+# documented tradeoff for a zero-dependency limiter at this scale.
+# namespace_id values are account-unique integers, nothing more.
+[[unsafe.bindings]]
+name = "RL_GENERAL"
+type = "ratelimit"
+namespace_id = "1101"
+simple = { limit = 60, period = 60 }
+
+[[unsafe.bindings]]
+name = "RL_SEARCH"
+type = "ratelimit"
+namespace_id = "1102"
+simple = { limit = 10, period = 60 }
+
+# Secrets, set only at interactive `wrangler secret put` prompts:
+#   INFRA_REPORT_KEY  shared with /etc/specular-sentinel/env
+#   RAG_REPORT_KEY    shared with atlas-corpus .env
+#   NOTIFY_TOKEN      the atlas-notify bearer, same value the other
+#                     consumers hold
