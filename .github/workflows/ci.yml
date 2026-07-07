@@ -31,8 +31,14 @@ jobs:
     steps:
       - name: Notify success
         if: needs.test.result == 'success'
+        env:
+          DISCORD_CICD_WEBHOOK: ${{ secrets.DISCORD_CICD_WEBHOOK }}
         run: |
-          curl -X POST "${{ secrets.DISCORD_CICD_WEBHOOK }}" \
+          if [ -z "$DISCORD_CICD_WEBHOOK" ]; then
+            echo "DISCORD_CICD_WEBHOOK is not set; skipping Discord notification."
+            exit 0
+          fi
+          curl --fail -X POST "$DISCORD_CICD_WEBHOOK" \
             -H "Content-Type: application/json" \
             -d '{
               "username": "ci-cd",
@@ -49,8 +55,14 @@ jobs:
             }'
       - name: Notify failure
         if: needs.test.result == 'failure'
+        env:
+          DISCORD_CICD_WEBHOOK: ${{ secrets.DISCORD_CICD_WEBHOOK }}
         run: |
-          curl -X POST "${{ secrets.DISCORD_CICD_WEBHOOK }}" \
+          if [ -z "$DISCORD_CICD_WEBHOOK" ]; then
+            echo "DISCORD_CICD_WEBHOOK is not set; skipping Discord notification."
+            exit 0
+          fi
+          curl --fail -X POST "$DISCORD_CICD_WEBHOOK" \
             -H "Content-Type: application/json" \
             -d '{
               "username": "ci-cd",
