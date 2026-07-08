@@ -57,6 +57,7 @@ npx wrangler deploy
 | `GET /v1/badge/status` | Shields-flat SVG, `N/M operational` |
 | `POST /v1/infra/report` | Sentinel ingest, bearer `INFRA_REPORT_KEY` |
 | `POST /v1/rag/report` | Corpus summary ingest, bearer `RAG_REPORT_KEY` |
+| `data/estate.manifest.json` | Canonical machine-readable estate manifest; repo ownership, lifecycle, layer, public surface, dependencies, and feeds |
 
 ## Operational notes
 
