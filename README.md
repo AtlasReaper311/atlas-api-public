@@ -44,6 +44,8 @@ npx wrangler deploy
 
 ## Surface
 
+`data/estate.manifest.json` is the canonical declared map of Atlas Systems. It lists the owned sites, Workers, local services, external dependencies, storage surfaces, public endpoints, metadata coverage, and dependency edges. The live registry shows what is currently discoverable; the manifest explains what the estate intends to own.
+
 | Endpoint | What it is |
 |---|---|
 | `GET /v1` | Endpoint index |
