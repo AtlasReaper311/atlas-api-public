@@ -1,0 +1,325 @@
+{
+  "schema": "atlas-estate-manifest/v1",
+  "name": "Atlas Systems",
+  "canonical_site": "https://atlas-systems.uk",
+  "canonical_api": "https://api.atlas-systems.uk/v1",
+  "owner": "AtlasReaper311",
+  "layers": [
+    "surface",
+    "public-api",
+    "observability",
+    "local-ai",
+    "reusable-kit",
+    "infra"
+  ],
+  "repos": [
+    {
+      "name": "atlas-systems",
+      "repo": "https://github.com/AtlasReaper311/atlas-systems",
+      "layer": "surface",
+      "lifecycle": "production",
+      "public_surface": "https://atlas-systems.uk",
+      "depends_on": [
+        "github-pulse",
+        "site-pulse",
+        "deploy-watch",
+        "atlas-api-public"
+      ],
+      "feeds": [
+        "portfolio",
+        "lab",
+        "corpus"
+      ]
+    },
+    {
+      "name": "status",
+      "repo": "https://github.com/AtlasReaper311/status",
+      "layer": "surface",
+      "lifecycle": "production",
+      "public_surface": "https://status.atlas-systems.uk",
+      "depends_on": [
+        "atlas-api-public",
+        "atlas-api-index"
+      ],
+      "feeds": [
+        "public status"
+      ]
+    },
+    {
+      "name": "atlas-doc-viewer",
+      "repo": "https://github.com/AtlasReaper311/atlas-doc-viewer",
+      "layer": "surface",
+      "lifecycle": "production",
+      "public_surface": "https://cv.atlas-systems.uk",
+      "depends_on": [],
+      "feeds": [
+        "cv surface"
+      ]
+    },
+    {
+      "name": "atlas-api-public",
+      "repo": "https://github.com/AtlasReaper311/atlas-api-public",
+      "layer": "public-api",
+      "lifecycle": "production",
+      "public_surface": "https://api.atlas-systems.uk/v1",
+      "depends_on": [
+        "atlas-api-index",
+        "atlas-corpus",
+        "specular-sentinel",
+        "github-pulse",
+        "specular-telemetry"
+      ],
+      "feeds": [
+        "lab",
+        "status",
+        "profile badge"
+      ]
+    },
+    {
+      "name": "atlas-api-index",
+      "repo": "https://github.com/AtlasReaper311/atlas-api-index",
+      "layer": "public-api",
+      "lifecycle": "production",
+      "public_surface": "https://api.atlas-systems.uk/",
+      "depends_on": [
+        "worker-meta-kit",
+        "atlas-notify"
+      ],
+      "feeds": [
+        "registry",
+        "system map"
+      ]
+    },
+    {
+      "name": "atlas-notify",
+      "repo": "https://github.com/AtlasReaper311/atlas-notify",
+      "layer": "observability",
+      "lifecycle": "production",
+      "public_surface": "https://api.atlas-systems.uk/notify/health",
+      "depends_on": [],
+      "feeds": [
+        "discord",
+        "failure log",
+        "blackbox"
+      ]
+    },
+    {
+      "name": "github-pulse",
+      "repo": "https://github.com/AtlasReaper311/github-pulse",
+      "layer": "observability",
+      "lifecycle": "production",
+      "public_surface": "https://api.atlas-systems.uk/pulse",
+      "depends_on": [
+        "GitHub API"
+      ],
+      "feeds": [
+        "homepage",
+        "weekly digest"
+      ]
+    },
+    {
+      "name": "site-pulse",
+      "repo": "https://github.com/AtlasReaper311/site-pulse",
+      "layer": "observability",
+      "lifecycle": "production",
+      "public_surface": "https://api.atlas-systems.uk/site-pulse",
+      "depends_on": [
+        "Cloudflare Analytics API"
+      ],
+      "feeds": [
+        "homepage",
+        "weekly digest"
+      ]
+    },
+    {
+      "name": "deploy-watch",
+      "repo": "https://github.com/AtlasReaper311/deploy-watch",
+      "layer": "observability",
+      "lifecycle": "production",
+      "public_surface": "https://api.atlas-systems.uk/deploy-watch/latest",
+      "depends_on": [
+        "Cloudflare Pages API"
+      ],
+      "feeds": [
+        "homepage",
+        "deploy-log"
+      ]
+    },
+    {
+      "name": "specular-telemetry",
+      "repo": "https://github.com/AtlasReaper311/specular-telemetry",
+      "layer": "observability",
+      "lifecycle": "production",
+      "public_surface": "https://api.atlas-systems.uk/specular",
+      "depends_on": [
+        "SPECULAR-CORE",
+        "cloudflared"
+      ],
+      "feeds": [
+        "lab",
+        "blackbox"
+      ]
+    },
+    {
+      "name": "specular-sentinel",
+      "repo": "https://github.com/AtlasReaper311/specular-sentinel",
+      "layer": "observability",
+      "lifecycle": "production",
+      "public_surface": "via atlas-api-public",
+      "depends_on": [
+        "SPECULAR-CORE",
+        "atlas-corpus",
+        "Ollama"
+      ],
+      "feeds": [
+        "infra health"
+      ]
+    },
+    {
+      "name": "atlas-blackbox",
+      "repo": "https://github.com/AtlasReaper311/atlas-blackbox",
+      "layer": "observability",
+      "lifecycle": "lab / Workers Plus gated",
+      "public_surface": "https://api.atlas-systems.uk/blackbox",
+      "depends_on": [
+        "specular-telemetry",
+        "atlas-notify"
+      ],
+      "feeds": [
+        "incident replay"
+      ]
+    },
+    {
+      "name": "atlas-corpus",
+      "repo": "https://github.com/AtlasReaper311/atlas-corpus",
+      "layer": "local-ai",
+      "lifecycle": "production",
+      "public_surface": "via atlas-api-public /v1/search",
+      "depends_on": [
+        "Ollama",
+        "ChromaDB",
+        "GitHub"
+      ],
+      "feeds": [
+        "estate search",
+        "Ramone"
+      ]
+    },
+    {
+      "name": "ramone-edge",
+      "repo": "https://github.com/AtlasReaper311/ramone-edge",
+      "layer": "local-ai",
+      "lifecycle": "production",
+      "public_surface": "https://ramone.atlas-systems.uk",
+      "depends_on": [
+        "Cloudflare Tunnel",
+        "SPECULAR-CORE",
+        "ollama-rag-kit"
+      ],
+      "feeds": [
+        "public Ramone interface"
+      ]
+    },
+    {
+      "name": "ramone-memory",
+      "repo": "https://github.com/AtlasReaper311/ramone-memory",
+      "layer": "local-ai",
+      "lifecycle": "production",
+      "public_surface": "no direct public surface",
+      "depends_on": [
+        "Ollama",
+        "ChromaDB"
+      ],
+      "feeds": [
+        "Ramone private memory"
+      ]
+    },
+    {
+      "name": "ramone-voice-trigger",
+      "repo": "https://github.com/AtlasReaper311/ramone-voice-trigger",
+      "layer": "local-ai",
+      "lifecycle": "production",
+      "public_surface": "controlled Worker endpoint",
+      "depends_on": [
+        "GitHub Actions",
+        "Cloudflare Workers"
+      ],
+      "feeds": [
+        "workflow dispatch"
+      ]
+    },
+    {
+      "name": "atlas-bootstrap",
+      "repo": "https://github.com/AtlasReaper311/atlas-bootstrap",
+      "layer": "infra",
+      "lifecycle": "production",
+      "public_surface": "no",
+      "depends_on": [
+        "Windows",
+        "WSL2",
+        "Docker",
+        "Ollama",
+        "GitHub"
+      ],
+      "feeds": [
+        "machine recovery"
+      ]
+    },
+    {
+      "name": "atlas-infra",
+      "repo": "https://github.com/AtlasReaper311/atlas-infra",
+      "layer": "infra",
+      "lifecycle": "production",
+      "public_surface": "no",
+      "depends_on": [
+        "GitHub Actions",
+        "Cloudflare"
+      ],
+      "feeds": [
+        "reusable workflows"
+      ]
+    },
+    {
+      "name": "worker-meta-kit",
+      "repo": "https://github.com/AtlasReaper311/worker-meta-kit",
+      "layer": "reusable-kit",
+      "lifecycle": "template",
+      "public_surface": "no",
+      "depends_on": [],
+      "feeds": [
+        "Worker conventions"
+      ]
+    },
+    {
+      "name": "atlas-kit-python-rag",
+      "repo": "https://github.com/AtlasReaper311/atlas-kit-python-rag",
+      "layer": "reusable-kit",
+      "lifecycle": "library",
+      "public_surface": "no",
+      "depends_on": [
+        "Python",
+        "ChromaDB",
+        "Ollama",
+        "OpenAI adapters"
+      ],
+      "feeds": [
+        "RAG architecture"
+      ]
+    },
+    {
+      "name": "ollama-rag-kit",
+      "repo": "https://github.com/AtlasReaper311/ollama-rag-kit",
+      "layer": "reusable-kit",
+      "lifecycle": "service template",
+      "public_surface": "no",
+      "depends_on": [
+        "Docker",
+        "Ollama",
+        "ChromaDB"
+      ],
+      "feeds": [
+        "local RAG services"
+      ]
+    }
+  ]
+}
