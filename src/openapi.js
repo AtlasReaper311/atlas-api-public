@@ -1,6 +1,6 @@
 /**
  * The OpenAPI 3.0 document for /v1, written by hand rather than
- * generated: eleven endpoints do not justify a generator dependency,
+ * generated: twelve endpoints do not justify a generator dependency,
  * and a hand-written spec forces every response shape to be decided
  * before it ships. The smoke suite walks every path in this document
  * against the live router, so spec drift fails CI instead of lying to
@@ -21,7 +21,7 @@ export function buildOpenApi() {
     openapi: "3.0.3",
     info: {
       title: "Atlas Systems public API",
-      version: "1.0.0",
+      version: "1.1.0",
       description:
         "Versioned read surface for the Atlas Systems estate: the Worker registry, RAG search over the estate corpus, live infra health, query stats, and a status badge. Runs at the edge on Cloudflare Workers; the RAG stack itself runs on a homelab machine that sleeps, and the API says so honestly when it does.",
       contact: { name: "Atlas Reaper", url: "https://atlas-systems.uk" },
@@ -159,6 +159,61 @@ export function buildOpenApi() {
           responses: { 200: { description: "Stats document" } },
         },
       },
+      "/v1/slo": {
+        get: {
+          summary: "Per-day probe counters for error budget maths",
+          description:
+            "The raw per-day ok/total counters behind the uptime numbers, one probe pass every ten minutes, pruned past the rolling window. Successful probes also carry round-trip milliseconds (ms_sum, ms_count) so consumers can show a measured average latency. Targets are deliberately not here; they live with the status page, so tuning a target never touches this Worker.",
+          responses: {
+            200: {
+              description: "SLO source document",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      ok: { type: "boolean" },
+                      measuring_since: {
+                        type: "string",
+                        format: "date-time",
+                        nullable: true,
+                      },
+                      window_days: { type: "integer" },
+                      components: {
+                        type: "object",
+                        additionalProperties: {
+                          type: "object",
+                          properties: {
+                            days: {
+                              type: "object",
+                              additionalProperties: {
+                                type: "object",
+                                properties: {
+                                  ok: { type: "integer" },
+                                  total: { type: "integer" },
+                                  ms_sum: { type: "integer" },
+                                  ms_count: { type: "integer" },
+                                },
+                              },
+                            },
+                            days_observed: { type: "integer" },
+                            first_day: { type: "string", nullable: true },
+                            ok: { type: "integer" },
+                            total: { type: "integer" },
+                            avg_ms: { type: "integer", nullable: true },
+                          },
+                        },
+                      },
+                      note: { type: "string" },
+                      generated_at: { type: "string", format: "date-time" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       "/v1/infra/status": {
         get: {
           summary: "Infra health state",
@@ -233,7 +288,7 @@ export function buildOpenApi() {
         get: {
           summary: "SVG status badge",
           description:
-            "A shields-flat badge reading N/M operational across the estate's five probed components. Sixty second cache; embeds cleanly in GitHub READMEs.",
+            "A shields-flat badge reading N/M operational across the estate's ten probed components. Sixty second cache; embeds cleanly in GitHub READMEs.",
           responses: {
             200: {
               description: "SVG image",

@@ -76,6 +76,12 @@ const ENDPOINTS = [
   },
   {
     method: "GET",
+    path: "/v1/slo",
+    description:
+      "The per-day probe counters behind the uptime numbers, served raw so the status page can compute error budget burn-down honestly. Every response carries the window and the measurement start date; there is nothing to hide behind.",
+  },
+  {
+    method: "GET",
     path: "/v1/infra/status",
     description:
       "The current verdict from the sentinel pipeline: Ollama reachability, corpus health, the RAG path end to end, WSL2 IP drift. A silent sentinel reads as down, not as its last good report.",
@@ -90,7 +96,7 @@ const ENDPOINTS = [
     method: "GET",
     path: "/v1/badge/status",
     description:
-      "A shields-flat SVG reading N/M operational across five probed components. Sixty second cache; embeds cleanly in a README.",
+      "A shields-flat SVG reading N/M operational across ten probed components. Sixty second cache; embeds cleanly in a README.",
   },
   {
     method: "GET",

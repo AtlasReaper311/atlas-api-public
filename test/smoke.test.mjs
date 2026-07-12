@@ -107,6 +107,15 @@ function makeEnv(overrides = {}) {
     SPECULAR_EDGE: {
       fetch: async () => jsonResponse({ online: true }),
     },
+    SITE_PULSE: {
+      fetch: async () => jsonResponse({ ok: true, service: "site-pulse" }),
+    },
+    DEPLOY_WATCH: {
+      fetch: async () => jsonResponse({ ok: true, service: "deploy-watch" }),
+    },
+    RAMONE_TRIGGER: {
+      fetch: async () => jsonResponse({ status: "live", name: "ramone-trigger" }),
+    },
     RL_GENERAL: { limit: async () => ({ success: true }) },
     RL_SEARCH: { limit: async () => ({ success: true }) },
     NOTIFY_TOKEN: "test-token",
@@ -462,8 +471,8 @@ test("stats compose the cron snapshots, pulse totals, and uptime", async () => {
 
   const res = await call(env, "/v1/stats");
   const body = await res.json();
-  assert.equal(body.estate.operational, 5);
-  assert.equal(body.estate.total_components, 5);
+  assert.equal(body.estate.operational, 10);
+  assert.equal(body.estate.total_components, 10);
   assert.equal(body.estate.workers.workers, 11);
   assert.equal(body.repos.public, 19);
   assert.equal(body.uptime.components.corpus, 100);
@@ -482,6 +491,35 @@ test("uptime buckets accumulate across cron passes", async () => {
   const doc = JSON.parse(await env.ATLAS_PUBLIC_KV.get("uptime:days:v1"));
   const today = new Date().toISOString().slice(0, 10);
   assert.equal(doc.components.corpus[today].total, 2);
+});
+
+test("slo serves per-day counters with an honest window label", async () => {
+  const env = makeEnv();
+  fetchHandler = (url) =>
+    url.pathname === "/health"
+      ? jsonResponse({ ok: true, chunks: 340 })
+      : jsonResponse({});
+  await runCron(env);
+  await runCron(env);
+  const res = await call(env, "/v1/slo");
+  const body = await res.json();
+  const today = new Date().toISOString().slice(0, 10);
+  assert.equal(body.ok, true);
+  assert.equal(body.window_days, 30);
+  assert.ok(body.measuring_since);
+  assert.equal(body.components.corpus.days[today].total, 2);
+  assert.equal(body.components.corpus.ok, 2);
+  assert.equal(body.components.corpus.days_observed, 1);
+  assert.ok(Number.isFinite(body.components.registry.avg_ms));
+  assert.equal(body.components.machine.avg_ms, null);
+});
+
+test("slo answers honestly before any counters exist", async () => {
+  const res = await call(makeEnv(), "/v1/slo");
+  const body = await res.json();
+  assert.equal(body.ok, true);
+  assert.equal(body.measuring_since, null);
+  assert.deepEqual(body.components, {});
 });
 
 // ------------------------------------------------------------------ //
@@ -503,7 +541,7 @@ test("badge renders green when the whole estate is up", async () => {
   const svg = await res.text();
   assert.ok(svg.startsWith("<svg"));
   assert.ok(svg.endsWith("</svg>"));
-  assert.match(svg, /5\/5 operational/);
+  assert.match(svg, /10\/10 operational/);
   assert.match(svg, /#4c1/);
 });
 
@@ -514,7 +552,7 @@ test("badge degrades honestly with no data", async () => {
 });
 
 test("badge geometry stays well formed for varied messages", () => {
-  for (const msg of ["0/5 operational", "12/12 operational", "no data"]) {
+  for (const msg of ["0/10 operational", "12/12 operational", "no data"]) {
     const svg = renderBadge("atlas systems", msg, "#4c1");
     const width = Number(svg.match(/width="(\d+)"/)[1]);
     assert.ok(width > 100 && width < 400, `implausible width ${width}`);

@@ -31,6 +31,7 @@ import { handleRagReport, handleRagStats } from "./routes/rag.js";
 import { handleRegistry } from "./routes/registry.js";
 import { handleSearch } from "./routes/search.js";
 import { handleStats } from "./routes/stats.js";
+import { handleSlo } from "./routes/slo.js";
 import { handleBadge } from "./routes/badge.js";
 import { handleDocs } from "./routes/docs.js";
 import { buildOpenApi } from "./openapi.js";
@@ -82,6 +83,8 @@ export default {
           return handleSearch(request, env);
         case "/v1/stats":
           return handleStats(request, env, ctx);
+        case "/v1/slo":
+          return handleSlo(request, env);
         case "/v1/infra/status":
           return handleInfraStatus(request, env);
         case "/v1/rag/stats":

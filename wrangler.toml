@@ -56,6 +56,21 @@ service = "github-pulse"
 binding = "SPECULAR_EDGE"
 service = "specular-edge"
 
+# The SLO probe set: the status page's tracked services accrue per-day
+# counters through the same estate pass as the original five components.
+# Probes never alert (see src/cron.js); they feed uptime and /v1/slo.
+[[services]]
+binding = "SITE_PULSE"
+service = "site-pulse"
+
+[[services]]
+binding = "DEPLOY_WATCH"
+service = "deploy-watch"
+
+[[services]]
+binding = "RAMONE_TRIGGER"
+service = "ramone-trigger"
+
 # The Workers rate limiting binding: per-colo counters, which is the
 # documented tradeoff for a zero-dependency limiter at this scale.
 # namespace_id values are account-unique integers, nothing more.

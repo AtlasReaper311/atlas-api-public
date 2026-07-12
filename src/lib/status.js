@@ -1,6 +1,6 @@
 /**
- * Estate status: one computation, three consumers (cron writes it,
- * /v1/stats and /v1/badge/status read it).
+ * Estate status: one computation, four consumers (cron writes it;
+ * /v1/stats, /v1/slo, and /v1/badge/status read it).
  *
  * "Uptime pulled from atlas-status" resolved honestly: the status page
  * is a client-side live checker with no history, so no uptime history
@@ -9,18 +9,34 @@
  * labels the observation window. Measured-since-deploy beats invented
  * history; a senior reader trusts the first and discounts the second.
  *
- * Five components, probed where they actually live:
- *   registry   atlas-api-index /_meta via service binding
- *   notify     atlas-notify /health via service binding
- *   specular   specular-edge /specular via binding; online:false means
- *              the tunnel pipeline is down even though the Worker is up
- *   corpus     corpus.atlas-systems.uk /health over the public tunnel,
- *              ok only when the service itself says ok
- *   machine    sentinel report freshness plus its overall verdict
+ * Ten components, probed where they actually live:
+ *   registry        atlas-api-index /_meta via service binding
+ *   notify          atlas-notify /health via service binding
+ *   specular        the telemetry pipeline end to end; specular-edge
+ *                   /specular via binding, ok only when online is not
+ *                   false (the Worker up with the tunnel down is down)
+ *   specular_edge   the same single fetch, judged on reachability
+ *                   alone, so the edge Worker and the pipeline it
+ *                   fronts accrue separate honest histories
+ *   corpus          corpus.atlas-systems.uk /health over the public
+ *                   tunnel, ok only when the service itself says ok
+ *   machine         sentinel report freshness plus its overall verdict
+ *   ramone_trigger  ramone-trigger /trigger/_meta via service binding
+ *   github_pulse    github-pulse /pulse via service binding; probes
+ *                   the real contract, cache and upstream included
+ *   site_pulse      site-pulse /site-pulse/health via service binding
+ *   deploy_watch    deploy-watch /deploy-watch/health via binding
  *
  * The machine sleeping drops specular, corpus, and machine together;
  * that is three real systems genuinely down, not double counting, and
- * the uptime numbers should say so.
+ * the uptime numbers should say so. specular_edge stays up through a
+ * sleep, which is exactly the distinction it exists to record.
+ *
+ * Probe duration rides along: a successful probe adds its round trip
+ * to the day bucket (ms_sum / ms_count) so /v1/slo can serve a
+ * measured average instead of a per-visitor guess. Failed probes are
+ * excluded on purpose; a 5000 ms timeout is a failure fact, not a
+ * latency fact, and averaging it in would poison the number.
  */
 
 import { nowIso } from "./http.js";
@@ -28,17 +44,31 @@ import { readState, staleAfterMs } from "../routes/infra.js";
 
 export const ESTATE_KEY = "estate:latest:v1";
 export const UPTIME_KEY = "uptime:days:v1";
-export const COMPONENTS = ["registry", "notify", "specular", "corpus", "machine"];
+export const COMPONENTS = [
+  "registry",
+  "notify",
+  "specular",
+  "specular_edge",
+  "corpus",
+  "machine",
+  "ramone_trigger",
+  "github_pulse",
+  "site_pulse",
+  "deploy_watch",
+];
 
 async function probeBinding(binding, url, judge) {
   if (!binding || typeof binding.fetch !== "function") {
     return { ok: false, detail: "binding missing" };
   }
+  const started = Date.now();
   try {
     const res = await binding.fetch(url, {
       signal: AbortSignal.timeout(5000),
     });
-    return await judge(res);
+    const verdict = await judge(res);
+    verdict.ms = Date.now() - started;
+    return verdict;
   } catch (err) {
     return { ok: false, detail: String(err.message || err).slice(0, 120) };
   }
@@ -50,33 +80,99 @@ async function judgeStatusOnly(res) {
     : { ok: false, detail: `http ${res.status}` };
 }
 
+/**
+ * One fetch, two verdicts. The pipeline verdict (specular) preserves
+ * the original component's semantics exactly, so its history stays
+ * continuous; the edge verdict (specular_edge) records reachability
+ * of the Worker itself and starts accruing from this deploy.
+ */
+async function probeSpecular(env) {
+  const binding = env.SPECULAR_EDGE;
+  if (!binding || typeof binding.fetch !== "function") {
+    return {
+      specular: { ok: false, detail: "binding missing" },
+      specular_edge: { ok: false, detail: "binding missing" },
+    };
+  }
+  const started = Date.now();
+  try {
+    const res = await binding.fetch("https://specular-edge/specular", {
+      signal: AbortSignal.timeout(5000),
+    });
+    const ms = Date.now() - started;
+    if (!res.ok) {
+      return {
+        specular: { ok: false, detail: `http ${res.status}`, ms },
+        specular_edge: { ok: false, detail: `http ${res.status}`, ms },
+      };
+    }
+    const body = await res.json().catch(() => null);
+    const pipeline =
+      body && body.online === false
+        ? { ok: false, detail: "worker up, telemetry pipeline offline", ms }
+        : { ok: true, detail: "telemetry flowing", ms };
+    return {
+      specular: pipeline,
+      specular_edge: { ok: true, detail: `http ${res.status}`, ms },
+    };
+  } catch (err) {
+    const detail = String(err.message || err).slice(0, 120);
+    return {
+      specular: { ok: false, detail },
+      specular_edge: { ok: false, detail },
+    };
+  }
+}
+
+async function probeCorpus(env) {
+  const started = Date.now();
+  try {
+    const res = await fetch(`${env.CORPUS_ORIGIN}/health`, {
+      signal: AbortSignal.timeout(5000),
+      headers: { "user-agent": "atlas-api-public/1.0" },
+    });
+    const ms = Date.now() - started;
+    if (!res.ok) return { ok: false, detail: `http ${res.status}`, ms };
+    const body = await res.json().catch(() => null);
+    return body && body.ok === true
+      ? { ok: true, detail: `${body.chunks ?? "?"} chunks indexed`, ms }
+      : { ok: false, detail: "reachable but reports degraded", ms };
+  } catch (err) {
+    return { ok: false, detail: String(err.message || err).slice(0, 120) };
+  }
+}
+
 export async function probeEstate(env) {
-  const [registry, notifyHealth, specular, corpus] = await Promise.all([
+  const [
+    registry,
+    notifyHealth,
+    specularPair,
+    corpus,
+    ramoneTrigger,
+    githubPulse,
+    sitePulse,
+    deployWatch,
+  ] = await Promise.all([
     probeBinding(env.REGISTRY, "https://atlas-api-index/_meta", judgeStatusOnly),
     probeBinding(env.ATLAS_NOTIFY, "https://atlas-notify/health", judgeStatusOnly),
-    probeBinding(env.SPECULAR_EDGE, "https://specular-edge/specular", async (res) => {
-      if (!res.ok) return { ok: false, detail: `http ${res.status}` };
-      const body = await res.json().catch(() => null);
-      if (body && body.online === false) {
-        return { ok: false, detail: "worker up, telemetry pipeline offline" };
-      }
-      return { ok: true, detail: "telemetry flowing" };
-    }),
-    (async () => {
-      try {
-        const res = await fetch(`${env.CORPUS_ORIGIN}/health`, {
-          signal: AbortSignal.timeout(5000),
-          headers: { "user-agent": "atlas-api-public/1.0" },
-        });
-        if (!res.ok) return { ok: false, detail: `http ${res.status}` };
-        const body = await res.json().catch(() => null);
-        return body && body.ok === true
-          ? { ok: true, detail: `${body.chunks ?? "?"} chunks indexed` }
-          : { ok: false, detail: "reachable but reports degraded" };
-      } catch (err) {
-        return { ok: false, detail: String(err.message || err).slice(0, 120) };
-      }
-    })(),
+    probeSpecular(env),
+    probeCorpus(env),
+    probeBinding(
+      env.RAMONE_TRIGGER,
+      "https://ramone-trigger/trigger/_meta",
+      judgeStatusOnly,
+    ),
+    probeBinding(env.GITHUB_PULSE, "https://github-pulse/pulse", judgeStatusOnly),
+    probeBinding(
+      env.SITE_PULSE,
+      "https://site-pulse/site-pulse/health",
+      judgeStatusOnly,
+    ),
+    probeBinding(
+      env.DEPLOY_WATCH,
+      "https://deploy-watch/deploy-watch/health",
+      judgeStatusOnly,
+    ),
   ]);
 
   const infra = await readState(env);
@@ -98,7 +194,18 @@ export async function probeEstate(env) {
     }
   }
 
-  return { registry, notify: notifyHealth, specular, corpus, machine };
+  return {
+    registry,
+    notify: notifyHealth,
+    specular: specularPair.specular,
+    specular_edge: specularPair.specular_edge,
+    corpus,
+    machine,
+    ramone_trigger: ramoneTrigger,
+    github_pulse: githubPulse,
+    site_pulse: sitePulse,
+    deploy_watch: deployWatch,
+  };
 }
 
 /** Registry worker counts ride along on the snapshot for /v1/stats. */
@@ -161,7 +268,14 @@ async function accumulateUptime(env, components) {
     const days = (doc.components[name] = doc.components[name] || {});
     const bucket = (days[today] = days[today] || { ok: 0, total: 0 });
     bucket.total += 1;
-    if (components[name].ok) bucket.ok += 1;
+    const result = components[name];
+    if (result.ok) {
+      bucket.ok += 1;
+      if (Number.isFinite(result.ms)) {
+        bucket.ms_sum = (bucket.ms_sum || 0) + result.ms;
+        bucket.ms_count = (bucket.ms_count || 0) + 1;
+      }
+    }
     for (const day of Object.keys(days)) {
       if (day < cutoff) delete days[day];
     }

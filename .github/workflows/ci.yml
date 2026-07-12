@@ -44,7 +44,7 @@ jobs:
               "username": "ci-cd",
               "embeds": [{
                 "title": "CI passed: atlas-api-public",
-                "description": "eslint plus the 28-test smoke suite passed on push to main.",
+                "description": "eslint plus the 30-test smoke suite passed on push to main.",
                 "color": 4906624,
                 "fields": [
                   {"name": "Commit", "value": "${{ github.sha }}", "inline": true},
