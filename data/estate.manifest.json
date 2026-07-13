@@ -550,6 +550,70 @@
         "Tunnels"
       ],
       "notes": "External platform hosting the public edge estate."
+    },
+    {
+      "name": "atlas-journey-watch",
+      "kind": "github-actions",
+      "layer": "observability",
+      "lifecycle": "production",
+      "repo": "https://github.com/AtlasReaper311/atlas-journey-watch",
+      "public_surface": "GitHub Actions scheduled workflow",
+      "meta_url": null,
+      "indexed": false,
+      "health_url": null,
+      "depends_on": [
+        "atlas-systems",
+        "status",
+        "atlas-api-public",
+        "atlas-api-index",
+        "atlas-notify",
+        "atlas-corpus",
+        "ramone-edge"
+      ],
+      "feeds": [
+        "synthetic journey evidence",
+        "atlas-notify"
+      ],
+      "notes": "Scheduled Playwright journey checks across the public estate. It verifies that key surfaces render, public API contracts remain readable, and sleeping local-AI paths fail honestly rather than silently."
+    },
+    {
+      "name": "atlas-dep-audit",
+      "kind": "github-actions",
+      "layer": "infra",
+      "lifecycle": "production",
+      "repo": "https://github.com/AtlasReaper311/atlas-dep-audit",
+      "public_surface": "GitHub Actions scheduled workflow",
+      "meta_url": null,
+      "indexed": false,
+      "health_url": null,
+      "depends_on": [
+        "github",
+        "atlas-api-public",
+        "atlas-notify",
+        "osv"
+      ],
+      "feeds": [
+        "CycloneDX SBOMs",
+        "OSV findings",
+        "build provenance"
+      ],
+      "notes": "Source-level dependency audit that reads the estate manifest, builds SBOMs, checks OSV, records provenance, and reports findings through atlas-notify."
+    },
+    {
+      "name": "osv",
+      "kind": "external-service",
+      "layer": "external",
+      "lifecycle": "production",
+      "repo": null,
+      "public_surface": "external",
+      "meta_url": null,
+      "indexed": false,
+      "health_url": null,
+      "depends_on": [],
+      "feeds": [
+        "vulnerability advisories"
+      ],
+      "notes": "Open Source Vulnerabilities query API used by atlas-dep-audit for package vulnerability checks."
     }
   ],
   "repositories": [
@@ -662,6 +726,16 @@
       "name": "atlas-bootstrap",
       "url": "https://github.com/AtlasReaper311/atlas-bootstrap",
       "role": "machine rebuild automation"
+    },
+    {
+      "name": "atlas-journey-watch",
+      "url": "https://github.com/AtlasReaper311/atlas-journey-watch",
+      "role": "synthetic estate journeys"
+    },
+    {
+      "name": "atlas-dep-audit",
+      "url": "https://github.com/AtlasReaper311/atlas-dep-audit",
+      "role": "supply-chain assurance"
     }
   ]
 }
