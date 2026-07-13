@@ -86,7 +86,7 @@
       "lifecycle": "production",
       "repo": "https://github.com/AtlasReaper311/atlas-api-public",
       "public_surface": "https://api.atlas-systems.uk/v1",
-      "meta_url": "https://api.atlas-systems.uk/_meta",
+      "meta_url": "https://api.atlas-systems.uk/v1/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/v1",
       "depends_on": [
@@ -373,10 +373,10 @@
       "layer": "observability",
       "lifecycle": "production",
       "repo": "https://github.com/AtlasReaper311/specular-sonify",
-      "public_surface": "controlled Worker endpoint",
-      "meta_url": "https://api.atlas-systems.uk/specular-sonify/_meta",
+      "public_surface": "https://api.atlas-systems.uk/sonify",
+      "meta_url": "https://api.atlas-systems.uk/sonify/_meta",
       "indexed": true,
-      "health_url": "https://api.atlas-systems.uk/specular-sonify/health",
+      "health_url": "https://api.atlas-systems.uk/sonify",
       "depends_on": [
         "specular-telemetry"
       ],
@@ -614,6 +614,27 @@
         "vulnerability advisories"
       ],
       "notes": "Open Source Vulnerabilities query API used by atlas-dep-audit for package vulnerability checks."
+    },
+    {
+      "name": "atlas-quota-watch",
+      "kind": "worker",
+      "layer": "observability",
+      "lifecycle": "production",
+      "repo": "https://github.com/AtlasReaper311/atlas-quota-watch",
+      "public_surface": "https://api.atlas-systems.uk/quota",
+      "meta_url": "https://api.atlas-systems.uk/quota/_meta",
+      "indexed": true,
+      "health_url": "https://api.atlas-systems.uk/quota",
+      "depends_on": [
+        "cloudflare",
+        "atlas-notify"
+      ],
+      "feeds": [
+        "quota evidence",
+        "atlas-notify",
+        "home-assistant"
+      ],
+      "notes": "Read-only Cloudflare usage watchdog with threshold and billing-period projection alerts."
     }
   ],
   "repositories": [
@@ -736,6 +757,11 @@
       "name": "atlas-dep-audit",
       "url": "https://github.com/AtlasReaper311/atlas-dep-audit",
       "role": "supply-chain assurance"
+    },
+    {
+      "name": "atlas-quota-watch",
+      "url": "https://github.com/AtlasReaper311/atlas-quota-watch",
+      "role": "Cloudflare usage and allowance watchdog"
     }
   ]
 }
