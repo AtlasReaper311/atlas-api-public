@@ -86,7 +86,7 @@
       "lifecycle": "production",
       "repo": "https://github.com/AtlasReaper311/atlas-api-public",
       "public_surface": "https://api.atlas-systems.uk/v1",
-      "meta_url": "https://api.atlas-systems.uk/_meta",
+      "meta_url": "https://api.atlas-systems.uk/v1/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/v1",
       "depends_on": [
@@ -373,10 +373,10 @@
       "layer": "observability",
       "lifecycle": "production",
       "repo": "https://github.com/AtlasReaper311/specular-sonify",
-      "public_surface": "controlled Worker endpoint",
-      "meta_url": "https://api.atlas-systems.uk/specular-sonify/_meta",
+      "public_surface": "https://api.atlas-systems.uk/sonify",
+      "meta_url": "https://api.atlas-systems.uk/sonify/_meta",
       "indexed": true,
-      "health_url": "https://api.atlas-systems.uk/specular-sonify/health",
+      "health_url": "https://api.atlas-systems.uk/sonify",
       "depends_on": [
         "specular-telemetry"
       ],
