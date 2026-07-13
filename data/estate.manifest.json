@@ -635,6 +635,24 @@
         "home-assistant"
       ],
       "notes": "Read-only Cloudflare usage watchdog with threshold and billing-period projection alerts."
+    },
+    {
+      "name": "atlas-badges",
+      "kind": "tool",
+      "layer": "reusable-kit",
+      "lifecycle": "production",
+      "repo": "https://github.com/AtlasReaper311/atlas-badges",
+      "public_surface": "GitHub repository and Python CLI",
+      "meta_url": null,
+      "indexed": false,
+      "health_url": null,
+      "depends_on": [
+        "github"
+      ],
+      "feeds": [
+        "repository README concept badges"
+      ],
+      "notes": "Evidence-backed CLI that scans repository source and maintains generated engineering-concept badge blocks."
     }
   ],
   "repositories": [
@@ -762,6 +780,11 @@
       "name": "atlas-quota-watch",
       "url": "https://github.com/AtlasReaper311/atlas-quota-watch",
       "role": "Cloudflare usage and allowance watchdog"
+    },
+    {
+      "name": "atlas-badges",
+      "url": "https://github.com/AtlasReaper311/atlas-badges",
+      "role": "evidence-backed concept badge tooling"
     }
   ]
 }
