@@ -57,6 +57,9 @@ npx wrangler deploy
 | `GET /v1/infra/status` | The sentinel pipeline's verdict; staleness recomputed at read time |
 | `GET /v1/rag/stats` | Query counts only; terms and IPs stay out of public responses structurally |
 | `GET /v1/badge/status` | Shields-flat SVG, `N/M operational` |
+| `GET /v1/control-plane/summary` | Public, redacted `ControlPlaneSummary` for sensor-only consumers; unavailable until a schema-valid bounded read model exists |
+| `GET /v1/control-plane/tools/openapi.json` | Bearer-protected OpenAPI 3.1 document containing exactly nine read-only Ramone operations |
+| `GET /v1/control-plane/tools/**` | Nine allowlisted GET operations over the same bounded fixture/KV read model; no provider proxy or raw evidence fetch |
 | `POST /v1/infra/report` | Sentinel ingest, bearer `INFRA_REPORT_KEY` |
 | `POST /v1/rag/report` | Corpus summary ingest, bearer `RAG_REPORT_KEY` |
 | `data/estate.manifest.json` | Canonical machine-readable estate manifest; repo ownership, lifecycle, layer, public surface, dependencies, and feeds |
@@ -80,9 +83,35 @@ npx wrangler deploy
 ```bash
 cp .dev.vars.example .dev.vars
 npx wrangler dev
-npm test          # 28 tests, node --test, no network
+npm test          # node --test, no network
 npm run lint
 ```
+
+### Phase 9 fixture mode
+
+The control-plane routes read either the injected test fixture or the single
+bounded KV document at `control-plane:read-model:v1`. This phase adds no writer,
+provider client, deployment, schedule, or automatic OpenWebUI assignment. If
+the document is missing or fails leak/shape validation, the public summary and
+tools return `503`; absence is never healthy.
+
+```bash
+npm test -- --test-name-pattern='control-plane'
+```
+
+Tests use a fixture-only bearer value. The future deployed connection uses the
+secret name `RAMONE_CONTROL_PLANE_READ_TOKEN`; no value belongs in Git, model
+context, request parameters, diagnostics, or logs. OpenWebUI will hold it in
+an administrator-owned external-tool connection after a separate live
+inventory and enablement approval.
+
+The dedicated tool document is deliberately separate from `/v1/openapi.json`.
+It contains exactly `GetEstateSummary`, `GetServiceStatus`,
+`GetReleaseStatus`, `ListActiveFindings`, `GetQuotaProjection`,
+`GetBackupStatus`, `ListGardenerProposals`, `FindRunbook`, and
+`SearchEvidence`. See
+[`docs/control-plane-tool-server.md`](docs/control-plane-tool-server.md) and
+the [unavailable-read-model runbook](docs/runbooks/control-plane-read-model-unavailable.md).
 
 ## How it fits into Atlas Systems
 

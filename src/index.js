@@ -34,6 +34,7 @@ import { handleStats } from "./routes/stats.js";
 import { handleSlo } from "./routes/slo.js";
 import { handleBadge } from "./routes/badge.js";
 import { handleDocs } from "./routes/docs.js";
+import { handleControlPlane } from "./routes/control-plane.js";
 import { buildOpenApi } from "./openapi.js";
 import { runCron } from "./cron.js";
 
@@ -58,6 +59,9 @@ export default {
 
     const rl = await rateLimit(env.RL_GENERAL, `g:${clientIp(request)}`);
     if (!rl.allowed) return tooMany();
+
+    const controlPlane = await handleControlPlane(request, env, path);
+    if (controlPlane) return controlPlane;
 
     if (request.method === "GET") {
       switch (path) {
