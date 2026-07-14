@@ -40,6 +40,7 @@ import { handleDocsAsset } from "./routes/docs-shell.js";
 import { handleTopology } from "./routes/topology.js";
 import { handleTraceIndex, handleTraceService } from "./routes/trace.js";
 import { handleSecurityText } from "./routes/security-txt.js";
+import { handleControlPlane } from "./routes/control-plane.js";
 import { buildOpenApi } from "./openapi-trace.js";
 import { runCron } from "./cron.js";
 
@@ -105,6 +106,9 @@ async function routeRequest(request, env, ctx) {
 
     const rl = await rateLimit(env.RL_GENERAL, `g:${clientIp(request)}`);
     if (!rl.allowed) return tooMany();
+
+    const controlPlane = await handleControlPlane(request, env, path);
+    if (controlPlane) return controlPlane;
 
     if (request.method === "GET") {
       if (path.startsWith("/v1/docs/") && wantsHtml(request)) {
