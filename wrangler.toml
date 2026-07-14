@@ -91,3 +91,6 @@ simple = { limit = 10, period = 60 }
 #   RAG_REPORT_KEY    shared with atlas-corpus .env
 #   NOTIFY_TOKEN      the atlas-notify bearer, same value the other
 #                     consumers hold
+#   RAMONE_CONTROL_PLANE_READ_TOKEN
+#                     dedicated read-only bearer for the future OpenWebUI
+#                     external-tool connection; no provider API permission

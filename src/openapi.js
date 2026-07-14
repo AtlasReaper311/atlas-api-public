@@ -297,6 +297,29 @@ export function buildOpenApi() {
           },
         },
       },
+      "/v1/control-plane/summary": {
+        get: {
+          summary: "Bounded public Atlas control-plane summary",
+          description:
+            "A redacted ControlPlaneSummary projection for sensor-only consumers. Missing, stale, unavailable, warning, and failed data are never represented as healthy.",
+          responses: {
+            200: { description: "ControlPlaneSummary v1 document" },
+            503: { description: "No schema-valid bounded read model is available" },
+          },
+        },
+      },
+      "/v1/control-plane/tools/openapi.json": {
+        get: {
+          summary: "Dedicated Ramone control-plane tool document",
+          description:
+            "Bearer-protected OpenAPI 3.1 document containing exactly nine GET operations. It is separate from this full public API document.",
+          security: [{ bearer: [] }],
+          responses: {
+            200: { description: "Dedicated nine-operation OpenAPI document" },
+            401: { description: "Missing or invalid read-only bearer" },
+          },
+        },
+      },
     },
     components: {
       securitySchemes: {
