@@ -26,6 +26,7 @@ import {
 } from "./routes/evidence.js";
 import { handleBadge } from "./routes/badge.js";
 import { handleDocs } from "./routes/docs.js";
+import { handleTopology } from "./routes/topology.js";
 import { buildOpenApi } from "./openapi.js";
 import { runCron } from "./cron.js";
 
@@ -79,6 +80,8 @@ export default {
           });
         case "/v1/registry":
           return handleRegistry(request, env, ctx);
+        case "/v1/topology":
+          return handleTopology();
         case "/v1/search":
           return handleSearch(request, env);
         case "/v1/stats":

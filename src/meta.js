@@ -8,6 +8,7 @@ export const META = {
     { method: "GET", path: "/v1/docs", description: "Human documentation" },
     { method: "GET", path: "/v1/openapi.json", description: "OpenAPI 3.0 spec" },
     { method: "GET", path: "/v1/registry", description: "Worker registry, stable public shape" },
+    { method: "GET", path: "/v1/topology", description: "Filtered public estate topology for deterministic renderers" },
     { method: "GET", path: "/v1/search", description: "RAG search over the estate corpus (?q=)" },
     { method: "GET", path: "/v1/stats", description: "Estate stats: repos, components, measured uptime" },
     { method: "GET", path: "/v1/slo", description: "Per-day probe counters for error budget maths; window labelled" },
