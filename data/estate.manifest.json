@@ -777,6 +777,16 @@
       "role": "supply-chain assurance"
     },
     {
+      "name": "atlas-gardener",
+      "url": "https://github.com/AtlasReaper311/atlas-gardener",
+      "role": "bounded estate remediation tooling"
+    },
+    {
+      "name": "atlas-resource-audit",
+      "url": "https://github.com/AtlasReaper311/atlas-resource-audit",
+      "role": "read-only Cloudflare resource reconciliation"
+    },
+    {
       "name": "atlas-quota-watch",
       "url": "https://github.com/AtlasReaper311/atlas-quota-watch",
       "role": "Cloudflare usage and allowance watchdog"
