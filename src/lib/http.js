@@ -1,12 +1,3 @@
-/**
- * Shared HTTP helpers for the /v1 surface.
- *
- * Response bodies are flat JSON documents carrying `ok` and
- * `generated_at`; errors add `error` and an optional `hint`. CORS is
- * wide open by design: the surface is public and read-only, and the two
- * authed ingest routes are protected by bearer keys, not by origin.
- */
-
 export function nowIso() {
   return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 }
@@ -41,17 +32,13 @@ export async function readJson(request, maxBytes = 32 * 1024) {
   return JSON.parse(text);
 }
 
-/**
- * Constant-time comparison for bearer keys; plain string equality leaks
- * match length through timing. Same pattern as atlas-notify.
- */
 export function timingSafeEqual(a, b) {
   const enc = new TextEncoder();
   const ab = enc.encode(a);
   const bb = enc.encode(b);
   if (ab.length !== bb.length) return false;
   let diff = 0;
-  for (let i = 0; i < ab.length; i++) diff |= ab[i] ^ bb[i];
+  for (let i = 0; i < ab.length; i += 1) diff |= ab[i] ^ bb[i];
   return diff === 0;
 }
 
@@ -62,12 +49,6 @@ export function bearerOk(request, secret) {
   return timingSafeEqual(header.slice(7), secret);
 }
 
-/**
- * The Workers rate limit binding counts per colo; that is the
- * documented tradeoff for a zero-dependency limiter at this scale. A
- * missing binding (local dev, tests) fails open rather than blocking
- * development; enforcement status is reported so callers can tell.
- */
 export async function rateLimit(binding, key) {
   if (!binding || typeof binding.limit !== "function") {
     return { allowed: true, enforced: false };

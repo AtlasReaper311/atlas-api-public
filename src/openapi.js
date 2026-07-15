@@ -284,6 +284,73 @@ export function buildOpenApi() {
           },
         },
       },
+      // ATLAS_EVIDENCE_PATHS
+      "/v1/evidence": {
+        get: {
+          summary: "Public assurance evidence index",
+          description:
+            "Latest conformance and chaos evidence summaries, each tied to a producer timestamp, source commit, and content fingerprint.",
+          responses: { 200: { description: "Evidence index" } },
+        },
+      },
+      "/v1/evidence/conformance": {
+        get: {
+          summary: "Latest estate conformance report",
+          parameters: [
+            {
+              name: "history",
+              in: "query",
+              required: false,
+              schema: { type: "integer", enum: [1] },
+              description: "Set to 1 for the bounded report history.",
+            },
+          ],
+          responses: {
+            200: { description: "Versioned conformance evidence" },
+            503: { description: "No report has been published" },
+          },
+        },
+      },
+      "/v1/evidence/chaos": {
+        get: {
+          summary: "Latest chaos assurance report",
+          parameters: [
+            {
+              name: "history",
+              in: "query",
+              required: false,
+              schema: { type: "integer", enum: [1] },
+              description: "Set to 1 for the bounded report history.",
+            },
+          ],
+          responses: {
+            200: { description: "Versioned chaos evidence" },
+            503: { description: "No report has been published" },
+          },
+        },
+      },
+      "/v1/evidence/conformance/report": {
+        post: {
+          summary: "Conformance evidence ingest",
+          security: [{ bearer: [] }],
+          responses: {
+            200: { description: "Stored or confirmed idempotent" },
+            401: { description: "Missing or incorrect bearer key" },
+            422: { description: "Schema or fingerprint validation failed" },
+          },
+        },
+      },
+      "/v1/evidence/chaos/report": {
+        post: {
+          summary: "Chaos evidence ingest",
+          security: [{ bearer: [] }],
+          responses: {
+            200: { description: "Stored or confirmed idempotent" },
+            401: { description: "Missing or incorrect bearer key" },
+            422: { description: "Schema or fingerprint validation failed" },
+          },
+        },
+      },
       "/v1/badge/status": {
         get: {
           summary: "SVG status badge",

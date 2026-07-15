@@ -1,8 +1,8 @@
 export const META = {
   name: "atlas-api-public",
   description:
-    "Versioned public API for the estate: registry, RAG search, stats, infra health, and the status badge",
-  version: "1.1.0",
+    "Versioned public API for registry, search, health, SLOs, and scored assurance evidence",
+  version: "1.2.0",
   endpoints: [
     { method: "GET", path: "/v1", description: "Endpoint index" },
     { method: "GET", path: "/v1/docs", description: "Human documentation" },
@@ -13,9 +13,13 @@ export const META = {
     { method: "GET", path: "/v1/slo", description: "Per-day probe counters for error budget maths; window labelled" },
     { method: "GET", path: "/v1/infra/status", description: "Infra health state from specular-sentinel" },
     { method: "GET", path: "/v1/rag/stats", description: "RAG query counts, no query text" },
+    { method: "GET", path: "/v1/evidence", description: "Public assurance evidence index" },
+    { method: "GET", path: "/v1/evidence/conformance", description: "Latest scored estate conformance report" },
+    { method: "GET", path: "/v1/evidence/chaos", description: "Latest chaos assurance report set" },
     { method: "GET", path: "/v1/badge/status", description: "SVG status badge" },
     { method: "POST", path: "/v1/infra/report", description: "Sentinel ingest (bearer)" },
     { method: "POST", path: "/v1/rag/report", description: "Corpus summary ingest (bearer)" },
+    { method: "POST", path: "/v1/evidence/{kind}/report", description: "Assurance evidence ingest (bearer)" },
   ],
   source: "https://github.com/AtlasReaper311/atlas-api-public",
 };
