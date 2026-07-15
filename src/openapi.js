@@ -21,9 +21,9 @@ export function buildOpenApi() {
     openapi: "3.0.3",
     info: {
       title: "Atlas Systems public API",
-      version: "1.1.0",
+      version: "1.2.0",
       description:
-        "Versioned read surface for the Atlas Systems estate: the Worker registry, RAG search over the estate corpus, live infra health, query stats, and a status badge. Runs at the edge on Cloudflare Workers; the RAG stack itself runs on a homelab machine that sleeps, and the API says so honestly when it does.",
+        "Versioned read surface for the Atlas Systems estate: public topology and repository inventory, the Worker registry, RAG search over the estate corpus, live infra health, assurance evidence, query stats, and status reporting. Runs at the edge on Cloudflare Workers; the RAG stack itself runs on a homelab machine that sleeps, and the API says so honestly when it does.",
       contact: { name: "Atlas Reaper", url: "https://atlas-systems.uk" },
     },
     servers: [{ url: "https://api.atlas-systems.uk" }],
@@ -44,6 +44,120 @@ export function buildOpenApi() {
         get: {
           summary: "This document",
           responses: { 200: { description: "OpenAPI 3.0 specification" } },
+        },
+      },
+      "/v1/topology": {
+        get: {
+          summary: "Public estate topology",
+          description:
+            "The canonical public estate map. Rich manifest components remain authoritative for runtime roles, layers, dependencies, routes, and health metadata. Public, non-archived Atlas repositories missing from the manifest are added as source-only repository components. Explicit exclusions such as simple-proxy are never exposed.",
+          responses: {
+            200: {
+              description: "Public topology and repository inventory",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: [
+                      "schema",
+                      "owner",
+                      "repository_count",
+                      "component_count",
+                      "components",
+                    ],
+                    properties: {
+                      schema: {
+                        type: "string",
+                        enum: ["atlas-public-topology/v2"],
+                      },
+                      owner: { type: "string" },
+                      canonical_site: {
+                        type: "string",
+                        format: "uri",
+                      },
+                      generated_at: {
+                        type: "string",
+                        format: "date-time",
+                        nullable: true,
+                      },
+                      repository_count: {
+                        type: "integer",
+                        minimum: 0,
+                      },
+                      component_count: {
+                        type: "integer",
+                        minimum: 0,
+                      },
+                      components: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          required: [
+                            "id",
+                            "kind",
+                            "layer",
+                            "repo",
+                            "repo_name",
+                            "source_only",
+                          ],
+                          properties: {
+                            id: { type: "string" },
+                            kind: {
+                              type: "string",
+                              enum: [
+                                "worker",
+                                "site",
+                                "github-actions",
+                                "tool",
+                                "repository",
+                              ],
+                            },
+                            layer: { type: "string" },
+                            lifecycle: { type: "string" },
+                            repo: {
+                              type: "string",
+                              format: "uri",
+                            },
+                            repo_name: { type: "string" },
+                            public_surface: {
+                              type: "string",
+                              format: "uri",
+                              nullable: true,
+                            },
+                            meta_url: {
+                              type: "string",
+                              format: "uri",
+                              nullable: true,
+                            },
+                            health_url: {
+                              type: "string",
+                              format: "uri",
+                              nullable: true,
+                            },
+                            indexed: { type: "boolean" },
+                            depends_on: {
+                              type: "array",
+                              items: { type: "string" },
+                            },
+                            description: { type: "string" },
+                            language: {
+                              type: "string",
+                              nullable: true,
+                            },
+                            topics: {
+                              type: "array",
+                              items: { type: "string" },
+                            },
+                            source_only: { type: "boolean" },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
       "/v1/registry": {
