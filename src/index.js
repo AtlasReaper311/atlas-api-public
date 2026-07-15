@@ -1,18 +1,5 @@
 /**
  * atlas-api-public: the versioned public surface of the estate.
- *
- * One Worker on api.atlas-systems.uk/v1* (more specific than
- * atlas-notify's /* wildcard, so it takes /v1 without unwiring
- * anything) hosting four concerns that share state and plumbing:
- *
- *   infra   the edge half of the specular-sentinel pipeline
- *   rag     the edge half of the corpus query stats pipeline
- *   public  registry, search proxy, stats, docs, openapi
- *   badge   the SVG status badge
- *
- * Versioning lives in the path: /v2 would be a new router branch here,
- * not a new Worker. The /_meta contract and the notify envelope are
- * adopted at birth, per the estate standard.
  */
 
 import {
@@ -32,10 +19,18 @@ import { handleRegistry } from "./routes/registry.js";
 import { handleSearch } from "./routes/search.js";
 import { handleStats } from "./routes/stats.js";
 import { handleSlo } from "./routes/slo.js";
+import {
+  handleEvidenceGet,
+  handleEvidenceIndex,
+  handleEvidenceReport,
+} from "./routes/evidence.js";
 import { handleBadge } from "./routes/badge.js";
 import { handleDocs } from "./routes/docs.js";
 import { buildOpenApi } from "./openapi.js";
 import { runCron } from "./cron.js";
+
+const EVIDENCE_PATH = /^\/v1\/evidence\/(conformance|chaos)$/;
+const EVIDENCE_REPORT_PATH = /^\/v1\/evidence\/(conformance|chaos)\/report$/;
 
 export default {
   async fetch(request, env, ctx) {
@@ -49,9 +44,6 @@ export default {
     const meta = handleMeta(url, META);
     if (meta) return meta;
 
-    // The badge is exempt from the general limiter: GitHub's camo proxy
-    // fetches it on every README render, and a 429 there would show a
-    // broken image to exactly the audience the badge exists for.
     if (path === "/v1/badge/status" && request.method === "GET") {
       return handleBadge(request, env, ctx);
     }
@@ -60,6 +52,14 @@ export default {
     if (!rl.allowed) return tooMany();
 
     if (request.method === "GET") {
+      if (path === "/v1/evidence") {
+        return handleEvidenceIndex(request, env);
+      }
+      const evidenceMatch = path.match(EVIDENCE_PATH);
+      if (evidenceMatch) {
+        return handleEvidenceGet(request, env, evidenceMatch[1]);
+      }
+
       switch (path) {
         case "/v1":
           return json({
@@ -93,6 +93,10 @@ export default {
     }
 
     if (request.method === "POST") {
+      const evidenceReportMatch = path.match(EVIDENCE_REPORT_PATH);
+      if (evidenceReportMatch) {
+        return handleEvidenceReport(request, env, evidenceReportMatch[1]);
+      }
       switch (path) {
         case "/v1/infra/report":
           return handleInfraReport(request, env, ctx);

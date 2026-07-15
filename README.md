@@ -61,6 +61,12 @@ npx wrangler deploy
 | `POST /v1/rag/report` | Corpus summary ingest, bearer `RAG_REPORT_KEY` |
 | `data/estate.manifest.json` | Canonical machine-readable estate manifest; repo ownership, lifecycle, layer, public surface, dependencies, and feeds |
 
+## Public evidence surface
+
+`GET /v1/evidence` indexes the latest scored conformance and chaos-assurance records. The detailed routes expose the full fingerprinted report and a bounded history; authenticated producer routes accept only the two versioned schemas and reject altered fingerprints. The weekly jobs in [`atlas-infra`](https://github.com/AtlasReaper311/atlas-infra) remain the evidence producers, while this Worker is the public store and read boundary.
+
+The ingest secret is `EVIDENCE_REPORT_KEY`. Set it only through `wrangler secret put EVIDENCE_REPORT_KEY`; give the producing workflow the same value through `gh secret set EVIDENCE_REPORT_KEY --repo AtlasReaper311/atlas-infra`.
+
 ## Operational notes
 
 **Route layering.** `/v1*` is more specific than `atlas-notify`'s `/*` wildcard on the same hostname, so this Worker takes `/v1` traffic without unwiring anything. That layering rule is what lets one hostname host four Workers.
