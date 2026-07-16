@@ -9,7 +9,7 @@
  * labels the observation window. Measured-since-deploy beats invented
  * history; a senior reader trusts the first and discounts the second.
  *
- * Ten components, probed where they actually live:
+ * Nineteen components, probed where they actually live:
  *   registry        atlas-api-index /_meta via service binding
  *   notify          atlas-notify /health via service binding
  *   specular        the telemetry pipeline end to end; specular-edge
@@ -26,6 +26,14 @@
  *                   the real contract, cache and upstream included
  *   site_pulse      site-pulse /site-pulse/health via service binding
  *   deploy_watch    deploy-watch /deploy-watch/health via binding
+ *   atlas_blackbox  atlas-blackbox /blackbox/health via binding
+ *   atlas_quota_watch quota summary via binding; threshold breaches
+ *                     are distinct from Worker reachability
+ *   ramone_edge     the public Ramone status surface via binding
+ *   atlas_doc_viewer, atlas_systems, status_surface
+ *                   bounded public HTTP reachability probes
+ *   atlas_badges, atlas_dep_audit, atlas_journey_watch
+ *                   current GitHub Actions evidence from github-pulse
  *
  * The machine sleeping drops specular, corpus, and machine together;
  * that is three real systems genuinely down, not double counting, and
@@ -55,11 +63,42 @@ export const COMPONENTS = [
   "github_pulse",
   "site_pulse",
   "deploy_watch",
+  "atlas_blackbox",
+  "atlas_quota_watch",
+  "ramone_edge",
+  "atlas_doc_viewer",
+  "atlas_systems",
+  "status_surface",
+  "atlas_badges",
+  "atlas_dep_audit",
+  "atlas_journey_watch",
 ];
 
-async function probeBinding(binding, url, judge) {
+const WORKFLOW_COMPONENTS = Object.freeze({
+  "atlas-badges": "atlas_badges",
+  "atlas-dep-audit": "atlas_dep_audit",
+  "atlas-journey-watch": "atlas_journey_watch",
+});
+
+const COMPONENT_STATUSES = new Set(["healthy", "degraded", "down", "unknown"]);
+
+export function componentStatus(result) {
+  if (COMPONENT_STATUSES.has(result?.status)) return result.status;
+  if (result?.ok === true) return "healthy";
+  if (result?.ok === false) return "down";
+  return "unknown";
+}
+
+function evidence(result, evidenceSource) {
+  return { ...result, evidence_source: evidenceSource };
+}
+
+async function probeBinding(binding, url, judge, evidenceSource = url) {
   if (!binding || typeof binding.fetch !== "function") {
-    return { ok: false, detail: "binding missing" };
+    return evidence(
+      { ok: false, status: "unknown", detail: "binding missing" },
+      evidenceSource,
+    );
   }
   const started = Date.now();
   try {
@@ -68,9 +107,31 @@ async function probeBinding(binding, url, judge) {
     });
     const verdict = await judge(res);
     verdict.ms = Date.now() - started;
-    return verdict;
+    return evidence(verdict, evidenceSource);
   } catch (err) {
-    return { ok: false, detail: String(err.message || err).slice(0, 120) };
+    return evidence(
+      { ok: false, detail: String(err.message || err).slice(0, 120) },
+      evidenceSource,
+    );
+  }
+}
+
+async function probeUrl(url, judge = judgeStatusOnly, init = {}) {
+  const started = Date.now();
+  try {
+    const res = await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(5000),
+      headers: { "user-agent": "atlas-api-public/1.1" },
+    });
+    const verdict = await judge(res);
+    verdict.ms = Date.now() - started;
+    return evidence(verdict, url);
+  } catch (err) {
+    return evidence(
+      { ok: false, detail: String(err.message || err).slice(0, 120) },
+      url,
+    );
   }
 }
 
@@ -78,6 +139,47 @@ async function judgeStatusOnly(res) {
   return res.ok
     ? { ok: true, detail: `http ${res.status}` }
     : { ok: false, detail: `http ${res.status}` };
+}
+
+async function judgeJsonOk(res) {
+  if (!res.ok) return { ok: false, detail: `http ${res.status}` };
+  const body = await res.json().catch(() => null);
+  return body?.ok === true
+    ? { ok: true, detail: `http ${res.status}` }
+    : { ok: false, detail: "reachable but does not report ok" };
+}
+
+async function judgeQuota(res) {
+  if (!res.ok) return { ok: false, detail: `http ${res.status}` };
+  const body = await res.json().catch(() => null);
+  if (body?.ok !== true || !Array.isArray(body.meters)) {
+    return { ok: false, status: "unknown", detail: "quota contract unavailable" };
+  }
+  if (body.meters.some((meter) => meter.breach === true)) {
+    return { ok: false, status: "down", detail: "one or more quota limits breached" };
+  }
+  const threshold = Number(body.warn_threshold_pct);
+  if (
+    Number.isFinite(threshold)
+    && body.meters.some((meter) => Number(meter.pct) >= threshold)
+  ) {
+    return { ok: true, status: "degraded", detail: "one or more quota meters above warning threshold" };
+  }
+  return { ok: true, status: "healthy", detail: "quota meters below warning threshold" };
+}
+
+async function judgeRamoneEdge(res) {
+  if (!res.ok) return { ok: false, detail: `http ${res.status}` };
+  const body = await res.json().catch(() => null);
+  if (typeof body?.awake !== "boolean") {
+    return { ok: false, status: "unknown", detail: "status contract unavailable" };
+  }
+  return {
+    ok: true,
+    status: "healthy",
+    detail: body.awake ? "edge reachable; local AI awake" : "edge reachable; local AI sleeping",
+    measured_at: body.checked_at ?? null,
+  };
 }
 
 /**
@@ -88,10 +190,17 @@ async function judgeStatusOnly(res) {
  */
 async function probeSpecular(env) {
   const binding = env.SPECULAR_EDGE;
+  const source = "service-binding:specular-edge/specular";
   if (!binding || typeof binding.fetch !== "function") {
     return {
-      specular: { ok: false, detail: "binding missing" },
-      specular_edge: { ok: false, detail: "binding missing" },
+      specular: evidence(
+        { ok: false, status: "unknown", detail: "binding missing" },
+        source,
+      ),
+      specular_edge: evidence(
+        { ok: false, status: "unknown", detail: "binding missing" },
+        source,
+      ),
     };
   }
   const started = Date.now();
@@ -102,8 +211,8 @@ async function probeSpecular(env) {
     const ms = Date.now() - started;
     if (!res.ok) {
       return {
-        specular: { ok: false, detail: `http ${res.status}`, ms },
-        specular_edge: { ok: false, detail: `http ${res.status}`, ms },
+        specular: evidence({ ok: false, detail: `http ${res.status}`, ms }, source),
+        specular_edge: evidence({ ok: false, detail: `http ${res.status}`, ms }, source),
       };
     }
     const body = await res.json().catch(() => null);
@@ -112,19 +221,20 @@ async function probeSpecular(env) {
         ? { ok: false, detail: "worker up, telemetry pipeline offline", ms }
         : { ok: true, detail: "telemetry flowing", ms };
     return {
-      specular: pipeline,
-      specular_edge: { ok: true, detail: `http ${res.status}`, ms },
+      specular: evidence(pipeline, source),
+      specular_edge: evidence({ ok: true, detail: `http ${res.status}`, ms }, source),
     };
   } catch (err) {
     const detail = String(err.message || err).slice(0, 120);
     return {
-      specular: { ok: false, detail },
-      specular_edge: { ok: false, detail },
+      specular: evidence({ ok: false, detail }, source),
+      specular_edge: evidence({ ok: false, detail }, source),
     };
   }
 }
 
 async function probeCorpus(env) {
+  const source = `${env.CORPUS_ORIGIN}/health`;
   const started = Date.now();
   try {
     const res = await fetch(`${env.CORPUS_ORIGIN}/health`, {
@@ -132,13 +242,59 @@ async function probeCorpus(env) {
       headers: { "user-agent": "atlas-api-public/1.0" },
     });
     const ms = Date.now() - started;
-    if (!res.ok) return { ok: false, detail: `http ${res.status}`, ms };
+    if (!res.ok) return evidence({ ok: false, detail: `http ${res.status}`, ms }, source);
     const body = await res.json().catch(() => null);
-    return body && body.ok === true
+    return evidence(body && body.ok === true
       ? { ok: true, detail: `${body.chunks ?? "?"} chunks indexed`, ms }
-      : { ok: false, detail: "reachable but reports degraded", ms };
+      : { ok: false, detail: "reachable but reports degraded", ms }, source);
   } catch (err) {
-    return { ok: false, detail: String(err.message || err).slice(0, 120) };
+    return evidence(
+      { ok: false, detail: String(err.message || err).slice(0, 120) },
+      source,
+    );
+  }
+}
+
+async function probeWorkflowHealth(env) {
+  const missing = () => Object.fromEntries(
+    Object.values(WORKFLOW_COMPONENTS).map((name) => [
+      name,
+      {
+        ok: false,
+        status: "unknown",
+        detail: "workflow evidence unavailable",
+        evidence_source: "service-binding:github-pulse/pulse/workflows",
+        measured_at: null,
+      },
+    ]),
+  );
+  if (!env.GITHUB_PULSE || typeof env.GITHUB_PULSE.fetch !== "function") {
+    return missing();
+  }
+  try {
+    const res = await env.GITHUB_PULSE.fetch(
+      "https://github-pulse/pulse/workflows",
+      { signal: AbortSignal.timeout(5000) },
+    );
+    if (!res.ok) return missing();
+    const body = await res.json().catch(() => null);
+    return Object.fromEntries(
+      Object.entries(WORKFLOW_COMPONENTS).map(([workflowId, componentName]) => {
+        const item = body?.workflows?.[workflowId];
+        const status = componentStatus(item);
+        return [componentName, {
+          ok: status === "healthy" || status === "degraded",
+          status,
+          detail: item?.detail ?? "workflow evidence unavailable",
+          evidence_source:
+            item?.evidence_source
+            ?? `service-binding:github-pulse/pulse/workflows#${workflowId}`,
+          measured_at: item?.measured_at ?? null,
+        }];
+      }),
+    );
+  } catch {
+    return missing();
   }
 }
 
@@ -152,33 +308,86 @@ export async function probeEstate(env) {
     githubPulse,
     sitePulse,
     deployWatch,
+    atlasBlackbox,
+    atlasQuotaWatch,
+    ramoneEdge,
+    atlasDocViewer,
+    atlasSystems,
+    statusSurface,
+    workflowHealth,
   ] = await Promise.all([
-    probeBinding(env.REGISTRY, "https://atlas-api-index/_meta", judgeStatusOnly),
-    probeBinding(env.ATLAS_NOTIFY, "https://atlas-notify/health", judgeStatusOnly),
+    probeBinding(
+      env.REGISTRY,
+      "https://atlas-api-index/_meta",
+      judgeStatusOnly,
+      "service-binding:atlas-api-index/_meta",
+    ),
+    probeBinding(
+      env.ATLAS_NOTIFY,
+      "https://atlas-notify/health",
+      judgeStatusOnly,
+      "service-binding:atlas-notify/health",
+    ),
     probeSpecular(env),
     probeCorpus(env),
     probeBinding(
       env.RAMONE_TRIGGER,
       "https://ramone-trigger/trigger/_meta",
       judgeStatusOnly,
+      "service-binding:ramone-trigger/trigger/_meta",
     ),
-    probeBinding(env.GITHUB_PULSE, "https://github-pulse/pulse", judgeStatusOnly),
+    probeBinding(
+      env.GITHUB_PULSE,
+      "https://github-pulse/pulse",
+      judgeStatusOnly,
+      "service-binding:github-pulse/pulse",
+    ),
     probeBinding(
       env.SITE_PULSE,
       "https://site-pulse/site-pulse/health",
       judgeStatusOnly,
+      "service-binding:site-pulse/site-pulse/health",
     ),
     probeBinding(
       env.DEPLOY_WATCH,
       "https://deploy-watch/deploy-watch/health",
       judgeStatusOnly,
+      "service-binding:deploy-watch/deploy-watch/health",
     ),
+    probeBinding(
+      env.ATLAS_BLACKBOX,
+      "https://atlas-blackbox/blackbox/health",
+      judgeJsonOk,
+      "service-binding:atlas-blackbox/blackbox/health",
+    ),
+    probeBinding(
+      env.ATLAS_QUOTA_WATCH,
+      "https://atlas-quota-watch/quota",
+      judgeQuota,
+      "service-binding:atlas-quota-watch/quota",
+    ),
+    probeBinding(
+      env.RAMONE_EDGE,
+      "https://ramone-edge/status",
+      judgeRamoneEdge,
+      "service-binding:ramone-edge/status",
+    ),
+    probeUrl("https://cv.atlas-systems.uk", judgeStatusOnly, { method: "HEAD" }),
+    probeUrl("https://atlas-systems.uk", judgeStatusOnly, { method: "HEAD" }),
+    probeUrl("https://status.atlas-systems.uk", judgeStatusOnly, { method: "HEAD" }),
+    probeWorkflowHealth(env),
   ]);
 
   const infra = await readState(env);
   let machine;
   if (!infra) {
-    machine = { ok: false, detail: "no sentinel reports yet" };
+    machine = {
+      ok: false,
+      status: "unknown",
+      detail: "no sentinel reports yet",
+      evidence_source: "specular-sentinel:infra state",
+      measured_at: null,
+    };
   } else {
     const age = Date.now() - Date.parse(infra.last_report_at);
     const fresh = Number.isFinite(age) && age < staleAfterMs(env);
@@ -192,6 +401,8 @@ export async function probeEstate(env) {
         detail: infra.overall === "ok" ? "all checks passing" : "degraded",
       };
     }
+    machine.evidence_source = "specular-sentinel:infra state";
+    machine.measured_at = infra.last_report_at ?? null;
   }
 
   return {
@@ -205,6 +416,13 @@ export async function probeEstate(env) {
     github_pulse: githubPulse,
     site_pulse: sitePulse,
     deploy_watch: deployWatch,
+    atlas_blackbox: atlasBlackbox,
+    atlas_quota_watch: atlasQuotaWatch,
+    ramone_edge: ramoneEdge,
+    atlas_doc_viewer: atlasDocViewer,
+    atlas_systems: atlasSystems,
+    status_surface: statusSurface,
+    ...workflowHealth,
   };
 }
 
@@ -322,7 +540,10 @@ export function badgeStatus(snapshot) {
       total: COMPONENTS.length,
     };
   }
-  const { operational, total } = snapshot;
+  const total = COMPONENTS.length;
+  const operational = COMPONENTS.filter(
+    (name) => snapshot.components?.[name]?.ok === true,
+  ).length;
   let color = "#dfb317"; // amber
   if (operational === total) color = "#4c1"; // green
   else if (operational <= total / 2) color = "#e05d44"; // red

@@ -14,6 +14,7 @@ import {
   readUptime,
   uptimePercent,
   COMPONENTS,
+  componentStatus,
 } from "../lib/status.js";
 import { readState, staleAfterMs } from "./infra.js";
 import { readRagSummary } from "./rag.js";
@@ -73,13 +74,27 @@ export async function handleStats(_request, env, ctx) {
         : null,
       estate: estate
         ? {
-            operational: estate.operational,
-            total_components: estate.total,
+            operational: COMPONENTS.filter(
+              (name) => estate.components?.[name]?.ok === true,
+            ).length,
+            total_components: COMPONENTS.length,
             components: Object.fromEntries(
               COMPONENTS.map((name) => [
                 name,
                 Boolean(estate.components?.[name]?.ok),
               ]),
+            ),
+            component_details: Object.fromEntries(
+              COMPONENTS.map((name) => {
+                const result = estate.components?.[name];
+                return [name, {
+                  status: componentStatus(result),
+                  detail: result?.detail ?? null,
+                  latency_ms: Number.isFinite(result?.ms) ? result.ms : null,
+                  evidence_source: result?.evidence_source ?? null,
+                  measured_at: result?.measured_at ?? estate.checked_at ?? null,
+                }];
+              }),
             ),
             workers: estate.worker_counts,
             checked_at: estate.checked_at,

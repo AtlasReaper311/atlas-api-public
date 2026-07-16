@@ -53,7 +53,7 @@ npx wrangler deploy
 | `GET /v1/openapi.json` | The spec; the smoke suite walks every path in it against the router, so drift fails CI |
 | `GET /v1/registry` | The estate registry via a service binding to [`atlas-api-index`](https://github.com/AtlasReaper311/atlas-api-index), reshaped into a stable v1 form |
 | `GET /v1/search?q=` | RAG search proxied to the corpus tunnel; visitor IPs stop at the edge |
-| `GET /v1/stats` | Repos, components, and uptime measured from live probes, labelled with when measurement began |
+| `GET /v1/stats` | Repos, 19 component verdicts, evidence detail, and uptime measured from live probes |
 | `GET /v1/infra/status` | The sentinel pipeline's verdict; staleness recomputed at read time |
 | `GET /v1/rag/stats` | Query counts only; terms and IPs stay out of public responses structurally |
 | `GET /v1/badge/status` | Shields-flat SVG, `N/M operational` |
@@ -79,6 +79,8 @@ The ingest secret is `EVIDENCE_REPORT_KEY`. Set it only through `wrangler secret
 
 **Uptime honesty.** No uptime history existed anywhere in the estate (the status page is a live client-side checker), so `/v1/stats` accrues its own inside a rolling window and says when measurement began. Measured-since-deploy beats invented history.
 
+**Mixed evidence, one vocabulary.** Always-on Workers and sites use bounded reachability probes. `atlas-badges` proves the current `main` commit through CI, while `atlas-dep-audit` and `atlas-journey-watch` use the success and freshness of their scheduled workflows supplied by `github-pulse`. `/v1/stats` retains the original boolean `estate.components` map and adds `estate.component_details` with `healthy`, `degraded`, `down`, or `unknown`, evidence source, measurement time, latency, and a bounded explanation.
+
 **CSP.** The site already allowlists `https://api.atlas-systems.uk` in `connect-src` (see `atlas-systems/_headers`), so the Live Systems cards can read this surface without a header change; any new hostname would need adding there first.
 
 ## Development
@@ -86,7 +88,7 @@ The ingest secret is `EVIDENCE_REPORT_KEY`. Set it only through `wrangler secret
 ```bash
 cp .dev.vars.example .dev.vars
 npx wrangler dev
-npm test          # 28 tests, node --test, no network
+npm test          # 42 tests, node --test, no network
 npm run lint
 ```
 
