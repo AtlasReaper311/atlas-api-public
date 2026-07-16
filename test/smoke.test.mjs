@@ -15,6 +15,7 @@ import assert from "node:assert/strict";
 import worker from "../src/index.js";
 import { runCron } from "../src/cron.js";
 import { buildOpenApi } from "../src/openapi.js";
+import { badgeStatus } from "../src/lib/status.js";
 import { renderBadge } from "../src/routes/badge.js";
 
 const BASE = "https://api.atlas-systems.uk";
@@ -102,7 +103,31 @@ function makeEnv(overrides = {}) {
           : jsonResponse(REGISTRY_DOC),
     },
     GITHUB_PULSE: {
-      fetch: async () => jsonResponse({ totals: { publicRepos: 19, stars: 12 } }),
+      fetch: async (url) =>
+        new URL(url).pathname.endsWith("/pulse/workflows")
+          ? jsonResponse({
+              workflows: {
+                "atlas-badges": {
+                  status: "healthy",
+                  detail: "current main CI succeeded",
+                  evidence_source: "github-actions:AtlasReaper311/atlas-badges/workflows/ci.yml",
+                  measured_at: new Date().toISOString(),
+                },
+                "atlas-dep-audit": {
+                  status: "healthy",
+                  detail: "latest scheduled run succeeded",
+                  evidence_source: "github-actions:AtlasReaper311/atlas-dep-audit/workflows/audit.yml",
+                  measured_at: new Date().toISOString(),
+                },
+                "atlas-journey-watch": {
+                  status: "healthy",
+                  detail: "latest scheduled run succeeded",
+                  evidence_source: "github-actions:AtlasReaper311/atlas-journey-watch/workflows/journey-watch.yml",
+                  measured_at: new Date().toISOString(),
+                },
+              },
+            })
+          : jsonResponse({ totals: { publicRepos: 19, stars: 12 } }),
     },
     SPECULAR_EDGE: {
       fetch: async () => jsonResponse({ online: true }),
@@ -115,6 +140,19 @@ function makeEnv(overrides = {}) {
     },
     RAMONE_TRIGGER: {
       fetch: async () => jsonResponse({ status: "live", name: "ramone-trigger" }),
+    },
+    ATLAS_BLACKBOX: {
+      fetch: async () => jsonResponse({ ok: true, name: "atlas-blackbox" }),
+    },
+    ATLAS_QUOTA_WATCH: {
+      fetch: async () => jsonResponse({
+        ok: true,
+        warn_threshold_pct: 80,
+        meters: [{ id: "workers_requests", pct: 4.5, breach: false }],
+      }),
+    },
+    RAMONE_EDGE: {
+      fetch: async () => jsonResponse({ awake: false, checked_at: new Date().toISOString() }),
     },
     RL_GENERAL: { limit: async () => ({ success: true }) },
     RL_SEARCH: { limit: async () => ({ success: true }) },
@@ -471,13 +509,44 @@ test("stats compose the cron snapshots, pulse totals, and uptime", async () => {
 
   const res = await call(env, "/v1/stats");
   const body = await res.json();
-  assert.equal(body.estate.operational, 10);
-  assert.equal(body.estate.total_components, 10);
+  assert.equal(body.estate.operational, 19);
+  assert.equal(body.estate.total_components, 19);
   assert.equal(body.estate.workers.workers, 11);
   assert.equal(body.repos.public, 19);
   assert.equal(body.uptime.components.corpus, 100);
+  assert.equal(body.estate.component_details.atlas_badges.status, "healthy");
+  assert.match(
+    body.estate.component_details.atlas_badges.evidence_source,
+    /github-actions/,
+  );
   assert.ok(body.uptime.measuring_since);
   assert.equal(body.infra.overall, "ok");
+});
+
+test("workflow evidence preserves degraded, down, and unknown states", async () => {
+  const env = makeEnv({
+    GITHUB_PULSE: {
+      fetch: async (url) =>
+        new URL(url).pathname.endsWith("/pulse/workflows")
+          ? jsonResponse({
+              workflows: {
+                "atlas-badges": { status: "degraded", detail: "CI running" },
+                "atlas-dep-audit": { status: "down", detail: "audit failed" },
+                "atlas-journey-watch": { status: "unknown", detail: "no evidence" },
+              },
+            })
+          : jsonResponse({ totals: { publicRepos: 19, stars: 12 } }),
+    },
+  });
+  fetchHandler = () => jsonResponse({ ok: true, chunks: 340 });
+  await runCron(env);
+
+  const body = await (await call(env, "/v1/stats")).json();
+  assert.equal(body.estate.component_details.atlas_badges.status, "degraded");
+  assert.equal(body.estate.components.atlas_badges, true);
+  assert.equal(body.estate.component_details.atlas_dep_audit.status, "down");
+  assert.equal(body.estate.components.atlas_dep_audit, false);
+  assert.equal(body.estate.component_details.atlas_journey_watch.status, "unknown");
 });
 
 test("uptime buckets accumulate across cron passes", async () => {
@@ -541,7 +610,7 @@ test("badge renders green when the whole estate is up", async () => {
   const svg = await res.text();
   assert.ok(svg.startsWith("<svg"));
   assert.ok(svg.endsWith("</svg>"));
-  assert.match(svg, /10\/10 operational/);
+  assert.match(svg, /19\/19 operational/);
   assert.match(svg, /#4c1/);
 });
 
@@ -551,8 +620,32 @@ test("badge degrades honestly with no data", async () => {
   assert.match(svg, /no data/);
 });
 
+test("badge counts the expanded contract before the first new cron pass", () => {
+  const legacyComponents = Object.fromEntries(
+    [
+      "registry",
+      "notify",
+      "specular",
+      "specular_edge",
+      "corpus",
+      "machine",
+      "ramone_trigger",
+      "github_pulse",
+      "site_pulse",
+      "deploy_watch",
+    ].map((name) => [name, { ok: true }]),
+  );
+  const status = badgeStatus({
+    operational: 10,
+    total: 10,
+    components: legacyComponents,
+  });
+  assert.equal(status.message, "10/19 operational");
+  assert.equal(status.total, 19);
+});
+
 test("badge geometry stays well formed for varied messages", () => {
-  for (const msg of ["0/10 operational", "12/12 operational", "no data"]) {
+  for (const msg of ["0/19 operational", "19/19 operational", "no data"]) {
     const svg = renderBadge("atlas systems", msg, "#4c1");
     const width = Number(svg.match(/width="(\d+)"/)[1]);
     assert.ok(width > 100 && width < 400, `implausible width ${width}`);

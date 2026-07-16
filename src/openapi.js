@@ -269,7 +269,7 @@ export function buildOpenApi() {
         get: {
           summary: "Estate statistics",
           description:
-            "Repository totals, component health, and uptime measured from live probes. Uptime accrues from first deploy inside a rolling window; the response labels when measurement began rather than inventing history.",
+            "Repository totals, nineteen component verdicts, and uptime measured from the ten-minute estate probe. The additive component_details map preserves healthy, degraded, down, and unknown with evidence source, measurement time, detail, and latency; the original boolean components map remains for compatibility. Uptime accrues from first deploy inside a rolling window rather than inventing history.",
           responses: { 200: { description: "Stats document" } },
         },
       },
@@ -469,7 +469,7 @@ export function buildOpenApi() {
         get: {
           summary: "SVG status badge",
           description:
-            "A shields-flat badge reading N/M operational across the estate's ten probed components. Sixty second cache; embeds cleanly in GitHub READMEs.",
+            "A shields-flat badge reading N/M operational across the estate's nineteen probed components. Sixty second cache; embeds cleanly in GitHub READMEs.",
           responses: {
             200: {
               description: "SVG image",

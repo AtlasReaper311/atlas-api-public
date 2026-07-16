@@ -48,6 +48,18 @@ service = "deploy-watch"
 binding = "RAMONE_TRIGGER"
 service = "ramone-trigger"
 
+[[services]]
+binding = "ATLAS_BLACKBOX"
+service = "atlas-blackbox"
+
+[[services]]
+binding = "ATLAS_QUOTA_WATCH"
+service = "atlas-quota-watch"
+
+[[services]]
+binding = "RAMONE_EDGE"
+service = "ramone-edge"
+
 [[unsafe.bindings]]
 name = "RL_GENERAL"
 type = "ratelimit"
