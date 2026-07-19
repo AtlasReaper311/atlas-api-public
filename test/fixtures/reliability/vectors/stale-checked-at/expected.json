@@ -1,0 +1,75 @@
+{
+  "schema_version": "atlas-control-plane/reliability-result/v1",
+  "evaluated_at": "2026-07-19T12:00:00Z",
+  "stale_after": "2026-07-19T12:30:00Z",
+  "policy_fingerprint": "c27941811cf142b6002f2512d918d16ab8b15f39461eb78f3b8f8d96d10ef2dd",
+  "source": {
+    "provider": "atlas-api-public/v1/slo",
+    "window_days": 30,
+    "measuring_since": "2026-07-13T00:00:00Z",
+    "checked_at": "2026-07-19T10:00:00Z"
+  },
+  "results": [
+    {
+      "service_id": "service-a",
+      "objective_id": "service-a-availability-30d",
+      "indicator": "availability",
+      "target_pct": 99.5,
+      "state": "stale_evidence",
+      "control_plane_state": "stale",
+      "reasons": [
+        "counters were last confirmed 7200 seconds ago, past the 1800 second bound"
+      ],
+      "window": {
+        "start_day": "2026-07-13",
+        "end_day": "2026-07-19",
+        "days_observed": 7
+      },
+      "samples": {
+        "ok": 924,
+        "failed": 0,
+        "total": 924
+      },
+      "availability_pct": 100,
+      "coverage": {
+        "fraction": 0.9872,
+        "observed": 924,
+        "expected": 936
+      },
+      "latency": {
+        "avg_ms": 180,
+        "percentiles_supported": false,
+        "percentile_reason": "per-day aggregate counters cannot support percentiles"
+      },
+      "budget": {
+        "allowed_failures": null,
+        "remaining_fraction": null,
+        "consumed_fraction": null
+      },
+      "burn": {
+        "fast": {
+          "rate": 0,
+          "samples": 204,
+          "bucket_days": 2,
+          "reason": null
+        },
+        "slow": {
+          "rate": 0,
+          "samples": 924,
+          "bucket_days": 8,
+          "reason": null
+        }
+      },
+      "freshness": {
+        "evidence_stale_after_seconds": 1800
+      }
+    }
+  ],
+  "unmeasured": [
+    {
+      "service_id": "service-x",
+      "reason": "no approved objective; service remains explicitly unmeasured"
+    }
+  ],
+  "fingerprint": "e3a3941cc1bf057029422f894774168b3157870d4f9df809022be56766191e0a"
+}

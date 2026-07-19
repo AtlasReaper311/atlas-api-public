@@ -12,7 +12,7 @@ test("OpenAPI publishes the topology contract", () => {
   const topology = spec.paths["/v1/topology"]?.get;
 
   assert.ok(topology);
-  assert.equal(spec.info.version, "1.2.0");
+  assert.equal(spec.info.version, "1.3.0");
 
   const schema =
     topology.responses[200].content["application/json"].schema;
@@ -57,7 +57,7 @@ test("human docs derive their endpoint catalogue from OpenAPI", async () => {
 
   assert.ok(html.includes("/v1/topology"));
   assert.ok(html.includes("/v1/evidence"));
-  assert.ok(html.includes("version 1.2.0"));
+  assert.ok(html.includes("version 1.3.0"));
 });
 
 test("human docs contain no parallel hard-coded endpoint array", async () => {

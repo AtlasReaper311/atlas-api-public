@@ -1,0 +1,75 @@
+{
+  "schema_version": "atlas-control-plane/reliability-result/v1",
+  "evaluated_at": "2026-07-19T12:00:00Z",
+  "stale_after": "2026-07-19T12:30:00Z",
+  "policy_fingerprint": "c27941811cf142b6002f2512d918d16ab8b15f39461eb78f3b8f8d96d10ef2dd",
+  "source": {
+    "provider": "atlas-api-public/v1/slo",
+    "window_days": 30,
+    "measuring_since": "2026-06-19T00:00:00Z",
+    "checked_at": "2026-07-19T11:55:00Z"
+  },
+  "results": [
+    {
+      "service_id": "service-a",
+      "objective_id": "service-a-availability-30d",
+      "indicator": "availability",
+      "target_pct": 99.5,
+      "state": "budget_at_risk",
+      "control_plane_state": "warning",
+      "reasons": [
+        "remaining budget 0.2259 is at or below the risk fraction"
+      ],
+      "window": {
+        "start_day": "2026-06-19",
+        "end_day": "2026-07-19",
+        "days_observed": 31
+      },
+      "samples": {
+        "ok": 4375,
+        "failed": 17,
+        "total": 4392
+      },
+      "availability_pct": 99.61,
+      "coverage": {
+        "fraction": 1,
+        "observed": 4392,
+        "expected": 4392
+      },
+      "latency": {
+        "avg_ms": 180,
+        "percentiles_supported": false,
+        "percentile_reason": "per-day aggregate counters cannot support percentiles"
+      },
+      "budget": {
+        "allowed_failures": 21.96,
+        "remaining_fraction": 0.2259,
+        "consumed_fraction": 0.7741
+      },
+      "burn": {
+        "fast": {
+          "rate": 0,
+          "samples": 216,
+          "bucket_days": 2,
+          "reason": null
+        },
+        "slow": {
+          "rate": 0,
+          "samples": 1080,
+          "bucket_days": 8,
+          "reason": null
+        }
+      },
+      "freshness": {
+        "evidence_stale_after_seconds": 1800
+      }
+    }
+  ],
+  "unmeasured": [
+    {
+      "service_id": "service-x",
+      "reason": "no approved objective; service remains explicitly unmeasured"
+    }
+  ],
+  "fingerprint": "5bd1ebb48e6f15003a4a6bec6071afa383abc442cb296067ebeffacde8435d04"
+}

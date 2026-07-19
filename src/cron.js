@@ -1,5 +1,5 @@
 /**
- * The scheduled pass, every ten minutes, two jobs in strict order:
+ * The scheduled pass, every ten minutes, three jobs in strict order:
  *
  *   1. Dead-man's switch: if the sentinel has been silent past the
  *      threshold, mark the infra state stale-down and alert once. The
@@ -8,6 +8,10 @@
  *   2. Estate probes and uptime accumulation, which read the infra
  *      state for the machine component; running second means they see
  *      the corrected verdict, not a stale ok.
+ *   3. Reliability derivation over the counters just written: error
+ *      budgets, burn rates, states, and transition notifications. Runs
+ *      last so it always sees this pass's data, and its failure never
+ *      blocks the probes.
  *
  * Alert discipline: the estate probes never alert. Corpus and machine
  * failures already alert through the infra pipeline; a second source
@@ -19,6 +23,7 @@ import { nowIso } from "./lib/http.js";
 import { notify } from "./lib/notify.js";
 import { readState, staleAfterMs, STATE_KEY } from "./routes/infra.js";
 import { runEstatePass } from "./lib/status.js";
+import { runReliabilityPass } from "./routes/reliability.js";
 
 async function checkSentinelSilence(env) {
   const state = await readState(env);
@@ -55,5 +60,8 @@ async function checkSentinelSilence(env) {
 
 export async function runCron(env) {
   await checkSentinelSilence(env);
-  await runEstatePass(env);
+  const snapshot = await runEstatePass(env);
+  // Third job, strictly after the probes: derive reliability verdicts from
+  // the counters just written. Its failure never blocks the probe pipeline.
+  await runReliabilityPass(env, snapshot);
 }

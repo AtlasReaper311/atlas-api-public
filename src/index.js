@@ -24,6 +24,13 @@ import {
   handleEvidenceIndex,
   handleEvidenceReport,
 } from "./routes/evidence.js";
+import {
+  handleReliability,
+  handleReliabilityBaseline,
+  handleReliabilityObjectives,
+  handleReliabilityPolicyReport,
+  handleReliabilityService,
+} from "./routes/reliability.js";
 import { handleBadge } from "./routes/badge.js";
 import { handleDocs } from "./routes/docs.js";
 import { handleTopology } from "./routes/topology.js";
@@ -32,6 +39,8 @@ import { runCron } from "./cron.js";
 
 const EVIDENCE_PATH = /^\/v1\/evidence\/(conformance|chaos)$/;
 const EVIDENCE_REPORT_PATH = /^\/v1\/evidence\/(conformance|chaos)\/report$/;
+const RELIABILITY_SERVICE_PATH = /^\/v1\/reliability\/services\/([a-z0-9-]{1,64})$/;
+const RELIABILITY_BASELINE_PATH = /^\/v1\/reliability\/baseline\/([a-z0-9-]{1,64})$/;
 
 export default {
   async fetch(request, env, ctx) {
@@ -59,6 +68,14 @@ export default {
       const evidenceMatch = path.match(EVIDENCE_PATH);
       if (evidenceMatch) {
         return handleEvidenceGet(request, env, evidenceMatch[1]);
+      }
+      const reliabilityService = path.match(RELIABILITY_SERVICE_PATH);
+      if (reliabilityService) {
+        return handleReliabilityService(request, env, reliabilityService[1]);
+      }
+      const reliabilityBaseline = path.match(RELIABILITY_BASELINE_PATH);
+      if (reliabilityBaseline) {
+        return handleReliabilityBaseline(request, env, reliabilityBaseline[1]);
       }
 
       switch (path) {
@@ -88,6 +105,10 @@ export default {
           return handleStats(request, env, ctx);
         case "/v1/slo":
           return handleSlo(request, env);
+        case "/v1/reliability":
+          return handleReliability(request, env);
+        case "/v1/reliability/objectives":
+          return handleReliabilityObjectives(request, env);
         case "/v1/infra/status":
           return handleInfraStatus(request, env);
         case "/v1/rag/stats":
@@ -105,6 +126,8 @@ export default {
           return handleInfraReport(request, env, ctx);
         case "/v1/rag/report":
           return handleRagReport(request, env, ctx);
+        case "/v1/reliability/objectives/report":
+          return handleReliabilityPolicyReport(request, env);
       }
     }
 

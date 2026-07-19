@@ -2,7 +2,7 @@ export const META = {
   name: "atlas-api-public",
   description:
     "Versioned public API for registry, search, health, SLOs, and scored assurance evidence",
-  version: "1.2.0",
+  version: "1.3.0",
   endpoints: [
     { method: "GET", path: "/v1", description: "Endpoint index" },
     { method: "GET", path: "/v1/docs", description: "Human documentation" },
@@ -12,6 +12,10 @@ export const META = {
     { method: "GET", path: "/v1/search", description: "RAG search over the estate corpus (?q=)" },
     { method: "GET", path: "/v1/stats", description: "Estate stats: repos, components, measured uptime" },
     { method: "GET", path: "/v1/slo", description: "Per-day probe counters for error budget maths; window labelled" },
+    { method: "GET", path: "/v1/reliability", description: "Derived error budgets, burn rates, and explicit states" },
+    { method: "GET", path: "/v1/reliability/services/{service_id}", description: "One service's derived reliability result" },
+    { method: "GET", path: "/v1/reliability/objectives", description: "Active published reliability policy summary" },
+    { method: "GET", path: "/v1/reliability/baseline/{service_id}", description: "Release baseline for journey verification" },
     { method: "GET", path: "/v1/infra/status", description: "Infra health state from specular-sentinel" },
     { method: "GET", path: "/v1/rag/stats", description: "RAG query counts, no query text" },
     { method: "GET", path: "/v1/evidence", description: "Public assurance evidence index" },
@@ -21,6 +25,7 @@ export const META = {
     { method: "POST", path: "/v1/infra/report", description: "Sentinel ingest (bearer)" },
     { method: "POST", path: "/v1/rag/report", description: "Corpus summary ingest (bearer)" },
     { method: "POST", path: "/v1/evidence/{kind}/report", description: "Assurance evidence ingest (bearer)" },
+    { method: "POST", path: "/v1/reliability/objectives/report", description: "Reliability policy ingest (bearer)" },
   ],
   source: "https://github.com/AtlasReaper311/atlas-api-public",
 };
