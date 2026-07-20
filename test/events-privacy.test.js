@@ -25,11 +25,39 @@ test("public event projection keeps approved public repository events", () => {
   );
 });
 
+test("public event projection accepts only approved operational envelope classes", () => {
+  assert.equal(
+    isPublicEvent({
+      dialect: "envelope",
+      event: "reliability",
+      title: "Public reliability state changed",
+    }),
+    true,
+  );
+  assert.equal(
+    isPublicEvent({
+      dialect: "envelope",
+      event: "alert",
+      title: "Internal service changed state",
+    }),
+    false,
+  );
+  assert.equal(
+    isPublicEvent({
+      dialect: "cloudflare",
+      event: "cloudflare",
+      title: "Account notification",
+    }),
+    false,
+  );
+});
+
 test("public projection recalculates counts after filtering", () => {
   const result = publicEventProjection({
     events: [
       { level: "success", dialect: "github", title: "Push to AtlasReaper311/atlas-api-public", ts: "2026-07-20T00:00:00Z" },
       { level: "failure", dialect: "github", title: "Push to AtlasReaper311/owner-private-service", ts: "2026-07-20T00:01:00Z" },
+      { level: "warning", dialect: "envelope", event: "alert", title: "Internal alert", ts: "2026-07-20T00:02:00Z" },
     ],
   });
 
