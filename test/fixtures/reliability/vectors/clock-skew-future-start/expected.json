@@ -1,0 +1,75 @@
+{
+  "schema_version": "atlas-control-plane/reliability-result/v1",
+  "evaluated_at": "2026-07-19T12:00:00Z",
+  "stale_after": "2026-07-19T12:30:00Z",
+  "policy_fingerprint": "c27941811cf142b6002f2512d918d16ab8b15f39461eb78f3b8f8d96d10ef2dd",
+  "source": {
+    "provider": "atlas-api-public/v1/slo",
+    "window_days": 30,
+    "measuring_since": "2026-07-20T00:00:00Z",
+    "checked_at": "2026-07-19T11:55:00Z"
+  },
+  "results": [
+    {
+      "service_id": "service-a",
+      "objective_id": "service-a-availability-30d",
+      "indicator": "availability",
+      "target_pct": 99.5,
+      "state": "insufficient_evidence",
+      "control_plane_state": "unknown",
+      "reasons": [
+        "only 60 samples of the 288 required"
+      ],
+      "window": {
+        "start_day": "2026-07-19",
+        "end_day": "2026-07-19",
+        "days_observed": 1
+      },
+      "samples": {
+        "ok": 60,
+        "failed": 0,
+        "total": 60
+      },
+      "availability_pct": 100,
+      "coverage": {
+        "fraction": null,
+        "observed": 60,
+        "expected": 0
+      },
+      "latency": {
+        "avg_ms": 180,
+        "percentiles_supported": false,
+        "percentile_reason": "per-day aggregate counters cannot support percentiles"
+      },
+      "budget": {
+        "allowed_failures": null,
+        "remaining_fraction": null,
+        "consumed_fraction": null
+      },
+      "burn": {
+        "fast": {
+          "rate": 0,
+          "samples": 60,
+          "bucket_days": 2,
+          "reason": null
+        },
+        "slow": {
+          "rate": null,
+          "samples": 60,
+          "bucket_days": 8,
+          "reason": "insufficient samples for burn window (60 of 144)"
+        }
+      },
+      "freshness": {
+        "evidence_stale_after_seconds": 1800
+      }
+    }
+  ],
+  "unmeasured": [
+    {
+      "service_id": "service-x",
+      "reason": "no approved objective; service remains explicitly unmeasured"
+    }
+  ],
+  "fingerprint": "8be752da07a45fdcbfd306626aa47ce7d9cbf37883b830afebdf3d44ebbdf632"
+}

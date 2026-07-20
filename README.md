@@ -57,9 +57,18 @@ npx wrangler deploy
 | `GET /v1/infra/status` | The sentinel pipeline's verdict; staleness recomputed at read time |
 | `GET /v1/rag/stats` | Query counts only; terms and IPs stay out of public responses structurally |
 | `GET /v1/badge/status` | Shields-flat SVG, `N/M operational` |
+| `GET /v1/reliability` | Derived error budgets, day-granular burn rates, coverage, and explicit states for every measured service |
+| `GET /v1/reliability/services/{id}` | One service's derived result; known services without objectives answer `unmeasured`, never healthy |
+| `GET /v1/reliability/objectives` | The active published policy: targets, windows, sources, and the explicit unmeasured list |
+| `GET /v1/reliability/baseline/{id}` | Release baseline for journey verification, average-latency variant, honest 503 when evidence cannot support one |
 | `POST /v1/infra/report` | Sentinel ingest, bearer `INFRA_REPORT_KEY` |
 | `POST /v1/rag/report` | Corpus summary ingest, bearer `RAG_REPORT_KEY` |
+| `POST /v1/reliability/objectives/report` | Fingerprint-verified policy ingest from the atlas-infra workflow, bearer `EVIDENCE_REPORT_KEY` |
 | `data/estate.manifest.json` | Canonical machine-readable estate manifest; repo ownership, lifecycle, layer, public surface, dependencies, and feeds |
+
+## Reliability derivation
+
+The third cron job derives reliability verdicts from the counters the probe pass just wrote: error budget remaining, fast and slow day-granular burn rates, measurement coverage, and one of eight explicit states per objective. The mathematics is a vendored port of the canonical reference in [`atlas-infra`](https://github.com/AtlasReaper311/atlas-infra) (`scripts/reliability_evaluator.py`); the shared vectors under `test/fixtures/reliability/vectors/` pin both implementations to byte-identical output, fingerprints included, so neither can drift alone. Targets arrive only through the fingerprint-verified policy ingest; the Worker bundles none, and a missing or aged-out policy degrades every result to an explicit unavailable state instead of inventing health. State transitions (healthy to at-risk, at-risk to exhausted, measured to stale, source unavailable, and measured recovery after six consecutive healthy passes) emit deduplicated, cooled-down `reliability` events through the existing notify binding, with one consolidated event replacing the flood when five or more services degrade in a single pass.
 
 ## Public evidence surface
 

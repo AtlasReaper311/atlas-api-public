@@ -1,0 +1,181 @@
+{
+  "schema_version": "atlas-control-plane/reliability-result/v1",
+  "evaluated_at": "2026-07-19T12:00:00Z",
+  "stale_after": "2026-07-19T12:30:00Z",
+  "policy_fingerprint": "9c6e65e7b8addcfd09eae48f388591350b0fb9306f4ebfd829bfdd33ae20909c",
+  "source": {
+    "provider": "atlas-api-public/v1/slo",
+    "window_days": 30,
+    "measuring_since": "2026-07-13T00:00:00Z",
+    "checked_at": "2026-07-19T11:55:00Z"
+  },
+  "results": [
+    {
+      "service_id": "service-a",
+      "objective_id": "service-a-availability-30d",
+      "indicator": "availability",
+      "target_pct": 99.5,
+      "state": "objective_met",
+      "control_plane_state": "healthy",
+      "reasons": [],
+      "window": {
+        "start_day": "2026-07-13",
+        "end_day": "2026-07-19",
+        "days_observed": 7
+      },
+      "samples": {
+        "ok": 936,
+        "failed": 0,
+        "total": 936
+      },
+      "availability_pct": 100,
+      "coverage": {
+        "fraction": 1,
+        "observed": 936,
+        "expected": 936
+      },
+      "latency": {
+        "avg_ms": 180,
+        "percentiles_supported": false,
+        "percentile_reason": "per-day aggregate counters cannot support percentiles"
+      },
+      "budget": {
+        "allowed_failures": 4.68,
+        "remaining_fraction": 1,
+        "consumed_fraction": 0
+      },
+      "burn": {
+        "fast": {
+          "rate": 0,
+          "samples": 216,
+          "bucket_days": 2,
+          "reason": null
+        },
+        "slow": {
+          "rate": 0,
+          "samples": 936,
+          "bucket_days": 8,
+          "reason": null
+        }
+      },
+      "freshness": {
+        "evidence_stale_after_seconds": 1800
+      }
+    },
+    {
+      "service_id": "service-b",
+      "objective_id": "service-b-availability-30d",
+      "indicator": "availability",
+      "target_pct": 75,
+      "state": "budget_exhausted",
+      "control_plane_state": "failed",
+      "reasons": [
+        "the error budget for the window is exhausted"
+      ],
+      "window": {
+        "start_day": "2026-07-13",
+        "end_day": "2026-07-19",
+        "days_observed": 7
+      },
+      "samples": {
+        "ok": 640,
+        "failed": 296,
+        "total": 936
+      },
+      "availability_pct": 68.38,
+      "coverage": {
+        "fraction": 1,
+        "observed": 936,
+        "expected": 936
+      },
+      "latency": {
+        "avg_ms": 900,
+        "percentiles_supported": false,
+        "percentile_reason": "per-day aggregate counters cannot support percentiles"
+      },
+      "budget": {
+        "allowed_failures": 234,
+        "remaining_fraction": -0.265,
+        "consumed_fraction": 1.265
+      },
+      "burn": {
+        "fast": {
+          "rate": 1.41,
+          "samples": 216,
+          "bucket_days": 2,
+          "reason": null
+        },
+        "slow": {
+          "rate": 1.26,
+          "samples": 936,
+          "bucket_days": 8,
+          "reason": null
+        }
+      },
+      "freshness": {
+        "evidence_stale_after_seconds": 1800
+      }
+    },
+    {
+      "service_id": "service-c",
+      "objective_id": "service-c-availability-30d",
+      "indicator": "availability",
+      "target_pct": 100,
+      "state": "unavailable_source",
+      "control_plane_state": "unavailable",
+      "reasons": [
+        "component gamma has no counters"
+      ],
+      "window": {
+        "start_day": null,
+        "end_day": null,
+        "days_observed": 0
+      },
+      "samples": {
+        "ok": 0,
+        "failed": 0,
+        "total": 0
+      },
+      "availability_pct": null,
+      "coverage": {
+        "fraction": null,
+        "observed": 0,
+        "expected": 0
+      },
+      "latency": {
+        "avg_ms": null,
+        "percentiles_supported": false,
+        "percentile_reason": "per-day aggregate counters cannot support percentiles"
+      },
+      "budget": {
+        "allowed_failures": null,
+        "remaining_fraction": null,
+        "consumed_fraction": null
+      },
+      "burn": {
+        "fast": {
+          "rate": null,
+          "samples": 0,
+          "bucket_days": 2,
+          "reason": "source unavailable"
+        },
+        "slow": {
+          "rate": null,
+          "samples": 0,
+          "bucket_days": 8,
+          "reason": "source unavailable"
+        }
+      },
+      "freshness": {
+        "evidence_stale_after_seconds": 1800
+      }
+    }
+  ],
+  "unmeasured": [
+    {
+      "service_id": "service-x",
+      "reason": "no approved objective; service remains explicitly unmeasured"
+    }
+  ],
+  "fingerprint": "4cc3393c383e5160f6046bf01925b0eda3585b8ee082987e9e3a6045ecd31a60"
+}

@@ -1,0 +1,91 @@
+{
+  "policy": {
+    "schema": "atlas-reliability-policy/v1",
+    "generated_at": "2026-07-19T00:00:00Z",
+    "source": {
+      "repository": "AtlasReaper311/atlas-infra",
+      "path": "policy/reliability"
+    },
+    "evaluator_config": {
+      "schema_version": "atlas-reliability-evaluator-config/v1",
+      "expected_samples_per_day": 144,
+      "result_stale_after_seconds": 1800,
+      "policy_stale_after_seconds": 691200,
+      "minimum_evaluation_samples": 288,
+      "fast_burn": {
+        "bucket_days": 2,
+        "minimum_samples": 24,
+        "at_risk_threshold": 2
+      },
+      "slow_burn": {
+        "bucket_days": 8,
+        "minimum_samples": 144,
+        "at_risk_threshold": 1.5
+      },
+      "remaining_budget_at_risk_fraction": 0.25,
+      "coverage_confidence_floor": 0.5,
+      "recovery_confirmation_passes": 6,
+      "notification_cooldown_seconds": 21600,
+      "storm_suppression_threshold": 5,
+      "percentile_reason": "per-day aggregate counters cannot support percentiles",
+      "release_baseline": {
+        "latency_regression_percent": 25,
+        "error_rate_increase": 0.02,
+        "stale_after_seconds": 1800
+      }
+    },
+    "objectives": [
+      {
+        "schema_version": "atlas-control-plane/reliability-objective/v1",
+        "objective_id": "service-a-availability-30d",
+        "service_id": "service-a",
+        "indicator": "availability",
+        "measurement_source": {
+          "provider": "atlas-api-public/v1/slo",
+          "component": "alpha"
+        },
+        "window_days": 30,
+        "target_pct": 99.5,
+        "freshness": {
+          "evidence_stale_after_seconds": 1800
+        },
+        "min_samples": {
+          "evaluate": 288,
+          "fast_burn": 24,
+          "slow_burn": 144
+        },
+        "provenance": {
+          "origin": "owner-approved-policy",
+          "source_ref": "tests/fixtures/reliability",
+          "approved_by": "AtlasReaper311",
+          "approved_at": "2026-07-19T00:00:00Z"
+        },
+        "display": {
+          "label": "service-a fixture",
+          "domain": "edge"
+        }
+      }
+    ],
+    "unmeasured": [
+      {
+        "service_id": "service-x",
+        "reason": "no approved objective; service remains explicitly unmeasured"
+      }
+    ],
+    "fingerprint": "c27941811cf142b6002f2512d918d16ab8b15f39461eb78f3b8f8d96d10ef2dd"
+  },
+  "uptime": {
+    "started_at": "2026-07-13T00:00:00Z",
+    "window_days": 30,
+    "components": {
+      "other": {
+        "2026-07-19": {
+          "ok": 10,
+          "total": 10
+        }
+      }
+    }
+  },
+  "now": "2026-07-19T12:00:00Z",
+  "source_checked_at": "2026-07-19T11:55:00Z"
+}

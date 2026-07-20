@@ -21,7 +21,7 @@ export function buildOpenApi() {
     openapi: "3.0.3",
     info: {
       title: "Atlas Systems public API",
-      version: "1.2.0",
+      version: "1.3.0",
       description:
         "Versioned read surface for the Atlas Systems estate: public topology and repository inventory, the Worker registry, RAG search over the estate corpus, live infra health, assurance evidence, query stats, and status reporting. Runs at the edge on Cloudflare Workers; the RAG stack itself runs on a homelab machine that sleeps, and the API says so honestly when it does.",
       contact: { name: "Atlas Reaper", url: "https://atlas-systems.uk" },
@@ -457,6 +457,112 @@ export function buildOpenApi() {
       "/v1/evidence/chaos/report": {
         post: {
           summary: "Chaos evidence ingest",
+          security: [{ bearer: [] }],
+          responses: {
+            200: { description: "Stored or confirmed idempotent" },
+            401: { description: "Missing or incorrect bearer key" },
+            422: { description: "Schema or fingerprint validation failed" },
+          },
+        },
+      },
+      "/v1/reliability": {
+        get: {
+          summary: "Derived reliability results for every measured service",
+          description:
+            "Error budgets, day-granular burn rates, coverage, and explicit states derived deterministically from the /v1/slo counters and the published policy. Services without approved objectives appear in the unmeasured list; missing, stale, malformed, or insufficient evidence is a stated condition, never health. The report is served with an explicit stale marker once past its freshness bound.",
+          responses: {
+            200: {
+              description: "Reliability result envelope",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      ok: { type: "boolean" },
+                      policy_state: {
+                        type: "string",
+                        enum: ["fresh", "stale", "missing"],
+                      },
+                      stale: { type: "boolean" },
+                      report: {
+                        type: "object",
+                        description:
+                          "An atlas-control-plane/reliability-result/v1 document",
+                      },
+                      generated_at: { type: "string", format: "date-time" },
+                    },
+                  },
+                },
+              },
+            },
+            503: { description: "No evaluation has been produced yet" },
+          },
+        },
+      },
+      "/v1/reliability/services/{service_id}": {
+        get: {
+          summary: "One service's derived reliability result",
+          parameters: [
+            {
+              name: "service_id",
+              in: "path",
+              required: true,
+              schema: {
+                type: "string",
+                pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                maxLength: 64,
+              },
+            },
+          ],
+          responses: {
+            200: {
+              description:
+                "The service result, or an explicit unmeasured state for known services without objectives",
+            },
+            400: { description: "Malformed service_id" },
+            404: { description: "Unknown service_id" },
+            503: { description: "No evaluation has been produced yet" },
+          },
+        },
+      },
+      "/v1/reliability/objectives": {
+        get: {
+          summary: "The active published reliability policy",
+          description:
+            "Targets, windows, and measurement sources from the canonical atlas-infra policy, plus the explicit unmeasured list. Targets are public presentation data already; no credential or evidence payload appears here.",
+          responses: {
+            200: { description: "Policy summary with fingerprint" },
+            503: { description: "No policy has been published" },
+          },
+        },
+      },
+      "/v1/reliability/baseline/{service_id}": {
+        get: {
+          summary: "Release baseline for atlas-journey-watch verification",
+          description:
+            "An atlas-journey-watch/release-baseline/v1 document comparing the recent measurement window against the objective window, using average latency because per-day aggregates cannot support percentiles. Serves an honest 503 when evidence is insufficient, stale, or unavailable.",
+          parameters: [
+            {
+              name: "service_id",
+              in: "path",
+              required: true,
+              schema: {
+                type: "string",
+                pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                maxLength: 64,
+              },
+            },
+          ],
+          responses: {
+            200: { description: "Baseline document" },
+            404: { description: "No approved objective for this service" },
+            503: { description: "Evidence cannot support an honest baseline" },
+          },
+        },
+      },
+      "/v1/reliability/objectives/report": {
+        post: {
+          summary: "Reliability policy ingest",
           security: [{ bearer: [] }],
           responses: {
             200: { description: "Stored or confirmed idempotent" },

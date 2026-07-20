@@ -266,7 +266,10 @@ test("every path in openapi.json exists on the router", async () => {
     url.pathname === "/search" ? jsonResponse(CORPUS_SEARCH) : jsonResponse({});
   for (const [path, methods] of Object.entries(spec.paths)) {
     for (const method of Object.keys(methods)) {
-      const target = path === "/v1/search" ? `${path}?q=tunnel` : path;
+      // Path templates walk with a concrete estate id so the router's
+      // pattern branch is genuinely exercised.
+      const concrete = path.replace("{service_id}", "atlas-notify");
+      const target = concrete === "/v1/search" ? `${concrete}?q=tunnel` : concrete;
       const init =
         method === "post"
           ? { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }

@@ -1,0 +1,75 @@
+{
+  "schema_version": "atlas-control-plane/reliability-result/v1",
+  "evaluated_at": "2026-07-19T12:00:00Z",
+  "stale_after": "2026-07-19T12:30:00Z",
+  "policy_fingerprint": "c27941811cf142b6002f2512d918d16ab8b15f39461eb78f3b8f8d96d10ef2dd",
+  "source": {
+    "provider": "atlas-api-public/v1/slo",
+    "window_days": 30,
+    "measuring_since": "2026-07-01T00:00:00Z",
+    "checked_at": null
+  },
+  "results": [
+    {
+      "service_id": "service-a",
+      "objective_id": "service-a-availability-30d",
+      "indicator": "availability",
+      "target_pct": 99.5,
+      "state": "stale_evidence",
+      "control_plane_state": "stale",
+      "reasons": [
+        "newest counters day 2026-07-16 is older than one day"
+      ],
+      "window": {
+        "start_day": "2026-07-10",
+        "end_day": "2026-07-16",
+        "days_observed": 7
+      },
+      "samples": {
+        "ok": 1008,
+        "failed": 0,
+        "total": 1008
+      },
+      "availability_pct": 100,
+      "coverage": {
+        "fraction": 0.3784,
+        "observed": 1008,
+        "expected": 2664
+      },
+      "latency": {
+        "avg_ms": 180,
+        "percentiles_supported": false,
+        "percentile_reason": "per-day aggregate counters cannot support percentiles"
+      },
+      "budget": {
+        "allowed_failures": null,
+        "remaining_fraction": null,
+        "consumed_fraction": null
+      },
+      "burn": {
+        "fast": {
+          "rate": 0,
+          "samples": 288,
+          "bucket_days": 2,
+          "reason": null
+        },
+        "slow": {
+          "rate": 0,
+          "samples": 1008,
+          "bucket_days": 8,
+          "reason": null
+        }
+      },
+      "freshness": {
+        "evidence_stale_after_seconds": 1800
+      }
+    }
+  ],
+  "unmeasured": [
+    {
+      "service_id": "service-x",
+      "reason": "no approved objective; service remains explicitly unmeasured"
+    }
+  ],
+  "fingerprint": "63d0660a780eeec025fbb271d197fcd4bcee5bbdb18c2d96f43732382bf5ad24"
+}
