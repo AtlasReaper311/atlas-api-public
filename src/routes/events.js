@@ -14,6 +14,16 @@ const PUBLIC_IDENTITIES = new Set([
   "cv.atlas-systems.uk",
 ]);
 
+const PUBLIC_ENVELOPE_EVENTS = new Set([
+  "api_deploy",
+  "infra_health",
+  "pages_deploy",
+  "quota_cost",
+  "rag_queries",
+  "reliability",
+  "site_deploy",
+]);
+
 function candidates(event) {
   const values = [event?.title, event?.message, event?.event, event?.repo]
     .filter((value) => typeof value === "string")
@@ -32,23 +42,34 @@ function candidates(event) {
     for (const match of values.matchAll(pattern)) found.add(match[1]);
   }
 
-  if (typeof event?.repo === "string") found.add(event.repo.replace(/^AtlasReaper311\//, ""));
+  if (typeof event?.repo === "string") {
+    found.add(event.repo.replace(/^AtlasReaper311\//, ""));
+  }
   return [...found];
 }
 
-export function isPublicEvent(event) {
+function identitiesArePublic(event) {
   const identities = candidates(event);
-  if (identities.length > 0) {
-    return identities.every((identity) => PUBLIC_IDENTITIES.has(identity));
+  return identities.length === 0 || identities.every((identity) => PUBLIC_IDENTITIES.has(identity));
+}
+
+export function isPublicEvent(event) {
+  const dialect = String(event?.dialect || "").toLowerCase();
+
+  if (dialect === "github") {
+    const identities = candidates(event);
+    return identities.length > 0 && identities.every((identity) => PUBLIC_IDENTITIES.has(identity));
   }
 
-  const dialect = String(event?.dialect || "").toLowerCase();
-  if (dialect === "github") return false;
+  if (dialect === "envelope") {
+    const eventLabel = String(event?.event || "");
+    return PUBLIC_ENVELOPE_EVENTS.has(eventLabel) && identitiesArePublic(event);
+  }
 
-  const text = `${event?.title || ""} ${event?.message || ""}`;
-  if (/github\.com\/AtlasReaper311\//i.test(text)) return false;
-
-  return true;
+  // Cloudflare provider notifications and unknown historical dialects can
+  // contain arbitrary account resource names. They are operational evidence,
+  // not a public feed contract, so the public projection drops them.
+  return false;
 }
 
 function sanitizeEvent(event) {
@@ -98,7 +119,7 @@ export async function handlePublicEvents(request, env) {
   let upstream;
   try {
     upstream = await env.ATLAS_NOTIFY.fetch(
-      `https://atlas-notify/notify/recent?limit=50`,
+      "https://atlas-notify/notify/recent?limit=50",
       { signal: AbortSignal.timeout(5000) },
     );
   } catch {
