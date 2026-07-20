@@ -1,13 +1,13 @@
 {
-  "schema": "atlas-estate-manifest/v1",
-  "name": "Atlas Systems",
-  "description": "Canonical machine-readable map of the Atlas Systems estate.",
+  "schema": "atlas-estate-manifest/v2",
+  "name": "Atlas Systems public estate",
+  "description": "Canonical machine-readable map of the public Atlas Systems estate. Private repository and service governance remains source-owned and is never projected here.",
   "owner": "AtlasReaper311",
   "canonical_site": "https://atlas-systems.uk",
   "canonical_status": "https://status.atlas-systems.uk",
   "canonical_api": "https://api.atlas-systems.uk/v1",
   "generated_manually": true,
-  "principle": "The manifest declares what Atlas Systems owns. The registry shows what is live. Status shows what is healthy.",
+  "principle": "The public manifest declares what Atlas Systems intentionally publishes. The public registry shows which approved public Workers are live. Private components never enter either projection.",
   "layers": [
     "surface",
     "public-api",
@@ -30,18 +30,8 @@
       "meta_url": null,
       "indexed": false,
       "health_url": "https://atlas-systems.uk",
-      "depends_on": [
-        "github-pulse",
-        "site-pulse",
-        "deploy-watch",
-        "atlas-api-public"
-      ],
-      "feeds": [
-        "portfolio",
-        "lab",
-        "writing",
-        "corpus"
-      ],
+      "depends_on": ["github-pulse", "site-pulse", "deploy-watch", "atlas-api-public"],
+      "feeds": ["portfolio", "lab", "writing", "corpus"],
       "notes": "Primary public portfolio surface."
     },
     {
@@ -54,14 +44,9 @@
       "meta_url": null,
       "indexed": false,
       "health_url": "https://status.atlas-systems.uk",
-      "depends_on": [
-        "atlas-api-public",
-        "atlas-api-index"
-      ],
-      "feeds": [
-        "public status"
-      ],
-      "notes": "Public status surface. Reads registry data first and falls back to a local service list."
+      "depends_on": ["atlas-api-public", "atlas-api-index"],
+      "feeds": ["public status"],
+      "notes": "Public status surface."
     },
     {
       "name": "atlas-doc-viewer",
@@ -74,9 +59,7 @@
       "indexed": false,
       "health_url": "https://cv.atlas-systems.uk",
       "depends_on": [],
-      "feeds": [
-        "cv surface"
-      ],
+      "feeds": ["cv surface"],
       "notes": "Public document viewer surface."
     },
     {
@@ -89,20 +72,9 @@
       "meta_url": "https://api.atlas-systems.uk/v1/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/v1",
-      "depends_on": [
-        "atlas-api-index",
-        "github-pulse",
-        "specular-telemetry",
-        "atlas-corpus",
-        "specular-sentinel"
-      ],
-      "feeds": [
-        "public API",
-        "status",
-        "lab",
-        "profile badge"
-      ],
-      "notes": "Versioned public API spine for Atlas Systems."
+      "depends_on": ["atlas-api-index", "github-pulse", "specular-telemetry", "atlas-corpus", "specular-sentinel"],
+      "feeds": ["public API", "status", "lab", "profile badge"],
+      "notes": "Versioned public API spine."
     },
     {
       "name": "atlas-api-index",
@@ -114,16 +86,9 @@
       "meta_url": "https://api.atlas-systems.uk/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk",
-      "depends_on": [
-        "worker-meta-kit",
-        "atlas-notify"
-      ],
-      "feeds": [
-        "worker registry",
-        "system map",
-        "status"
-      ],
-      "notes": "Discovers Worker metadata and publishes the live service registry."
+      "depends_on": ["worker-meta-kit", "atlas-notify"],
+      "feeds": ["public worker registry", "system map", "status"],
+      "notes": "Publishes only explicitly approved public Worker metadata."
     },
     {
       "name": "atlas-notify",
@@ -135,15 +100,9 @@
       "meta_url": "https://api.atlas-systems.uk/notify/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/notify/health",
-      "depends_on": [
-        "discord"
-      ],
-      "feeds": [
-        "discord",
-        "notify-log",
-        "atlas-blackbox"
-      ],
-      "notes": "Central event router for deploys, alerts, failures, and status events."
+      "depends_on": ["discord"],
+      "feeds": ["public event projection", "status", "lab"],
+      "notes": "Operational event router with a sanitized public recent-event projection."
     },
     {
       "name": "github-pulse",
@@ -155,15 +114,9 @@
       "meta_url": "https://api.atlas-systems.uk/pulse/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/pulse",
-      "depends_on": [
-        "github"
-      ],
-      "feeds": [
-        "atlas-systems",
-        "weekly digest",
-        "profile stats"
-      ],
-      "notes": "Read-only GitHub activity proxy with server-side token handling."
+      "depends_on": ["github"],
+      "feeds": ["atlas-systems", "public activity aggregates"],
+      "notes": "Read-only GitHub activity proxy. Private repository activity may affect anonymous aggregate counts but never repository-level output."
     },
     {
       "name": "site-pulse",
@@ -175,14 +128,9 @@
       "meta_url": "https://api.atlas-systems.uk/site-pulse/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/site-pulse/health",
-      "depends_on": [
-        "cloudflare"
-      ],
-      "feeds": [
-        "atlas-systems",
-        "site analytics"
-      ],
-      "notes": "Cloudflare Analytics proxy for honest 24-hour site activity."
+      "depends_on": ["cloudflare"],
+      "feeds": ["atlas-systems", "site analytics"],
+      "notes": "Cloudflare Analytics proxy for public site activity."
     },
     {
       "name": "deploy-watch",
@@ -194,75 +142,51 @@
       "meta_url": "https://api.atlas-systems.uk/deploy-watch/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/deploy-watch/latest",
-      "depends_on": [
-        "cloudflare"
-      ],
-      "feeds": [
-        "atlas-systems",
-        "atlas-notify",
-        "status"
-      ],
-      "notes": "Confirms Cloudflare Pages deployment outcomes independently of GitHub push events."
+      "depends_on": ["cloudflare"],
+      "feeds": ["atlas-systems", "atlas-notify", "status"],
+      "notes": "Public Pages deployment outcome monitor."
     },
     {
       "name": "atlas-blackbox",
       "kind": "worker",
       "layer": "observability",
-      "lifecycle": "lab / Workers Plus gated",
+      "lifecycle": "production",
       "repo": "https://github.com/AtlasReaper311/atlas-blackbox",
       "public_surface": "https://api.atlas-systems.uk/blackbox",
       "meta_url": "https://api.atlas-systems.uk/blackbox/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/blackbox/health",
-      "depends_on": [
-        "specular-telemetry",
-        "atlas-notify"
-      ],
-      "feeds": [
-        "incident replay"
-      ],
-      "notes": "Rolling incident recorder. Requires Workers Plus if Durable Object SQLite is enabled."
+      "depends_on": ["specular-telemetry", "atlas-notify"],
+      "feeds": ["incident replay", "dora"],
+      "notes": "Rolling incident recorder for public estate reliability evidence."
     },
     {
-      "name": "specular-telemetry",
+      "name": "specular-edge",
       "kind": "worker",
-      "layer": "observability",
+      "layer": "edge",
       "lifecycle": "production",
       "repo": "https://github.com/AtlasReaper311/specular-telemetry",
       "public_surface": "https://api.atlas-systems.uk/specular",
       "meta_url": "https://api.atlas-systems.uk/specular/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/specular",
-      "depends_on": [
-        "specular-edge",
-        "cloudflared",
-        "telemetry-kv"
-      ],
-      "feeds": [
-        "lab",
-        "status",
-        "atlas-blackbox"
-      ],
-      "notes": "Edge-facing telemetry surface for SPECULAR-CORE hardware and local service state."
+      "depends_on": ["specular-telemetry", "cloudflared"],
+      "feeds": ["lab", "status", "atlas-blackbox"],
+      "notes": "Public edge projection for bounded workstation telemetry."
     },
     {
-      "name": "specular-edge",
+      "name": "specular-telemetry",
       "kind": "local-service",
-      "layer": "edge",
+      "layer": "observability",
       "lifecycle": "production",
       "repo": "https://github.com/AtlasReaper311/specular-telemetry",
-      "public_surface": "via specular-telemetry",
+      "public_surface": "via specular-edge",
       "meta_url": null,
       "indexed": false,
       "health_url": null,
-      "depends_on": [
-        "SPECULAR-CORE",
-        "ollama"
-      ],
-      "feeds": [
-        "specular-telemetry"
-      ],
-      "notes": "Local FastAPI service behind Cloudflare Tunnel."
+      "depends_on": ["SPECULAR-CORE", "ollama"],
+      "feeds": ["specular-edge"],
+      "notes": "Local telemetry producer behind the public edge projection."
     },
     {
       "name": "specular-sentinel",
@@ -274,16 +198,9 @@
       "meta_url": null,
       "indexed": false,
       "health_url": null,
-      "depends_on": [
-        "SPECULAR-CORE",
-        "atlas-corpus",
-        "ollama"
-      ],
-      "feeds": [
-        "atlas-api-public",
-        "infra status"
-      ],
-      "notes": "Local observer that reports machine and service facts to the edge."
+      "depends_on": ["SPECULAR-CORE", "atlas-corpus", "ollama"],
+      "feeds": ["atlas-api-public", "infra status"],
+      "notes": "Local observer that reports bounded infrastructure facts."
     },
     {
       "name": "atlas-corpus",
@@ -295,17 +212,9 @@
       "meta_url": null,
       "indexed": false,
       "health_url": null,
-      "depends_on": [
-        "github",
-        "ollama",
-        "chroma"
-      ],
-      "feeds": [
-        "estate search",
-        "atlas-api-public",
-        "ramone-memory"
-      ],
-      "notes": "Semantic corpus over Atlas Systems READMEs, decisions, case studies, and context documents."
+      "depends_on": ["github", "ollama"],
+      "feeds": ["estate search", "atlas-api-public", "ramone-memory"],
+      "notes": "Semantic corpus over public Atlas Systems source and published content."
     },
     {
       "name": "ramone-edge",
@@ -317,16 +226,9 @@
       "meta_url": "https://ramone.atlas-systems.uk/_meta",
       "indexed": true,
       "health_url": "https://ramone.atlas-systems.uk/status",
-      "depends_on": [
-        "cloudflared",
-        "specular-edge",
-        "ollama",
-        "ramone-memory"
-      ],
-      "feeds": [
-        "public Ramone interface"
-      ],
-      "notes": "Public Worker face for private local AI services."
+      "depends_on": ["cloudflared", "specular-edge", "ollama", "ramone-memory"],
+      "feeds": ["public Ramone interface"],
+      "notes": "Public Worker face for local AI services."
     },
     {
       "name": "ramone-memory",
@@ -338,15 +240,9 @@
       "meta_url": null,
       "indexed": false,
       "health_url": null,
-      "depends_on": [
-        "ollama",
-        "chroma",
-        "home-assistant"
-      ],
-      "feeds": [
-        "Ramone private memory"
-      ],
-      "notes": "Private memory layer for local Ramone sessions."
+      "depends_on": ["ollama", "home-assistant"],
+      "feeds": ["Ramone memory"],
+      "notes": "Local memory layer represented only because its source repository is public."
     },
     {
       "name": "ramone-trigger",
@@ -358,14 +254,9 @@
       "meta_url": "https://api.atlas-systems.uk/ramone-trigger/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/ramone-trigger/health",
-      "depends_on": [
-        "github"
-      ],
-      "feeds": [
-        "workflow dispatch",
-        "Ramone automation"
-      ],
-      "notes": "Trigger surface for voice or automation initiated Ramone workflows."
+      "depends_on": ["github"],
+      "feeds": ["workflow dispatch", "Ramone automation"],
+      "notes": "Authenticated automation trigger whose source repository is public."
     },
     {
       "name": "specular-sonify",
@@ -377,48 +268,79 @@
       "meta_url": "https://api.atlas-systems.uk/sonify/_meta",
       "indexed": true,
       "health_url": "https://api.atlas-systems.uk/sonify",
-      "depends_on": [
-        "specular-telemetry"
-      ],
-      "feeds": [
-        "audio telemetry experiments"
-      ],
-      "notes": "Sonification layer for telemetry-driven audio experiments."
+      "depends_on": ["specular-telemetry"],
+      "feeds": ["audio telemetry experiments"],
+      "notes": "Sonification layer for public telemetry experiments."
     },
     {
-      "name": "atlas-vault",
+      "name": "atlas-quota-watch",
       "kind": "worker",
-      "layer": "storage",
+      "layer": "observability",
       "lifecycle": "production",
-      "repo": null,
-      "public_surface": "controlled Worker endpoint",
-      "meta_url": "https://api.atlas-systems.uk/vault/_meta",
+      "repo": "https://github.com/AtlasReaper311/atlas-quota-watch",
+      "public_surface": "https://api.atlas-systems.uk/quota",
+      "meta_url": "https://api.atlas-systems.uk/quota/_meta",
       "indexed": true,
-      "health_url": "https://api.atlas-systems.uk/vault/health",
-      "depends_on": [],
-      "feeds": [
-        "controlled storage"
-      ],
-      "notes": "Controlled storage surface. Add repo URL when the public repo is ready."
+      "health_url": "https://api.atlas-systems.uk/quota",
+      "depends_on": ["cloudflare", "atlas-notify"],
+      "feeds": ["quota evidence", "atlas-notify"],
+      "notes": "Read-only Cloudflare usage watchdog."
     },
     {
-      "name": "atlas-backend",
-      "kind": "internal-service",
-      "layer": "local-ai",
-      "lifecycle": "internal",
-      "repo": null,
-      "public_surface": "no direct public surface",
+      "name": "atlas-dora",
+      "kind": "worker",
+      "layer": "observability",
+      "lifecycle": "production",
+      "repo": "https://github.com/AtlasReaper311/atlas-dora",
+      "public_surface": "https://api.atlas-systems.uk/dora",
+      "meta_url": "https://api.atlas-systems.uk/dora/_meta",
+      "indexed": true,
+      "health_url": "https://api.atlas-systems.uk/dora/health",
+      "depends_on": ["atlas-notify", "atlas-blackbox", "deploy-watch", "atlas-api-public"],
+      "feeds": ["lab", "delivery metrics"],
+      "notes": "Public aggregate DORA metrics. Source-level private identities are not part of the public contract."
+    },
+    {
+      "name": "atlas-journey-watch",
+      "kind": "github-actions",
+      "layer": "observability",
+      "lifecycle": "production",
+      "repo": "https://github.com/AtlasReaper311/atlas-journey-watch",
+      "public_surface": "GitHub Actions scheduled workflow",
       "meta_url": null,
       "indexed": false,
       "health_url": null,
-      "depends_on": [
-        "cloudflared",
-        "specular-edge"
-      ],
-      "feeds": [
-        "atlas-api-public"
-      ],
-      "notes": "Internal backend node. It is intentionally not indexed until it becomes a public Worker or exposes a stable metadata route."
+      "depends_on": ["atlas-systems", "status", "atlas-api-public", "atlas-api-index"],
+      "feeds": ["synthetic journey evidence"],
+      "notes": "Public synthetic journey checks."
+    },
+    {
+      "name": "atlas-dep-audit",
+      "kind": "github-actions",
+      "layer": "infra",
+      "lifecycle": "production",
+      "repo": "https://github.com/AtlasReaper311/atlas-dep-audit",
+      "public_surface": "GitHub Actions scheduled workflow",
+      "meta_url": null,
+      "indexed": false,
+      "health_url": null,
+      "depends_on": ["github", "atlas-api-public", "osv"],
+      "feeds": ["supply-chain assurance"],
+      "notes": "Public source-level dependency assurance."
+    },
+    {
+      "name": "atlas-badges",
+      "kind": "tool",
+      "layer": "reusable-kit",
+      "lifecycle": "production",
+      "repo": "https://github.com/AtlasReaper311/atlas-badges",
+      "public_surface": "GitHub repository and Python CLI",
+      "meta_url": null,
+      "indexed": false,
+      "health_url": null,
+      "depends_on": ["github"],
+      "feeds": ["repository README concept badges"],
+      "notes": "Evidence-backed public repository tooling."
     },
     {
       "name": "cloudflared",
@@ -430,34 +352,9 @@
       "meta_url": null,
       "indexed": false,
       "health_url": null,
-      "depends_on": [
-        "SPECULAR-CORE"
-      ],
-      "feeds": [
-        "specular-edge",
-        "ramone-edge",
-        "specular-telemetry"
-      ],
-      "notes": "Cloudflare Tunnel bridge between public Workers and local services."
-    },
-    {
-      "name": "telemetry-kv",
-      "kind": "kv-namespace",
-      "layer": "storage",
-      "lifecycle": "production",
-      "repo": null,
-      "public_surface": "no",
-      "meta_url": null,
-      "indexed": false,
-      "health_url": null,
-      "depends_on": [
-        "cloudflare"
-      ],
-      "feeds": [
-        "specular-telemetry",
-        "site-pulse"
-      ],
-      "notes": "Cloudflare KV storage for cached telemetry and low-write edge state."
+      "depends_on": ["SPECULAR-CORE"],
+      "feeds": ["specular-edge", "ramone-edge"],
+      "notes": "Tunnel bridge between public Workers and local services."
     },
     {
       "name": "ollama",
@@ -469,15 +366,9 @@
       "meta_url": null,
       "indexed": false,
       "health_url": null,
-      "depends_on": [
-        "SPECULAR-CORE"
-      ],
-      "feeds": [
-        "atlas-corpus",
-        "ramone-memory",
-        "ramone-edge"
-      ],
-      "notes": "Local model runtime. Kept off the public edge."
+      "depends_on": ["SPECULAR-CORE"],
+      "feeds": ["atlas-corpus", "ramone-memory", "ramone-edge"],
+      "notes": "Local model runtime kept off the public edge."
     },
     {
       "name": "home-assistant",
@@ -489,13 +380,9 @@
       "meta_url": null,
       "indexed": false,
       "health_url": null,
-      "depends_on": [
-        "ramone-memory"
-      ],
-      "feeds": [
-        "Ramone local automation"
-      ],
-      "notes": "Local automation consumer for Ramone memory and voice-triggered flows."
+      "depends_on": ["ramone-memory"],
+      "feeds": ["Ramone local automation"],
+      "notes": "Local automation consumer."
     },
     {
       "name": "discord",
@@ -508,10 +395,8 @@
       "indexed": false,
       "health_url": null,
       "depends_on": [],
-      "feeds": [
-        "notifications"
-      ],
-      "notes": "External notification sink for deploy, alert, and status events."
+      "feeds": ["notifications"],
+      "notes": "External notification sink."
     },
     {
       "name": "github",
@@ -524,12 +409,8 @@
       "indexed": false,
       "health_url": null,
       "depends_on": [],
-      "feeds": [
-        "repo activity",
-        "workflow dispatch",
-        "corpus ingestion"
-      ],
-      "notes": "External source for repository metadata, workflow runs, commits, and corpus source material."
+      "feeds": ["public repository metadata", "workflow evidence", "corpus source material"],
+      "notes": "External source for public repository and workflow data."
     },
     {
       "name": "cloudflare",
@@ -542,62 +423,8 @@
       "indexed": false,
       "health_url": null,
       "depends_on": [],
-      "feeds": [
-        "Workers",
-        "Pages",
-        "Analytics",
-        "KV",
-        "Tunnels"
-      ],
+      "feeds": ["Workers", "Pages", "Analytics", "KV", "Tunnels"],
       "notes": "External platform hosting the public edge estate."
-    },
-    {
-      "name": "atlas-journey-watch",
-      "kind": "github-actions",
-      "layer": "observability",
-      "lifecycle": "production",
-      "repo": "https://github.com/AtlasReaper311/atlas-journey-watch",
-      "public_surface": "GitHub Actions scheduled workflow",
-      "meta_url": null,
-      "indexed": false,
-      "health_url": null,
-      "depends_on": [
-        "atlas-systems",
-        "status",
-        "atlas-api-public",
-        "atlas-api-index",
-        "atlas-notify",
-        "atlas-corpus",
-        "ramone-edge"
-      ],
-      "feeds": [
-        "synthetic journey evidence",
-        "atlas-notify"
-      ],
-      "notes": "Scheduled Playwright journey checks across the public estate. It verifies that key surfaces render, public API contracts remain readable, and sleeping local-AI paths fail honestly rather than silently."
-    },
-    {
-      "name": "atlas-dep-audit",
-      "kind": "github-actions",
-      "layer": "infra",
-      "lifecycle": "production",
-      "repo": "https://github.com/AtlasReaper311/atlas-dep-audit",
-      "public_surface": "GitHub Actions scheduled workflow",
-      "meta_url": null,
-      "indexed": false,
-      "health_url": null,
-      "depends_on": [
-        "github",
-        "atlas-api-public",
-        "atlas-notify",
-        "osv"
-      ],
-      "feeds": [
-        "CycloneDX SBOMs",
-        "OSV findings",
-        "build provenance"
-      ],
-      "notes": "Source-level dependency audit that reads the estate manifest, builds SBOMs, checks OSV, records provenance, and reports findings through atlas-notify."
     },
     {
       "name": "osv",
@@ -610,191 +437,9 @@
       "indexed": false,
       "health_url": null,
       "depends_on": [],
-      "feeds": [
-        "vulnerability advisories"
-      ],
-      "notes": "Open Source Vulnerabilities query API used by atlas-dep-audit for package vulnerability checks."
-    },
-    {
-      "name": "atlas-quota-watch",
-      "kind": "worker",
-      "layer": "observability",
-      "lifecycle": "production",
-      "repo": "https://github.com/AtlasReaper311/atlas-quota-watch",
-      "public_surface": "https://api.atlas-systems.uk/quota",
-      "meta_url": "https://api.atlas-systems.uk/quota/_meta",
-      "indexed": true,
-      "health_url": "https://api.atlas-systems.uk/quota",
-      "depends_on": [
-        "cloudflare",
-        "atlas-notify"
-      ],
-      "feeds": [
-        "quota evidence",
-        "atlas-notify",
-        "home-assistant"
-      ],
-      "notes": "Read-only Cloudflare usage watchdog with threshold and billing-period projection alerts."
-    },
-    {
-      "name": "atlas-badges",
-      "kind": "tool",
-      "layer": "reusable-kit",
-      "lifecycle": "production",
-      "repo": "https://github.com/AtlasReaper311/atlas-badges",
-      "public_surface": "GitHub repository and Python CLI",
-      "meta_url": null,
-      "indexed": false,
-      "health_url": null,
-      "depends_on": [
-        "github"
-      ],
-      "feeds": [
-        "repository README concept badges"
-      ],
-      "notes": "Evidence-backed CLI that scans repository source and maintains generated engineering-concept badge blocks."
+      "feeds": ["vulnerability advisories"],
+      "notes": "Open Source Vulnerabilities query API."
     }
   ],
-  "repositories": [
-    {
-      "name": "atlas-systems",
-      "url": "https://github.com/AtlasReaper311/atlas-systems",
-      "role": "primary public site"
-    },
-    {
-      "name": "status",
-      "url": "https://github.com/AtlasReaper311/status",
-      "role": "public status surface"
-    },
-    {
-      "name": "atlas-doc-viewer",
-      "url": "https://github.com/AtlasReaper311/atlas-doc-viewer",
-      "role": "document viewer"
-    },
-    {
-      "name": "atlas-api-public",
-      "url": "https://github.com/AtlasReaper311/atlas-api-public",
-      "role": "public API spine"
-    },
-    {
-      "name": "atlas-api-index",
-      "url": "https://github.com/AtlasReaper311/atlas-api-index",
-      "role": "Worker registry"
-    },
-    {
-      "name": "atlas-notify",
-      "url": "https://github.com/AtlasReaper311/atlas-notify",
-      "role": "event router"
-    },
-    {
-      "name": "github-pulse",
-      "url": "https://github.com/AtlasReaper311/github-pulse",
-      "role": "GitHub activity proxy"
-    },
-    {
-      "name": "site-pulse",
-      "url": "https://github.com/AtlasReaper311/site-pulse",
-      "role": "Cloudflare analytics proxy"
-    },
-    {
-      "name": "deploy-watch",
-      "url": "https://github.com/AtlasReaper311/deploy-watch",
-      "role": "Cloudflare Pages outcome monitor"
-    },
-    {
-      "name": "specular-telemetry",
-      "url": "https://github.com/AtlasReaper311/specular-telemetry",
-      "role": "hardware telemetry edge"
-    },
-    {
-      "name": "specular-sentinel",
-      "url": "https://github.com/AtlasReaper311/specular-sentinel",
-      "role": "local infra observer"
-    },
-    {
-      "name": "specular-sonify",
-      "url": "https://github.com/AtlasReaper311/specular-sonify",
-      "role": "telemetry sonification"
-    },
-    {
-      "name": "atlas-blackbox",
-      "url": "https://github.com/AtlasReaper311/atlas-blackbox",
-      "role": "incident recorder"
-    },
-    {
-      "name": "atlas-corpus",
-      "url": "https://github.com/AtlasReaper311/atlas-corpus",
-      "role": "semantic estate corpus"
-    },
-    {
-      "name": "ramone-edge",
-      "url": "https://github.com/AtlasReaper311/ramone-edge",
-      "role": "public local-AI edge"
-    },
-    {
-      "name": "ramone-memory",
-      "url": "https://github.com/AtlasReaper311/ramone-memory",
-      "role": "private local-AI memory"
-    },
-    {
-      "name": "ramone-voice-trigger",
-      "url": "https://github.com/AtlasReaper311/ramone-voice-trigger",
-      "role": "voice-triggered automation"
-    },
-    {
-      "name": "worker-meta-kit",
-      "url": "https://github.com/AtlasReaper311/worker-meta-kit",
-      "role": "Worker metadata convention kit"
-    },
-    {
-      "name": "atlas-kit-python-rag",
-      "url": "https://github.com/AtlasReaper311/atlas-kit-python-rag",
-      "role": "Python RAG library"
-    },
-    {
-      "name": "ollama-rag-kit",
-      "url": "https://github.com/AtlasReaper311/ollama-rag-kit",
-      "role": "local RAG service template"
-    },
-    {
-      "name": "atlas-infra",
-      "url": "https://github.com/AtlasReaper311/atlas-infra",
-      "role": "reusable CI/CD workflows"
-    },
-    {
-      "name": "atlas-bootstrap",
-      "url": "https://github.com/AtlasReaper311/atlas-bootstrap",
-      "role": "machine rebuild automation"
-    },
-    {
-      "name": "atlas-journey-watch",
-      "url": "https://github.com/AtlasReaper311/atlas-journey-watch",
-      "role": "synthetic estate journeys"
-    },
-    {
-      "name": "atlas-dep-audit",
-      "url": "https://github.com/AtlasReaper311/atlas-dep-audit",
-      "role": "supply-chain assurance"
-    },
-    {
-      "name": "atlas-gardener",
-      "url": "https://github.com/AtlasReaper311/atlas-gardener",
-      "role": "bounded estate remediation tooling"
-    },
-    {
-      "name": "atlas-resource-audit",
-      "url": "https://github.com/AtlasReaper311/atlas-resource-audit",
-      "role": "read-only Cloudflare resource reconciliation"
-    },
-    {
-      "name": "atlas-quota-watch",
-      "url": "https://github.com/AtlasReaper311/atlas-quota-watch",
-      "role": "Cloudflare usage and allowance watchdog"
-    },
-    {
-      "name": "atlas-badges",
-      "url": "https://github.com/AtlasReaper311/atlas-badges",
-      "role": "evidence-backed concept badge tooling"
-    }
-  ]
+  "repositories": []
 }
