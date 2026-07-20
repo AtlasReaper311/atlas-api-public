@@ -44,14 +44,19 @@ function visible(component) {
     return false;
   }
 
-  if (!repoName(component.repo)) {
+  const kindAllowed = ALLOWED_KINDS.has(component.kind);
+  const hasPublicRepository = Boolean(repoName(component.repo));
+  const isIndexedRuntime = component.indexed === true && kindAllowed;
+
+  // Public source links are preferred, but a deployed/indexed runtime must not
+  // disappear from the declared topology merely because its source repository
+  // is private. atlas-vault is the canonical example: its runtime contract is
+  // public while its repository is intentionally not.
+  if (!hasPublicRepository && !isIndexedRuntime) {
     return false;
   }
 
-  return (
-    ALLOWED_KINDS.has(component.kind) ||
-    component.indexed === true
-  );
+  return kindAllowed || component.indexed === true;
 }
 
 function inferLayer(repository) {
@@ -142,6 +147,10 @@ function normaliseRepository(repository) {
   };
 }
 
+function componentSortKey(component) {
+  return component.repo_name || component.id;
+}
+
 export function buildPublicTopology(
   source = manifest,
   inventory = repositoryInventory,
@@ -151,7 +160,9 @@ export function buildPublicTopology(
     .map(normaliseManifestComponent);
 
   const representedRepositories = new Set(
-    manifestComponents.map((component) => component.repo_name),
+    manifestComponents
+      .map((component) => component.repo_name)
+      .filter(Boolean),
   );
 
   const repositoryComponents = (
@@ -170,7 +181,7 @@ export function buildPublicTopology(
     ...manifestComponents,
     ...repositoryComponents,
   ].sort((a, b) => {
-    const repoOrder = a.repo_name.localeCompare(b.repo_name);
+    const repoOrder = componentSortKey(a).localeCompare(componentSortKey(b));
 
     if (repoOrder !== 0) {
       return repoOrder;
@@ -189,7 +200,9 @@ export function buildPublicTopology(
     canonical_site: source.canonical_site,
     generated_at: inventory.generated_at || null,
     repository_count: new Set(
-      components.map((component) => component.repo_name),
+      components
+        .map((component) => component.repo_name)
+        .filter(Boolean),
     ).size,
     component_count: components.length,
     components,
