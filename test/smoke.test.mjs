@@ -490,12 +490,12 @@ test("search honours its dedicated limiter", async () => {
   assert.equal((await call(env, "/v1/search?q=tunnel")).status, 429);
 });
 
-test("registry reshapes the upstream document into the stable v1 form", async () => {
+test("registry filters the upstream document into the stable public v1 form", async () => {
   const env = makeEnv();
   const res = await call(env, "/v1/registry");
   const body = await res.json();
   assert.equal(body.ok, true);
-  assert.equal(body.counts.workers, 11);
+  assert.equal(body.counts.workers, 1);
   assert.equal(body.workers[0].name, "atlas-notify");
   assert.equal(body.workers[0].version, "1.1.0");
   assert.deepEqual(body.workers[0].endpoints, [{ method: "GET", path: "/health" }]);
