@@ -16,25 +16,26 @@ const BLOCKED_LIFECYCLES = new Set([
   "retired",
 ]);
 
-const BLOCKED_COMPONENTS = new Set([
-  "simple-proxy",
-]);
-
 function repoName(repo) {
   const match =
     typeof repo === "string"
-      ? repo.match(
-          /^https:\/\/github\.com\/AtlasReaper311\/([^/?#]+)$/i,
-        )
+      ? repo.match(/^https:\/\/github\.com\/AtlasReaper311\/([^/?#]+)$/i)
       : null;
 
   return match ? match[1] : null;
 }
 
-function visible(component) {
-  if (!component || BLOCKED_COMPONENTS.has(component.name)) {
-    return false;
-  }
+function publicRepositoryNames(inventory) {
+  return new Set(
+    (inventory.repositories || [])
+      .filter((repository) => repository?.visibility === "public")
+      .map((repository) => repository.name)
+      .filter((name) => typeof name === "string"),
+  );
+}
+
+function visible(component, publicRepos) {
+  if (!component || !ALLOWED_KINDS.has(component.kind)) return false;
 
   if (
     BLOCKED_LIFECYCLES.has(
@@ -44,19 +45,16 @@ function visible(component) {
     return false;
   }
 
-  const kindAllowed = ALLOWED_KINDS.has(component.kind);
-  const hasPublicRepository = Boolean(repoName(component.repo));
-  const isIndexedRuntime = component.indexed === true && kindAllowed;
-
-  // Public source links are preferred, but a deployed/indexed runtime must not
-  // disappear from the declared topology merely because its source repository
-  // is private. atlas-vault is the canonical example: its runtime contract is
-  // public while its repository is intentionally not.
-  if (!hasPublicRepository && !isIndexedRuntime) {
+  const repositoryName = repoName(component.repo);
+  if (repositoryName && !publicRepos.has(repositoryName)) {
     return false;
   }
 
-  return kindAllowed || component.indexed === true;
+  if (!repositoryName && component.indexed !== true) {
+    return false;
+  }
+
+  return true;
 }
 
 function inferLayer(repository) {
@@ -112,9 +110,7 @@ function normaliseManifestComponent(component) {
     health_url: component.health_url || null,
     indexed: component.indexed === true,
     depends_on: Array.isArray(component.depends_on)
-      ? component.depends_on.filter(
-          (item) => typeof item === "string",
-        )
+      ? component.depends_on.filter((item) => typeof item === "string")
       : [],
     description: component.notes || "",
     language: null,
@@ -155,8 +151,9 @@ export function buildPublicTopology(
   source = manifest,
   inventory = repositoryInventory,
 ) {
+  const publicRepos = publicRepositoryNames(inventory);
   const manifestComponents = (source.components || [])
-    .filter(visible)
+    .filter((component) => visible(component, publicRepos))
     .map(normaliseManifestComponent);
 
   const representedRepositories = new Set(
@@ -165,14 +162,12 @@ export function buildPublicTopology(
       .filter(Boolean),
   );
 
-  const repositoryComponents = (
-    inventory.repositories || []
-  )
+  const repositoryComponents = (inventory.repositories || [])
     .filter(
       (repository) =>
         repository &&
+        repository.visibility === "public" &&
         typeof repository.name === "string" &&
-        !BLOCKED_COMPONENTS.has(repository.name) &&
         !representedRepositories.has(repository.name),
     )
     .map(normaliseRepository);
@@ -183,19 +178,13 @@ export function buildPublicTopology(
   ].sort((a, b) => {
     const repoOrder = componentSortKey(a).localeCompare(componentSortKey(b));
 
-    if (repoOrder !== 0) {
-      return repoOrder;
-    }
-
-    if (a.source_only !== b.source_only) {
-      return a.source_only ? 1 : -1;
-    }
-
+    if (repoOrder !== 0) return repoOrder;
+    if (a.source_only !== b.source_only) return a.source_only ? 1 : -1;
     return a.id.localeCompare(b.id);
   });
 
   return {
-    schema: "atlas-public-topology/v2",
+    schema: "atlas-public-topology/v3",
     owner: source.owner,
     canonical_site: source.canonical_site,
     generated_at: inventory.generated_at || null,
