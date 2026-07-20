@@ -14,36 +14,23 @@ const emptyInventory = {
   repositories: [],
 };
 
-test("indexed runtime components remain visible without a public repository", () => {
+test("explicit repo-less indexed public runtimes remain visible", () => {
   const topology = buildPublicTopology(
     {
       ...baseSource,
       components: [
         {
-          name: "atlas-vault",
+          name: "public-edge-runtime",
           kind: "worker",
-          layer: "storage",
+          layer: "edge",
           lifecycle: "production",
           repo: null,
-          public_surface: "controlled Worker endpoint",
-          meta_url: "https://api.atlas-systems.uk/vault/_meta",
-          health_url: "https://api.atlas-systems.uk/vault/health",
+          public_surface: "https://api.atlas-systems.uk/public-edge",
+          meta_url: "https://api.atlas-systems.uk/public-edge/_meta",
+          health_url: "https://api.atlas-systems.uk/public-edge/health",
           indexed: true,
           depends_on: [],
-          notes: "Private source, public runtime contract.",
-        },
-        {
-          name: "atlas-api-public",
-          kind: "worker",
-          layer: "public-api",
-          lifecycle: "production",
-          repo: "https://github.com/AtlasReaper311/atlas-api-public",
-          public_surface: "https://api.atlas-systems.uk/v1",
-          meta_url: "https://api.atlas-systems.uk/v1/_meta",
-          health_url: "https://api.atlas-systems.uk/v1",
-          indexed: true,
-          depends_on: [],
-          notes: "Public source and runtime.",
+          notes: "Explicit public runtime without a source repository link.",
         },
       ],
     },
@@ -51,15 +38,37 @@ test("indexed runtime components remain visible without a public repository", ()
   );
 
   assert.deepEqual(
-    topology.components.map((component) => component.id).sort(),
-    ["atlas-api-public", "atlas-vault"],
+    topology.components.map((component) => component.id),
+    ["public-edge-runtime"],
   );
 
-  const vault = topology.components.find((component) => component.id === "atlas-vault");
-  assert.equal(vault.repo, null);
-  assert.equal(vault.repo_name, null);
-  assert.equal(vault.source_only, false);
-  assert.equal(topology.repository_count, 1);
+  const runtime = topology.components[0];
+  assert.equal(runtime.repo, null);
+  assert.equal(runtime.repo_name, null);
+  assert.equal(runtime.source_only, false);
+  assert.equal(topology.repository_count, 0);
+});
+
+test("repository-backed components require public repository inventory evidence", () => {
+  const topology = buildPublicTopology(
+    {
+      ...baseSource,
+      components: [
+        {
+          name: "public-api",
+          kind: "worker",
+          layer: "public-api",
+          lifecycle: "production",
+          repo: "https://github.com/AtlasReaper311/public-api",
+          indexed: true,
+          depends_on: [],
+        },
+      ],
+    },
+    emptyInventory,
+  );
+
+  assert.equal(topology.components.length, 0);
 });
 
 test("repo-less non-indexed components remain private from public topology", () => {
