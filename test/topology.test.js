@@ -19,7 +19,7 @@ const baseManifest = {
   ],
 };
 
-test("topology preserves rich manifest components", () => {
+test("topology preserves rich manifest components backed by public repositories", () => {
   const topology = buildPublicTopology(baseManifest, {
     generated_at: "2026-07-15T00:00:00Z",
     repositories: [
@@ -27,6 +27,7 @@ test("topology preserves rich manifest components", () => {
         name: "atlas-api-public",
         html_url:
           "https://github.com/AtlasReaper311/atlas-api-public",
+        visibility: "public",
       },
     ],
   });
@@ -45,6 +46,7 @@ test("topology adds public repositories absent from the manifest", () => {
         name: "atlas-api-public",
         html_url:
           "https://github.com/AtlasReaper311/atlas-api-public",
+        visibility: "public",
       },
       {
         name: "atlas-resource-audit",
@@ -53,6 +55,7 @@ test("topology adds public repositories absent from the manifest", () => {
         description: "Estate resource audit",
         language: "Python",
         topics: ["audit", "github-actions"],
+        visibility: "public",
       },
     ],
   });
@@ -68,22 +71,19 @@ test("topology adds public repositories absent from the manifest", () => {
   assert.equal(topology.repository_count, 2);
 });
 
-test("topology never exposes blocked repositories", () => {
+test("topology never exposes repositories absent from the public inventory", () => {
   const topology = buildPublicTopology(baseManifest, {
     generated_at: "2026-07-15T00:00:00Z",
     repositories: [
       {
-        name: "simple-proxy",
+        name: "owner-private-service",
         html_url:
-          "https://github.com/AtlasReaper311/simple-proxy",
+          "https://github.com/AtlasReaper311/owner-private-service",
+        visibility: "private",
       },
     ],
   });
 
-  assert.equal(
-    topology.components.some(
-      (component) => component.id === "simple-proxy",
-    ),
-    false,
-  );
+  assert.equal(topology.components.length, 0);
+  assert.equal(topology.repository_count, 0);
 });

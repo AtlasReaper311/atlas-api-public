@@ -1,19 +1,34 @@
 /**
- * /v1/registry: the estate registry in a stable public shape.
+ * /v1/registry: the approved public Worker registry.
  *
- * Reads atlas-api-index over its service binding rather than REGISTRY_KV
- * directly: the binding couples this Worker to the registry's public
- * contract, KV would couple it to internal storage layout. The upstream
- * document is already KV-cached with an hourly cron behind it; a sixty
- * second edge cache here just absorbs card-refresh bursts.
- *
- * The reshape is the versioning promise in action: /v1 consumers get
- * this shape whatever the registry does internally, and the flattened
- * meta fields are exactly what the Lab's API panel already reads
- * (workers[*].meta.endpoints, surfaced as workers[*].endpoints).
+ * atlas-api-index performs account-level discovery but publishes only its
+ * explicit public allowlist. This route applies a second fail-closed boundary
+ * from estate.manifest.json so an upstream regression cannot expose an
+ * undeclared Worker through the versioned public API.
  */
 
+import manifest from "../../data/estate.manifest.json" with { type: "json" };
 import { json, errorResponse } from "../lib/http.js";
+
+const PUBLIC_WORKERS = new Set(
+  (manifest.components || [])
+    .filter((component) => component?.kind === "worker" && component.indexed === true)
+    .map((component) => component.name)
+    .filter((name) => typeof name === "string" && name.length > 0),
+);
+
+export function publicRegistryWorkers(workers = []) {
+  return workers
+    .filter((worker) => worker && PUBLIC_WORKERS.has(worker.name))
+    .map((worker) => ({
+      name: worker.name,
+      documented: Boolean(worker.documented),
+      description: worker.meta?.description ?? null,
+      version: worker.meta?.version ?? null,
+      endpoints: worker.meta?.endpoints ?? [],
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
 
 export async function handleRegistry(_request, env, ctx) {
   const cache = globalThis.caches ? globalThis.caches.default : null;
@@ -36,18 +51,18 @@ export async function handleRegistry(_request, env, ctx) {
   }
 
   const doc = await upstream.json();
+  const workers = publicRegistryWorkers(doc.workers || []);
   const body = {
     ok: true,
     generated_at: doc.generated_at,
-    counts: doc.counts,
-    workers: (doc.workers || []).map((worker) => ({
-      name: worker.name,
-      documented: Boolean(worker.documented),
-      description: worker.meta?.description ?? null,
-      version: worker.meta?.version ?? null,
-      endpoints: worker.meta?.endpoints ?? [],
-    })),
+    counts: {
+      workers: workers.length,
+      documented: workers.filter((worker) => worker.documented).length,
+      undocumented: workers.filter((worker) => !worker.documented).length,
+    },
+    workers,
     source: "atlas-api-index",
+    projection: "public-only",
   };
 
   const response = json(body, 200, { "cache-control": "public, max-age=60" });

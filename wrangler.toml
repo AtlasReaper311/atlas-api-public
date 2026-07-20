@@ -5,7 +5,8 @@ compatibility_date = "2026-06-01"
 account_id = "49e221b7e55a9e5c45b88d08efca5771"
 
 routes = [
-  { pattern = "api.atlas-systems.uk/v1*", zone_id = "8ba6350a78c988447c111048b125f917" }
+  { pattern = "api.atlas-systems.uk/v1*", zone_id = "8ba6350a78c988447c111048b125f917" },
+  { pattern = "api.atlas-systems.uk/notify/recent*", zone_id = "8ba6350a78c988447c111048b125f917" }
 ]
 
 [triggers]

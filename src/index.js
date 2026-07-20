@@ -19,6 +19,7 @@ import { handleRegistry } from "./routes/registry.js";
 import { handleSearch } from "./routes/search.js";
 import { handleStats } from "./routes/stats.js";
 import { handleSlo } from "./routes/slo.js";
+import { handlePublicEvents } from "./routes/events.js";
 import {
   handleEvidenceGet,
   handleEvidenceIndex,
@@ -49,6 +50,10 @@ export default {
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+
+    if (path === "/notify/recent" && request.method === "GET") {
+      return handlePublicEvents(request, env);
     }
 
     const meta = handleMeta(url, META);
