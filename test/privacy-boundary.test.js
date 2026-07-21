@@ -7,7 +7,11 @@ import { buildPublicTopology } from "../src/routes/topology.js";
 test("registry drops undeclared Workers", () => {
   const workers = publicRegistryWorkers([
     { name: "atlas-api-public", documented: true, meta: { endpoints: [] } },
-    { name: "owner-private-service", documented: true, meta: { endpoints: [{ method: "GET", path: "/secret" }] } },
+    {
+      name: "owner-private-service",
+      documented: true,
+      meta: { endpoints: [{ method: "GET", path: "/secret" }] },
+    },
   ]);
 
   assert.deepEqual(workers.map((worker) => worker.name), ["atlas-api-public"]);
@@ -45,7 +49,24 @@ test("topology drops components whose source repository is not public", () => {
       },
     ],
   };
+  const classificationSource = {
+    schema_version: "atlas-public-repository-classifications/projection/v1",
+    authority: "AtlasReaper311/atlas-infra",
+    source_fingerprint: `sha256:${"c".repeat(64)}`,
+    repository_count: 1,
+    repositories: [
+      {
+        repository: "AtlasReaper311/public-service",
+        lifecycle: "production",
+        scope: "public",
+        provenance: "original",
+        runtime_service: true,
+      },
+    ],
+  };
 
-  const topology = buildPublicTopology(source, inventory);
-  assert.deepEqual(topology.components.map((component) => component.id), ["public-service"]);
+  const topology = buildPublicTopology(source, inventory, classificationSource);
+  assert.deepEqual(topology.components.map((component) => component.id), [
+    "public-service",
+  ]);
 });
