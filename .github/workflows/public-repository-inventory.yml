@@ -48,7 +48,7 @@ jobs:
         run: |
           if git diff --quiet -- data/public-repositories.json
           then
-            echo "Inventory is already current."
+            echo "Public repository membership and stable metadata are already current."
             exit 0
           fi
 
@@ -76,7 +76,7 @@ jobs:
               --base main \
               --head "$branch" \
               --title "Refresh public repository inventory" \
-              --body "Automated refresh of public, non-archived AtlasReaper311 repositories consumed by /v1/topology."
+              --body "Automated refresh of the deterministic public, non-archived AtlasReaper311 repository membership projection consumed by /v1/topology. Activity timestamps are intentionally excluded; github-pulse owns live repository activity."
           else
             echo "Updated existing pull request: $existing"
           fi

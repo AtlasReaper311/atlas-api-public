@@ -1,8 +1,8 @@
 {
-  "schema": "atlas-public-repositories/v1",
+  "schema": "atlas-public-repositories/v2",
   "owner": "AtlasReaper311",
-  "generated_at": "2026-07-16T13:01:14.809Z",
-  "count": 30,
+  "repository_count": 31,
+  "inventory_fingerprint": "sha256:1b620719ce8ab9c0b0b7f18c87bee0017b4178c606a36d0bd5840ef76b97d130",
   "repositories": [
     {
       "name": "atlas-api-index",
@@ -16,9 +16,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-02T15:23:15Z",
-      "updated_at": "2026-07-15T20:13:28Z",
-      "pushed_at": "2026-07-15T20:13:24Z"
+      "created_at": "2026-07-02T15:23:15Z"
     },
     {
       "name": "atlas-api-public",
@@ -32,9 +30,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-06T23:44:06Z",
-      "updated_at": "2026-07-16T12:46:57Z",
-      "pushed_at": "2026-07-16T12:46:45Z"
+      "created_at": "2026-07-06T23:44:06Z"
     },
     {
       "name": "atlas-badges",
@@ -48,9 +44,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-13T23:27:03Z",
-      "updated_at": "2026-07-15T18:03:11Z",
-      "pushed_at": "2026-07-15T18:02:24Z"
+      "created_at": "2026-07-13T23:27:03Z"
     },
     {
       "name": "atlas-blackbox",
@@ -64,9 +58,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-05T15:42:05Z",
-      "updated_at": "2026-07-15T23:21:13Z",
-      "pushed_at": "2026-07-15T23:21:09Z"
+      "created_at": "2026-07-05T15:42:05Z"
     },
     {
       "name": "atlas-bootstrap",
@@ -80,9 +72,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-02T15:20:10Z",
-      "updated_at": "2026-07-15T18:02:41Z",
-      "pushed_at": "2026-07-15T18:02:02Z"
+      "created_at": "2026-07-02T15:20:10Z"
     },
     {
       "name": "atlas-corpus",
@@ -96,9 +86,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-02T11:11:39Z",
-      "updated_at": "2026-07-15T20:13:38Z",
-      "pushed_at": "2026-07-15T20:13:35Z"
+      "created_at": "2026-07-02T11:11:39Z"
     },
     {
       "name": "atlas-daily-digest",
@@ -112,9 +100,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-12T20:44:02Z",
-      "updated_at": "2026-07-15T23:21:18Z",
-      "pushed_at": "2026-07-15T23:21:15Z"
+      "created_at": "2026-07-12T20:44:02Z"
     },
     {
       "name": "atlas-dep-audit",
@@ -128,9 +114,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-13T21:04:59Z",
-      "updated_at": "2026-07-15T23:21:25Z",
-      "pushed_at": "2026-07-15T23:21:22Z"
+      "created_at": "2026-07-13T21:04:59Z"
     },
     {
       "name": "atlas-doc-viewer",
@@ -144,9 +128,21 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2025-12-29T06:40:01Z",
-      "updated_at": "2026-07-15T23:21:31Z",
-      "pushed_at": "2026-07-15T23:21:28Z"
+      "created_at": "2025-12-29T06:40:01Z"
+    },
+    {
+      "name": "atlas-dora",
+      "full_name": "AtlasReaper311/atlas-dora",
+      "html_url": "https://github.com/AtlasReaper311/atlas-dora",
+      "description": "DORA metrics Worker for the Atlas Systems estate",
+      "homepage": null,
+      "language": "JavaScript",
+      "topics": [],
+      "fork": false,
+      "archived": false,
+      "disabled": false,
+      "visibility": "public",
+      "created_at": "2026-07-13T11:14:43Z"
     },
     {
       "name": "atlas-gardener",
@@ -160,9 +156,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-14T10:36:31Z",
-      "updated_at": "2026-07-14T10:37:25Z",
-      "pushed_at": "2026-07-14T10:37:22Z"
+      "created_at": "2026-07-14T10:36:31Z"
     },
     {
       "name": "atlas-infra",
@@ -176,9 +170,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-05-26T19:28:49Z",
-      "updated_at": "2026-07-16T11:03:31Z",
-      "pushed_at": "2026-07-16T11:03:24Z"
+      "created_at": "2026-05-26T19:28:49Z"
     },
     {
       "name": "atlas-journey-watch",
@@ -192,9 +184,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-13T20:50:39Z",
-      "updated_at": "2026-07-15T23:21:37Z",
-      "pushed_at": "2026-07-15T23:21:35Z"
+      "created_at": "2026-07-13T20:50:39Z"
     },
     {
       "name": "atlas-kit-python-rag",
@@ -208,9 +198,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-06-02T16:43:37Z",
-      "updated_at": "2026-07-15T18:01:32Z",
-      "pushed_at": "2026-07-15T18:00:55Z"
+      "created_at": "2026-06-02T16:43:37Z"
     },
     {
       "name": "atlas-notify",
@@ -224,9 +212,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-06-12T16:38:46Z",
-      "updated_at": "2026-07-15T18:57:10Z",
-      "pushed_at": "2026-07-15T18:57:05Z"
+      "created_at": "2026-06-12T16:38:46Z"
     },
     {
       "name": "atlas-quota-watch",
@@ -240,9 +226,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-13T23:05:10Z",
-      "updated_at": "2026-07-14T20:40:55Z",
-      "pushed_at": "2026-07-14T20:40:40Z"
+      "created_at": "2026-07-13T23:05:10Z"
     },
     {
       "name": "atlas-resource-audit",
@@ -256,9 +240,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-14T20:17:14Z",
-      "updated_at": "2026-07-15T23:20:49Z",
-      "pushed_at": "2026-07-15T23:20:46Z"
+      "created_at": "2026-07-14T20:17:14Z"
     },
     {
       "name": "atlas-systems",
@@ -272,9 +254,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-05-27T16:04:19Z",
-      "updated_at": "2026-07-16T12:48:01Z",
-      "pushed_at": "2026-07-16T12:47:44Z"
+      "created_at": "2026-05-27T16:04:19Z"
     },
     {
       "name": "AtlasReaper311",
@@ -288,9 +268,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-05-26T19:04:43Z",
-      "updated_at": "2026-07-16T03:36:47Z",
-      "pushed_at": "2026-07-16T03:36:44Z"
+      "created_at": "2026-05-26T19:04:43Z"
     },
     {
       "name": "deploy-watch",
@@ -304,9 +282,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-06-18T00:59:00Z",
-      "updated_at": "2026-07-15T23:22:02Z",
-      "pushed_at": "2026-07-15T23:21:59Z"
+      "created_at": "2026-06-18T00:59:00Z"
     },
     {
       "name": "github-pulse",
@@ -320,9 +296,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-06-12T16:39:46Z",
-      "updated_at": "2026-07-16T12:46:45Z",
-      "pushed_at": "2026-07-16T12:46:21Z"
+      "created_at": "2026-06-12T16:39:46Z"
     },
     {
       "name": "ollama-rag-kit",
@@ -336,9 +310,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-06-12T16:39:19Z",
-      "updated_at": "2026-07-15T20:13:55Z",
-      "pushed_at": "2026-07-15T20:13:52Z"
+      "created_at": "2026-06-12T16:39:19Z"
     },
     {
       "name": "ramone-edge",
@@ -352,9 +324,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-06-23T01:40:37Z",
-      "updated_at": "2026-07-15T23:22:16Z",
-      "pushed_at": "2026-07-15T23:22:12Z"
+      "created_at": "2026-06-23T01:40:37Z"
     },
     {
       "name": "ramone-memory",
@@ -368,9 +338,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-02T08:42:42Z",
-      "updated_at": "2026-07-15T17:57:36Z",
-      "pushed_at": "2026-07-15T17:57:11Z"
+      "created_at": "2026-07-02T08:42:42Z"
     },
     {
       "name": "ramone-voice-trigger",
@@ -384,9 +352,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-02T11:10:02Z",
-      "updated_at": "2026-07-15T22:56:50Z",
-      "pushed_at": "2026-07-15T22:56:45Z"
+      "created_at": "2026-07-02T11:10:02Z"
     },
     {
       "name": "site-pulse",
@@ -400,9 +366,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-06-17T18:04:28Z",
-      "updated_at": "2026-07-15T23:22:22Z",
-      "pushed_at": "2026-07-15T23:22:19Z"
+      "created_at": "2026-06-17T18:04:28Z"
     },
     {
       "name": "specular-sentinel",
@@ -416,9 +380,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-06T23:44:14Z",
-      "updated_at": "2026-07-15T17:56:53Z",
-      "pushed_at": "2026-07-15T17:56:38Z"
+      "created_at": "2026-07-06T23:44:14Z"
     },
     {
       "name": "specular-sonify",
@@ -432,9 +394,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-08T01:47:53Z",
-      "updated_at": "2026-07-16T12:47:30Z",
-      "pushed_at": "2026-07-16T12:47:10Z"
+      "created_at": "2026-07-08T01:47:53Z"
     },
     {
       "name": "specular-telemetry",
@@ -448,9 +408,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-02T09:12:13Z",
-      "updated_at": "2026-07-15T18:55:59Z",
-      "pushed_at": "2026-07-15T18:55:49Z"
+      "created_at": "2026-07-02T09:12:13Z"
     },
     {
       "name": "status",
@@ -464,9 +422,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-06-18T00:37:38Z",
-      "updated_at": "2026-07-15T23:22:35Z",
-      "pushed_at": "2026-07-15T23:22:32Z"
+      "created_at": "2026-06-18T00:37:38Z"
     },
     {
       "name": "worker-meta-kit",
@@ -480,9 +436,7 @@
       "archived": false,
       "disabled": false,
       "visibility": "public",
-      "created_at": "2026-07-05T15:41:25Z",
-      "updated_at": "2026-07-15T17:56:20Z",
-      "pushed_at": "2026-07-15T17:55:53Z"
+      "created_at": "2026-07-05T15:41:25Z"
     }
   ]
 }
