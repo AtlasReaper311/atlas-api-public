@@ -67,7 +67,7 @@ export function validateProjection(projection, label = "projection") {
       throw new Error(`${label} contains duplicate repository ${repository}`);
     }
 
-    if (previous !== null && previous.localeCompare(repository) > 0) {
+    if (previous !== null && previous > repository) {
       throw new Error(`${label} repository entries are not deterministically sorted`);
     }
 
