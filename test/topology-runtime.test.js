@@ -14,6 +14,16 @@ const emptyInventory = {
   repositories: [],
 };
 
+function classifications(entries = []) {
+  return {
+    schema_version: "atlas-public-repository-classifications/projection/v1",
+    authority: "AtlasReaper311/atlas-infra",
+    source_fingerprint: `sha256:${"b".repeat(64)}`,
+    repository_count: entries.length,
+    repositories: entries,
+  };
+}
+
 test("explicit repo-less indexed public runtimes remain visible", () => {
   const topology = buildPublicTopology(
     {
@@ -35,6 +45,7 @@ test("explicit repo-less indexed public runtimes remain visible", () => {
       ],
     },
     emptyInventory,
+    classifications(),
   );
 
   assert.deepEqual(
@@ -46,6 +57,9 @@ test("explicit repo-less indexed public runtimes remain visible", () => {
   assert.equal(runtime.repo, null);
   assert.equal(runtime.repo_name, null);
   assert.equal(runtime.source_only, false);
+  assert.equal(runtime.lifecycle, "production");
+  assert.equal(runtime.scope, null);
+  assert.equal(runtime.provenance, null);
   assert.equal(topology.repository_count, 0);
 });
 
@@ -66,6 +80,15 @@ test("repository-backed components require public repository inventory evidence"
       ],
     },
     emptyInventory,
+    classifications([
+      {
+        repository: "AtlasReaper311/public-api",
+        lifecycle: "production",
+        scope: "public",
+        provenance: "original",
+        runtime_service: true,
+      },
+    ]),
   );
 
   assert.equal(topology.components.length, 0);
@@ -88,6 +111,7 @@ test("repo-less non-indexed components remain private from public topology", () 
       ],
     },
     emptyInventory,
+    classifications(),
   );
 
   assert.equal(topology.components.length, 0);
