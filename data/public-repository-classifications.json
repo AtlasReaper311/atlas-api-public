@@ -1,0 +1,43 @@
+{
+  "authority": "AtlasReaper311/atlas-infra",
+  "repositories": [
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/AtlasReaper311","runtime_service":false,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-api-index","runtime_service":true,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-api-public","runtime_service":true,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-badges","runtime_service":false,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-blackbox","runtime_service":true,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-bootstrap","runtime_service":false,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-corpus","runtime_service":true,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-daily-digest","runtime_service":true,"scope":"internal"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-dep-audit","runtime_service":false,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-doc-viewer","runtime_service":true,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-dora","runtime_service":true,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-gardener","runtime_service":false,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-infra","runtime_service":false,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-journey-watch","runtime_service":false,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-kit-python-rag","runtime_service":false,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-notify","runtime_service":true,"scope":"internal"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-quota-watch","runtime_service":true,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-resource-audit","runtime_service":false,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-systems","runtime_service":true,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/deploy-watch","runtime_service":true,"scope":"internal"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/github-pulse","runtime_service":true,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/ollama-rag-kit","runtime_service":false,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/ramone-edge","runtime_service":true,"scope":"internal"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/ramone-memory","runtime_service":true,"scope":"internal"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/ramone-voice-trigger","runtime_service":true,"scope":"internal"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/site-pulse","runtime_service":true,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/specular-sentinel","runtime_service":true,"scope":"internal"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/specular-sonify","runtime_service":true,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/specular-telemetry","runtime_service":true,"scope":"public"},
+    {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/status","runtime_service":true,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/worker-meta-kit","runtime_service":false,"scope":"public"}
+  ],
+  "repository_count": 31,
+  "schema_version": "atlas-public-repository-classifications/projection/v1",
+  "source_fingerprint": "sha256:6ff626f48e4d43a464e7410bb14ec67069fe82c03c3c4af5f12d8a997d1a38df",
+  "sources": {
+    "public_non_runtime": "policy/public-assurance-repositories.json",
+    "runtime_registry": "policy/estate-registry.json"
+  }
+}
