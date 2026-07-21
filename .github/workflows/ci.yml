@@ -29,14 +29,7 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Run tests
-        run: npm test > classification-test-output.txt 2>&1
-      - name: Upload failing test output
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1, Node 24
-        with:
-          name: classification-test-output
-          path: classification-test-output.txt
-          retention-days: 1
+        run: npm test
       - name: Check out Atlas Infra classification authority
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
         with:
