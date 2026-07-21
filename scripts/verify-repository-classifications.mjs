@@ -3,10 +3,20 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 
 const EXPECTED_SCHEMA = "atlas-public-repository-classifications/projection/v1";
 const EXPECTED_AUTHORITY = "AtlasReaper311/atlas-infra";
 const FINGERPRINT = /^sha256:[0-9a-f]{64}$/;
+const LIFECYCLES = new Set([
+  "production",
+  "active",
+  "experimental",
+  "deprecated",
+  "archived",
+]);
+const SCOPES = new Set(["public", "internal"]);
+const PROVENANCES = new Set(["original", "external-derived"]);
 
 export function readProjection(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -61,15 +71,15 @@ export function validateProjection(projection, label = "projection") {
       throw new Error(`${label} repository entries are not deterministically sorted`);
     }
 
-    if (!new Set(["production", "active", "experimental", "deprecated", "archived"]).has(item.lifecycle)) {
+    if (!LIFECYCLES.has(item.lifecycle)) {
       throw new Error(`${label} has invalid lifecycle for ${repository}`);
     }
 
-    if (!new Set(["public", "internal"]).has(item.scope)) {
+    if (!SCOPES.has(item.scope)) {
       throw new Error(`${label} has invalid scope for ${repository}`);
     }
 
-    if (!new Set(["original", "external-derived"]).has(item.provenance)) {
+    if (!PROVENANCES.has(item.provenance)) {
       throw new Error(`${label} has invalid provenance for ${repository}`);
     }
 
@@ -116,6 +126,9 @@ function main() {
   );
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)) {
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))
+) {
   main();
 }
