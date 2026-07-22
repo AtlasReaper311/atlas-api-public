@@ -41,6 +41,47 @@ test("OpenAPI publishes the current topology and Trace contracts", () => {
   );
 });
 
+test("OpenAPI describes live and fail-closed topology evidence", () => {
+  const spec = buildOpenApi();
+  const traceIndex = spec.paths["/v1/trace"].get;
+  const traceService = spec.paths["/v1/trace/services/{service_id}"].get;
+  const indexTopology =
+    traceIndex.responses[200].content["application/json"].schema.properties
+      .live_topology;
+  const serviceTopology =
+    traceService.responses[200].content["application/json"].schema.properties
+      .live_topology;
+
+  assert.deepEqual(indexTopology.required, ["state", "producer"]);
+  assert.deepEqual(indexTopology.properties.state.enum, [
+    "healthy",
+    "failed",
+    "unavailable",
+    "warning",
+  ]);
+  assert.ok(indexTopology.properties.observed_at);
+  assert.ok(indexTopology.properties.report_fingerprint);
+  assert.ok(indexTopology.properties.evidence_uri);
+  assert.ok(indexTopology.properties.privacy);
+  assert.ok(indexTopology.properties.component_count);
+  assert.ok(indexTopology.properties.public_summary);
+  assert.ok(indexTopology.properties.reason);
+  assert.ok(!indexTopology.required.includes("reason"));
+
+  assert.deepEqual(serviceTopology, indexTopology);
+  assert.ok(serviceTopology.properties.provider_kind);
+  assert.ok(serviceTopology.properties.metadata);
+
+  assert.doesNotMatch(
+    traceIndex.description,
+    /remains explicitly unavailable/i,
+  );
+  assert.match(
+    traceIndex.description,
+    /sanitized atlas-resource-audit evidence/i,
+  );
+});
+
 test("human docs derive their endpoint catalogue from OpenAPI", async () => {
   const spec = buildOpenApi();
   const expected = Object.entries(spec.paths)

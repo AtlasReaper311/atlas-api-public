@@ -11,19 +11,90 @@ const serviceIdParameter = {
   },
 };
 
+const topologySummary = {
+  type: "object",
+  required: ["failed", "healthy", "unavailable", "warning"],
+  properties: {
+    failed: { type: "integer", minimum: 0 },
+    healthy: { type: "integer", minimum: 0 },
+    unavailable: { type: "integer", minimum: 0 },
+    warning: { type: "integer", minimum: 0 },
+  },
+};
+
+const topologyPrivacy = {
+  type: "object",
+  required: [
+    "undeclared_identities_redacted",
+    "redacted_undeclared_observations",
+  ],
+  properties: {
+    undeclared_identities_redacted: { type: "boolean" },
+    redacted_undeclared_observations: {
+      type: "integer",
+      minimum: 0,
+    },
+  },
+};
+
+const topologyMetadata = {
+  type: "object",
+  nullable: true,
+  properties: {
+    name: { type: "string" },
+    state: {
+      type: "string",
+      enum: ["observed", "unavailable", "not-observed"],
+    },
+    status: { type: "string" },
+    version: { type: "string" },
+  },
+};
+
 const liveTopologyState = {
   type: "object",
-  required: ["state", "producer", "reason"],
+  required: ["state", "producer"],
+  description:
+    "Sanitized atlas-resource-audit evidence. Index responses include aggregate public topology counts; service responses include one public provider observation. Invalid, missing, future-dated, or stale evidence is represented as unavailable with a reason.",
   properties: {
     state: {
       type: "string",
-      enum: ["unavailable"],
+      enum: ["healthy", "failed", "unavailable", "warning"],
     },
     producer: {
       type: "string",
       enum: ["atlas-resource-audit"],
     },
+    authority: {
+      type: "string",
+      enum: ["AtlasReaper311/atlas-resource-audit"],
+    },
     reason: { type: "string" },
+    observed_at: {
+      type: "string",
+      format: "date-time",
+      nullable: true,
+    },
+    report_fingerprint: {
+      type: "string",
+      pattern: "^sha256:[0-9a-f]{64}$",
+      nullable: true,
+    },
+    evidence_uri: {
+      type: "string",
+      format: "uri",
+    },
+    privacy: topologyPrivacy,
+    component_count: {
+      type: "integer",
+      minimum: 0,
+    },
+    public_summary: topologySummary,
+    provider_kind: {
+      type: "string",
+      enum: ["worker", "pages-project"],
+    },
+    metadata: topologyMetadata,
   },
 };
 
@@ -45,7 +116,7 @@ export function buildOpenApi() {
     get: {
       summary: "Bounded public Atlas Trace index",
       description:
-        "Lists public runtime services eligible for proof-chain lookup. The projection is constrained to verified public repository classification and accepted public ADR scope. It is not an arbitrary graph query endpoint. Live Cloudflare topology remains explicitly unavailable until sanitized atlas-resource-audit evidence is separately published.",
+        "Lists public runtime services eligible for proof-chain lookup. The projection is constrained to verified public repository classification and accepted public ADR scope. It is not an arbitrary graph query endpoint. Sanitized atlas-resource-audit evidence reports the current bounded public Cloudflare topology state and fails closed to unavailable when missing, invalid, future-dated, or stale.",
       responses: {
         200: {
           description: "Public Trace service index",
@@ -122,7 +193,7 @@ export function buildOpenApi() {
     get: {
       summary: "One public service proof chain",
       description:
-        "Returns a bounded Atlas Trace projection for one explicitly public runtime service: its source repository node, service node, accepted governing ADR nodes, and deterministic SOURCE_OF/GOVERNED_BY edges. Private or non-public service identifiers return 404 without revealing whether they exist elsewhere in the estate.",
+        "Returns a bounded Atlas Trace projection for one explicitly public runtime service: its source repository node, service node, accepted governing ADR nodes, deterministic SOURCE_OF/GOVERNED_BY edges, and sanitized provider observation when current evidence is available. Private or non-public service identifiers return 404 without revealing whether they exist elsewhere in the estate.",
       parameters: [serviceIdParameter],
       responses: {
         200: {
