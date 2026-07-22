@@ -32,7 +32,7 @@
       "affects": {
         "repositories": ["AtlasReaper311/atlas-api-public", "AtlasReaper311/atlas-infra", "AtlasReaper311/status"],
         "services": ["atlas-api-public", "status"],
-        "contracts": ["atlas-control-plane/reliability-objective/v1", "atlas-control-plane/reliability-result/v1", "atlas-control-plane/release-reliability-correlation/v1"],
+        "contracts": ["atlas-control-plane/release-reliability-correlation/v1", "atlas-control-plane/reliability-objective/v1", "atlas-control-plane/reliability-result/v1"],
         "policies": ["policy/reliability/evaluator-config.json"]
       },
       "visibility": "public"
