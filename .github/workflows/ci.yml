@@ -58,6 +58,21 @@ jobs:
           node scripts/verify-repository-classifications.mjs \
             data/public-repository-classifications.json \
             .classification-authority/policy/public-repository-classifications.json
+      - name: Check out exact Atlas Infra ADR Trace authority
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        with:
+          repository: AtlasReaper311/atlas-infra
+          ref: 8ce372fe7c97e2cd17b16ed72550c3507ab0e751
+          path: .trace-authority
+          persist-credentials: false
+      - name: Verify ADR runtime projection
+        run: |
+          python3 .trace-authority/scripts/adr_trace.py emit \
+            --root .trace-authority \
+            --output /tmp/adr-runtime-index.json
+          node scripts/verify-adr-runtime-index.mjs \
+            data/adr-runtime-index.json \
+            /tmp/adr-runtime-index.json
 
   # CI result reported through the reusable atlas-notify workflow:
   # routes to #ci-cd via signal_class, failures mirror to #alerts.
