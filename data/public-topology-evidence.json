@@ -1,0 +1,146 @@
+{
+  "authority": "AtlasReaper311/atlas-resource-audit",
+  "component_count": 12,
+  "components": [
+    {
+      "metadata": null,
+      "provider_kind": "pages-project",
+      "service_id": "atlas-doc-viewer",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-api-index",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "provider_kind": "worker",
+      "service_id": "atlas-api-index",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-api-public",
+        "state": "observed",
+        "status": "live",
+        "version": "1.3.0"
+      },
+      "provider_kind": "worker",
+      "service_id": "atlas-api-public",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-blackbox",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "provider_kind": "worker",
+      "service_id": "atlas-blackbox",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-dora",
+        "state": "observed",
+        "status": "live",
+        "version": "0.1.0"
+      },
+      "provider_kind": "worker",
+      "service_id": "atlas-dora",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-quota-watch",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "provider_kind": "worker",
+      "service_id": "atlas-quota-watch",
+      "state": "healthy"
+    },
+    {
+      "metadata": null,
+      "provider_kind": "pages-project",
+      "service_id": "atlas-systems",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "github-pulse",
+        "state": "observed",
+        "status": "live",
+        "version": "1.2.0"
+      },
+      "provider_kind": "worker",
+      "service_id": "github-pulse",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "site-pulse",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "provider_kind": "worker",
+      "service_id": "site-pulse",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "specular-edge",
+        "state": "observed",
+        "status": "live",
+        "version": "1.1.0"
+      },
+      "provider_kind": "worker",
+      "service_id": "specular-edge",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "specular-sonify",
+        "state": "observed",
+        "status": "live",
+        "version": "2.0.0"
+      },
+      "provider_kind": "worker",
+      "service_id": "specular-sonify",
+      "state": "healthy"
+    },
+    {
+      "metadata": null,
+      "provider_kind": "pages-project",
+      "service_id": "status",
+      "state": "healthy"
+    }
+  ],
+  "privacy": {
+    "model": "declared-public-identities-plus-aggregate-undeclared-counts",
+    "redacted_undeclared_observations": 6,
+    "undeclared_identities_redacted": true,
+    "unexpected_binding_identities_redacted": true,
+    "unexpected_route_identities_redacted": true
+  },
+  "public_summary": {
+    "failed": 0,
+    "healthy": 12,
+    "unavailable": 0,
+    "warning": 0
+  },
+  "schema_version": "atlas-public-topology-evidence/projection/v1",
+  "source": {
+    "evidence_path": "evidence/topology/2026-07-22T102913Z.json",
+    "fingerprint": "sha256:032da61fe3a202ac29eb981210bcafed59d08de59b96f0b2bfcb7e5b4b511541",
+    "observed_at": "2026-07-22T10:29:13Z",
+    "producer_repository": "AtlasReaper311/atlas-resource-audit",
+    "producer_workflow": ".github/workflows/topology-audit.yml",
+    "schema_version": "atlas-resource-audit/topology-report/v1"
+  },
+  "status": "healthy"
+}
