@@ -250,10 +250,10 @@
       "layer": "local-ai",
       "lifecycle": "production",
       "repo": "https://github.com/AtlasReaper311/ramone-voice-trigger",
-      "public_surface": "controlled Worker endpoint",
-      "meta_url": "https://api.atlas-systems.uk/ramone-trigger/_meta",
+      "public_surface": "https://api.atlas-systems.uk/trigger",
+      "meta_url": "https://api.atlas-systems.uk/trigger/_meta",
       "indexed": true,
-      "health_url": "https://api.atlas-systems.uk/ramone-trigger/health",
+      "health_url": null,
       "depends_on": ["github"],
       "feeds": ["workflow dispatch", "Ramone automation"],
       "notes": "Authenticated automation trigger whose source repository is public."

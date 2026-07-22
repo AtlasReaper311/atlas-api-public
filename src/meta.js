@@ -1,14 +1,16 @@
 export const META = {
   name: "atlas-api-public",
   description:
-    "Versioned public API for registry, search, health, SLOs, and scored assurance evidence",
-  version: "1.3.0",
+    "Versioned public API for registry, topology, Atlas Trace proof chains, search, health, SLOs, and scored assurance evidence",
+  version: "1.4.0",
   endpoints: [
     { method: "GET", path: "/v1", description: "Endpoint index" },
     { method: "GET", path: "/v1/docs", description: "Human documentation" },
     { method: "GET", path: "/v1/openapi.json", description: "OpenAPI 3.0 spec" },
     { method: "GET", path: "/v1/registry", description: "Worker registry, stable public shape" },
     { method: "GET", path: "/v1/topology", description: "Filtered public estate topology for deterministic renderers" },
+    { method: "GET", path: "/v1/trace", description: "Bounded public Atlas Trace service index" },
+    { method: "GET", path: "/v1/trace/services/{service_id}", description: "One public service proof chain" },
     { method: "GET", path: "/v1/search", description: "RAG search over the estate corpus (?q=)" },
     { method: "GET", path: "/v1/stats", description: "Estate stats: repos, components, measured uptime" },
     { method: "GET", path: "/v1/slo", description: "Per-day probe counters for error budget maths; window labelled" },

@@ -28,8 +28,45 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
+      - name: Generate public topology evidence projection
+        run: |
+          node scripts/project-public-topology-evidence.mjs \
+            --write \
+            evidence/topology/2026-07-22T102913Z.json \
+            data/estate.manifest.json \
+            data/public-repository-classifications.json \
+            /tmp/public-topology-evidence.json
+      - name: Verify public topology evidence projection
+        run: |
+          diff -u \
+            data/public-topology-evidence.json \
+            /tmp/public-topology-evidence.json
+      - name: Upload generated topology projection on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: generated-public-topology-evidence
+          path: /tmp/public-topology-evidence.json
+          retention-days: 1
+      - name: Run Trace unit tests
+        run: |
+          node --test \
+            test/topology-evidence.test.js \
+            test/trace.test.js
       - name: Run tests
-        run: npm test
+        run: |
+          set +e
+          npm test > /tmp/atlas-api-public-tests.log 2>&1
+          TEST_STATUS=$?
+          cat /tmp/atlas-api-public-tests.log
+          exit "$TEST_STATUS"
+      - name: Upload failing unit-test output
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: atlas-api-public-test-output
+          path: /tmp/atlas-api-public-tests.log
+          retention-days: 1
       - name: Build exact Wrangler deployment candidate
         run: npx wrangler deploy --dry-run --outdir dist
       - name: Check out pinned Atlas Infra Worker contract validator
@@ -58,6 +95,21 @@ jobs:
           node scripts/verify-repository-classifications.mjs \
             data/public-repository-classifications.json \
             .classification-authority/policy/public-repository-classifications.json
+      - name: Check out exact Atlas Infra ADR Trace authority
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        with:
+          repository: AtlasReaper311/atlas-infra
+          ref: 8ce372fe7c97e2cd17b16ed72550c3507ab0e751
+          path: .trace-authority
+          persist-credentials: false
+      - name: Verify ADR runtime projection
+        run: |
+          python3 .trace-authority/scripts/adr_trace.py emit \
+            --root .trace-authority \
+            --output /tmp/adr-runtime-index.json
+          node scripts/verify-adr-runtime-index.mjs \
+            data/adr-runtime-index.json \
+            /tmp/adr-runtime-index.json
 
   # CI result reported through the reusable atlas-notify workflow:
   # routes to #ci-cd via signal_class, failures mirror to #alerts.
