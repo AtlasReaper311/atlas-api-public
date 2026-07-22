@@ -28,6 +28,8 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
+      - name: Run Trace unit tests
+        run: node --test test/trace.test.js
       - name: Run tests
         run: npm test
       - name: Build exact Wrangler deployment candidate
