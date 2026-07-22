@@ -1,6 +1,7 @@
 import adrRuntimeIndex from "../../data/adr-runtime-index.json" with { type: "json" };
 import repositoryClassifications from "../../data/public-repository-classifications.json" with { type: "json" };
 import { errorResponse, json, nowIso } from "../lib/http.js";
+import { topologyEvidenceState } from "../lib/topology-evidence.js";
 import { buildPublicTopology } from "./topology.js";
 
 const CLASSIFICATION_AUTHORITY = "AtlasReaper311/atlas-infra";
@@ -134,17 +135,35 @@ function adrEvidence(relationship) {
   };
 }
 
-function topologyEvidenceState() {
+function liveTopologyEvidence(liveTopology) {
+  if (
+    !liveTopology ||
+    liveTopology.state === "unavailable" ||
+    !/^sha256:[0-9a-f]{64}$/.test(
+      String(liveTopology.report_fingerprint || ""),
+    ) ||
+    typeof liveTopology.evidence_uri !== "string"
+  ) {
+    return null;
+  }
+
   return {
-    state: "unavailable",
     producer: "atlas-resource-audit",
-    reason:
-      "sanitized live Cloudflare topology evidence has not been published to atlas-api-public",
+    evidence_type: "live-provider-topology",
+    digest: liveTopology.report_fingerprint,
+    uri: liveTopology.evidence_uri,
+    visibility: "public",
+    observed_at: liveTopology.observed_at,
+    state: liveTopology.state,
   };
 }
 
-async function serviceNode(component, repository) {
+async function serviceNode(component, repository, liveTopology) {
   const key = `service:${component.id}`;
+  const evidence = [classificationEvidence()];
+  const topologyEvidence = liveTopologyEvidence(liveTopology);
+  if (topologyEvidence) evidence.push(topologyEvidence);
+
   return {
     schema_version: NODE_SCHEMA,
     node_id: await nodeId("service", key),
@@ -155,8 +174,9 @@ async function serviceNode(component, repository) {
       service_id: component.id,
     },
     visibility: "public",
-    evidence_state: "verified",
-    evidence: [classificationEvidence()],
+    evidence_state:
+      liveTopology?.state === "failed" ? "failed" : "verified",
+    evidence,
   };
 }
 
@@ -227,7 +247,9 @@ async function governanceEdge(service, adr, relationship) {
   };
 }
 
-export async function buildPublicTraceIndex() {
+export async function buildPublicTraceIndex({
+  nowMs = Date.now(),
+} = {}) {
   const services = publicServices();
   return {
     schema: "atlas-public-trace-index/v1",
@@ -247,18 +269,23 @@ export async function buildPublicTraceIndex() {
         proof_chain: `/v1/trace/services/${component.id}`,
       };
     }),
-    live_topology: topologyEvidenceState(),
+    live_topology: topologyEvidenceState(services, null, nowMs),
     generated_at: nowIso(),
   };
 }
 
-export async function buildPublicTraceService(serviceId) {
-  const component = publicServices().find((item) => item.id === serviceId);
+export async function buildPublicTraceService(
+  serviceId,
+  { nowMs = Date.now() } = {},
+) {
+  const services = publicServices();
+  const component = services.find((item) => item.id === serviceId);
   if (!component) return null;
 
+  const liveTopology = topologyEvidenceState(services, serviceId, nowMs);
   const repository = `AtlasReaper311/${repositoryName(component.repo)}`;
   const relationships = adrRelationshipsFor(serviceId, repository);
-  const service = await serviceNode(component, repository);
+  const service = await serviceNode(component, repository, liveTopology);
   const sourceRepository = await repositoryNode(repository);
   const governanceNodes = await Promise.all(relationships.map(adrNode));
   const nodes = [sourceRepository, service, ...governanceNodes];
@@ -287,12 +314,16 @@ export async function buildPublicTraceService(serviceId) {
       nodes,
       edges,
     },
-    live_topology: topologyEvidenceState(),
+    live_topology: liveTopology,
     sources: {
       classification: CLASSIFICATION_URI,
-      adr_authority: "https://github.com/AtlasReaper311/atlas-infra/tree/main/docs/adrs",
+      adr_authority:
+        "https://github.com/AtlasReaper311/atlas-infra/tree/main/docs/adrs",
       manifest:
         "https://github.com/AtlasReaper311/atlas-api-public/blob/main/data/estate.manifest.json",
+      topology_evidence:
+        liveTopology.evidence_uri ||
+        "https://github.com/AtlasReaper311/atlas-api-public/tree/main/evidence/topology",
     },
     generated_at: nowIso(),
   };
