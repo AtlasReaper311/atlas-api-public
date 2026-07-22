@@ -1,0 +1,77 @@
+{
+  "schema_version": "atlas-control-plane/adr-runtime-index/v1",
+  "relationships": [
+    {
+      "schema_version": "atlas-control-plane/adr-runtime-relationship/v1",
+      "relationship_id": "adrrel:sha256:90e89c86cd1654bd65e0bcf5617c9e22bac9e599481e5fc6c6d34f5560393ab3",
+      "adr": {
+        "id": "ADR-0001",
+        "path": "docs/adrs/ADR-0001-worker-to-worker-service-bindings.md",
+        "status": "accepted",
+        "date": "2026-07-02",
+        "title": "Worker-to-Worker calls use service bindings, not public hostnames"
+      },
+      "affects": {
+        "repositories": ["AtlasReaper311/atlas-api-index", "AtlasReaper311/atlas-notify"],
+        "services": ["atlas-api-index", "atlas-notify"],
+        "contracts": ["atlas-control-plane/service-contract/v1"],
+        "policies": ["policy/estate-registry.json"]
+      },
+      "visibility": "public"
+    },
+    {
+      "schema_version": "atlas-control-plane/adr-runtime-relationship/v1",
+      "relationship_id": "adrrel:sha256:b2193beab2448a093f70d69013b16e249c171f43d51a994de09e78d0fe753fbb",
+      "adr": {
+        "id": "ADR-0002",
+        "path": "docs/adrs/ADR-0002-reliability-objective-ownership.md",
+        "status": "accepted",
+        "date": "2026-07-20",
+        "title": "reliability objectives are canonical in atlas-infra"
+      },
+      "affects": {
+        "repositories": ["AtlasReaper311/atlas-api-public", "AtlasReaper311/atlas-infra", "AtlasReaper311/status"],
+        "services": ["atlas-api-public", "status"],
+        "contracts": ["atlas-control-plane/reliability-objective/v1", "atlas-control-plane/reliability-result/v1", "atlas-control-plane/release-reliability-correlation/v1"],
+        "policies": ["policy/reliability/evaluator-config.json"]
+      },
+      "visibility": "public"
+    },
+    {
+      "schema_version": "atlas-control-plane/adr-runtime-relationship/v1",
+      "relationship_id": "adrrel:sha256:285b64a3705d527bf6132874c44d27a19866ad60050e1230e1be9331af57494a",
+      "adr": {
+        "id": "ADR-0003",
+        "path": "docs/adrs/public-private-estate-boundary.md",
+        "status": "accepted",
+        "date": "2026-07-20",
+        "title": "Public and private estate boundary"
+      },
+      "affects": {
+        "repositories": ["AtlasReaper311/atlas-api-index", "AtlasReaper311/atlas-api-public", "AtlasReaper311/atlas-corpus", "AtlasReaper311/atlas-infra"],
+        "services": ["atlas-api-index", "atlas-api-public", "atlas-corpus"],
+        "contracts": ["atlas-control-plane/service-contract/v1"],
+        "policies": ["policy/estate-registry.json", "policy/public-repository-classifications.json"]
+      },
+      "visibility": "public"
+    },
+    {
+      "schema_version": "atlas-control-plane/adr-runtime-relationship/v1",
+      "relationship_id": "adrrel:sha256:2ece913d24d14e54e97360a9530fcb72342839aafae3e3bd368bddbd0f55613d",
+      "adr": {
+        "id": "ADR-0004",
+        "path": "docs/adrs/public-repository-classification-authority.md",
+        "status": "accepted",
+        "date": "2026-07-21",
+        "title": "Public repository classification authority"
+      },
+      "affects": {
+        "repositories": ["AtlasReaper311/atlas-api-public", "AtlasReaper311/atlas-infra"],
+        "services": ["atlas-api-public"],
+        "contracts": ["atlas-control-plane/service-contract/v1"],
+        "policies": ["policy/estate-registry.json", "policy/public-assurance-repositories.json", "policy/public-repository-classifications.json"]
+      },
+      "visibility": "public"
+    }
+  ]
+}
