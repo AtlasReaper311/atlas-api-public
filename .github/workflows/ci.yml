@@ -28,7 +28,7 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
-      - name: Verify public topology evidence projection
+      - name: Generate public topology evidence projection
         run: |
           node scripts/project-public-topology-evidence.mjs \
             --write \
@@ -36,9 +36,18 @@ jobs:
             data/estate.manifest.json \
             data/public-repository-classifications.json \
             /tmp/public-topology-evidence.json
+      - name: Verify public topology evidence projection
+        run: |
           diff -u \
             data/public-topology-evidence.json \
             /tmp/public-topology-evidence.json
+      - name: Upload generated topology projection on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: generated-public-topology-evidence
+          path: /tmp/public-topology-evidence.json
+          retention-days: 1
       - name: Run Trace unit tests
         run: |
           node --test \
