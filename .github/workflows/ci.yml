@@ -31,7 +31,19 @@ jobs:
       - name: Run Trace unit tests
         run: node --test test/trace.test.js
       - name: Run tests
-        run: npm test
+        run: |
+          set +e
+          npm test > /tmp/atlas-api-public-tests.log 2>&1
+          TEST_STATUS=$?
+          cat /tmp/atlas-api-public-tests.log
+          exit "$TEST_STATUS"
+      - name: Upload failing unit-test output
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: atlas-api-public-test-output
+          path: /tmp/atlas-api-public-tests.log
+          retention-days: 1
       - name: Build exact Wrangler deployment candidate
         run: npx wrangler deploy --dry-run --outdir dist
       - name: Check out pinned Atlas Infra Worker contract validator
