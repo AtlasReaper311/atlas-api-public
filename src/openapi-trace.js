@@ -33,6 +33,14 @@ export function buildOpenApi() {
   spec.info.description =
     "Versioned read surface for the Atlas Systems estate: public topology and repository inventory, bounded Atlas Trace proof chains, the Worker registry, RAG search over the estate corpus, live infra health, assurance evidence, query stats, and status reporting. Runs at the edge on Cloudflare Workers; unavailable evidence is represented explicitly rather than inferred.";
 
+  const topologySchema =
+    spec.paths?.["/v1/topology"]?.get?.responses?.[200]?.content?.[
+      "application/json"
+    ]?.schema?.properties?.schema;
+  if (topologySchema) {
+    topologySchema.enum = ["atlas-public-topology/v3"];
+  }
+
   spec.paths["/v1/trace"] = {
     get: {
       summary: "Bounded public Atlas Trace index",
