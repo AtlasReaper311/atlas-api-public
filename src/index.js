@@ -35,6 +35,7 @@ import {
 import { handleBadge } from "./routes/badge.js";
 import { handleDocs } from "./routes/docs.js";
 import { handleTopology } from "./routes/topology.js";
+import { handleTraceIndex, handleTraceService } from "./routes/trace.js";
 import { buildOpenApi } from "./openapi.js";
 import { runCron } from "./cron.js";
 
@@ -42,6 +43,7 @@ const EVIDENCE_PATH = /^\/v1\/evidence\/(conformance|chaos)$/;
 const EVIDENCE_REPORT_PATH = /^\/v1\/evidence\/(conformance|chaos)\/report$/;
 const RELIABILITY_SERVICE_PATH = /^\/v1\/reliability\/services\/([a-z0-9-]{1,64})$/;
 const RELIABILITY_BASELINE_PATH = /^\/v1\/reliability\/baseline\/([a-z0-9-]{1,64})$/;
+const TRACE_SERVICE_PATH = /^\/v1\/trace\/services\/([a-z0-9-]{1,64})$/;
 
 export default {
   async fetch(request, env, ctx) {
@@ -82,6 +84,10 @@ export default {
       if (reliabilityBaseline) {
         return handleReliabilityBaseline(request, env, reliabilityBaseline[1]);
       }
+      const traceService = path.match(TRACE_SERVICE_PATH);
+      if (traceService) {
+        return handleTraceService(traceService[1]);
+      }
 
       switch (path) {
         case "/v1":
@@ -104,6 +110,8 @@ export default {
           return handleRegistry(request, env, ctx);
         case "/v1/topology":
           return handleTopology();
+        case "/v1/trace":
+          return handleTraceIndex();
         case "/v1/search":
           return handleSearch(request, env);
         case "/v1/stats":
