@@ -1,0 +1,197 @@
+{
+  "findings": [
+    {
+      "severity": "info",
+      "subject": "redacted-provider-topology",
+      "summary": "Observed 6 undeclared or private topology objects; identities are redacted.",
+      "type": "observed-but-undeclared"
+    }
+  ],
+  "observed_at": "2026-07-22T10:29:13Z",
+  "pages_projects": [
+    {
+      "project_name": "atlas-doc-viewer",
+      "state": "healthy"
+    },
+    {
+      "project_name": "atlas-systems",
+      "state": "healthy"
+    },
+    {
+      "project_name": "status",
+      "state": "healthy"
+    }
+  ],
+  "privacy": {
+    "model": "declared-public-identities-plus-aggregate-undeclared-counts",
+    "undeclared_identities_redacted": true,
+    "unexpected_binding_identities_redacted": true,
+    "unexpected_route_identities_redacted": true
+  },
+  "schema_version": "atlas-resource-audit/topology-report/v1",
+  "status": "healthy",
+  "summary": {
+    "declared_pages_projects": 3,
+    "declared_workers": 14,
+    "error_findings": 0,
+    "informational_findings": 1,
+    "redacted_undeclared_observations": 6,
+    "warning_findings": 0
+  },
+  "workers": [
+    {
+      "metadata": {
+        "name": "atlas-api-index",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "script_name": "atlas-api-index",
+      "service_id": "atlas-api-index",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-api-public",
+        "state": "observed",
+        "status": "live",
+        "version": "1.3.0"
+      },
+      "script_name": "atlas-api-public",
+      "service_id": "atlas-api-public",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-blackbox",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "script_name": "atlas-blackbox",
+      "service_id": "atlas-blackbox",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-daily-digest",
+        "state": "observed",
+        "status": "live",
+        "version": "1.1.0"
+      },
+      "script_name": "atlas-daily-digest",
+      "service_id": "atlas-daily-digest",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-dora",
+        "state": "observed",
+        "status": "live",
+        "version": "0.1.0"
+      },
+      "script_name": "atlas-dora",
+      "service_id": "atlas-dora",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-notify",
+        "state": "observed",
+        "status": "live",
+        "version": "1.2.0"
+      },
+      "script_name": "atlas-notify",
+      "service_id": "atlas-notify",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "atlas-quota-watch",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "script_name": "atlas-quota-watch",
+      "service_id": "atlas-quota-watch",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "deploy-watch",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "script_name": "deploy-watch",
+      "service_id": "deploy-watch",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "github-pulse",
+        "state": "observed",
+        "status": "live",
+        "version": "1.2.0"
+      },
+      "script_name": "github-pulse",
+      "service_id": "github-pulse",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "ramone-edge",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "script_name": "ramone-edge",
+      "service_id": "ramone-edge",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "ramone-trigger",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "script_name": "ramone-trigger",
+      "service_id": "ramone-trigger",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "site-pulse",
+        "state": "observed",
+        "status": "live",
+        "version": "1.0.0"
+      },
+      "script_name": "site-pulse",
+      "service_id": "site-pulse",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "specular-edge",
+        "state": "observed",
+        "status": "live",
+        "version": "1.1.0"
+      },
+      "script_name": "specular-edge",
+      "service_id": "specular-edge",
+      "state": "healthy"
+    },
+    {
+      "metadata": {
+        "name": "specular-sonify",
+        "state": "observed",
+        "status": "live",
+        "version": "2.0.0"
+      },
+      "script_name": "specular-sonify",
+      "service_id": "specular-sonify",
+      "state": "healthy"
+    }
+  ]
+}
