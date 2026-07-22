@@ -6,7 +6,7 @@
  * the HTML catalogue automatically in the same deployment.
  */
 
-import { buildOpenApi } from "../openapi.js";
+import { buildOpenApi } from "../openapi-trace.js";
 
 const CSS = `
 :root{--bg:#0a0a0f;--bg-1:#111118;--bg-2:#1a1a24;--border:rgba(255,255,255,0.08);--border-hi:rgba(255,255,255,0.16);--text:#e8e8e0;--text-dim:#aaa9a0;--text-faint:#555560;--accent:#f5a623;--accent-dim:rgba(245,166,35,0.12);--green:#4ade80;--red:#e24b4a}
@@ -155,7 +155,7 @@ export function handleDocs() {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Atlas Systems public API</title>
-<meta name="description" content="Versioned public API for the Atlas Systems estate: topology, repository inventory, registry, assurance evidence, RAG search, and live infrastructure state.">
+<meta name="description" content="Versioned public API for the Atlas Systems estate: topology, Trace proof chains, repository inventory, registry, assurance evidence, RAG search, and live infrastructure state.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>${CSS}</style>
@@ -166,10 +166,11 @@ export function handleDocs() {
 <h1>Public API, v1</h1>
 <p class="sub">version ${escapeHtml(spec.info.version)} &middot; <a href="/v1/openapi.json">openapi.json</a> &middot; <a href="https://github.com/AtlasReaper311/atlas-api-public">source</a> &middot; <a href="https://atlas-systems.uk">atlas-systems.uk</a></p>
 
-<p>This is the versioned read surface of the Atlas Systems estate. It publishes the public repository and component topology, the live Worker registry, assurance evidence, semantic search over the estate corpus, and health telemetry from the machine that runs the local models. Runtime state and declared source inventory are separate on purpose: a public repository can exist without pretending to be a deployed service.</p>
+<p>This is the versioned read surface of the Atlas Systems estate. It publishes the public repository and component topology, bounded Atlas Trace proof chains, the live Worker registry, assurance evidence, semantic search over the estate corpus, and health telemetry from the machine that runs the local models. Runtime state and declared source inventory are separate on purpose: a public repository can exist without pretending to be a deployed service, and unavailable live evidence stays unavailable.</p>
 
 <h2>Quick start</h2>
 <pre><code>curl https://api.atlas-systems.uk/v1/topology
+curl https://api.atlas-systems.uk/v1/trace
 curl https://api.atlas-systems.uk/v1/registry
 curl https://api.atlas-systems.uk/v1/search?q=tunnel
 curl https://api.atlas-systems.uk/v1/evidence</code></pre>
