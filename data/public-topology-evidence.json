@@ -3,12 +3,6 @@
   "component_count": 12,
   "components": [
     {
-      "metadata": null,
-      "provider_kind": "pages-project",
-      "service_id": "atlas-doc-viewer",
-      "state": "healthy"
-    },
-    {
       "metadata": {
         "name": "atlas-api-index",
         "state": "observed",
@@ -39,6 +33,12 @@
       },
       "provider_kind": "worker",
       "service_id": "atlas-blackbox",
+      "state": "healthy"
+    },
+    {
+      "metadata": null,
+      "provider_kind": "pages-project",
+      "service_id": "atlas-doc-viewer",
       "state": "healthy"
     },
     {
