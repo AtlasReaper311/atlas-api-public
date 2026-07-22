@@ -28,8 +28,19 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
+      - name: Verify public topology evidence projection
+        run: |
+          node scripts/project-public-topology-evidence.mjs \
+            --check \
+            evidence/topology/2026-07-22T102913Z.json \
+            data/estate.manifest.json \
+            data/public-repository-classifications.json \
+            data/public-topology-evidence.json
       - name: Run Trace unit tests
-        run: node --test test/trace.test.js
+        run: |
+          node --test \
+            test/topology-evidence.test.js \
+            test/trace.test.js
       - name: Run tests
         run: |
           set +e
