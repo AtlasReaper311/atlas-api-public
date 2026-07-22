@@ -36,7 +36,7 @@ import { handleBadge } from "./routes/badge.js";
 import { handleDocs } from "./routes/docs.js";
 import { handleTopology } from "./routes/topology.js";
 import { handleTraceIndex, handleTraceService } from "./routes/trace.js";
-import { buildOpenApi } from "./openapi.js";
+import { buildOpenApi } from "./openapi-trace.js";
 import { runCron } from "./cron.js";
 
 const EVIDENCE_PATH = /^\/v1\/evidence\/(conformance|chaos)$/;
