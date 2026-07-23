@@ -38,7 +38,8 @@ jobs:
       name: public-interface-preview
       url: ${{ steps.deploy.outputs.preview_url }}
     env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_WORKERS_DEPLOY_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       PREVIEW_WORKER: atlas-api-docs-interface-pr-${{ github.event.pull_request.number }}
     steps:
       - name: Check out preview branch
