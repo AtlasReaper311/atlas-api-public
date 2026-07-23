@@ -1,0 +1,187 @@
+name: Public interface preview
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".github/workflows/interface-preview.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "wrangler.toml"
+      - "src/index.js"
+      - "src/routes/docs.js"
+      - "src/routes/docs-shell.js"
+      - "src/routes/docs-icons.generated.js"
+      - "scripts/embed-docs-icons.mjs"
+      - "assets/docs-icons/site.webmanifest"
+      - "test/docs-interface.test.js"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.repository }}-public-interface-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Validate and upload API docs preview version
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feat/public-api-docs-shell-v1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: public-interface-preview
+      url: ${{ steps.deploy.outputs.preview_url }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      PREVIEW_ALIAS: interface-pr-${{ github.event.pull_request.number }}
+    steps:
+      - name: Check out preview branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Check out canonical browser icons
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        with:
+          repository: AtlasReaper311/atlas-systems
+          ref: main
+          path: .atlas-icon-source
+          sparse-checkout: |
+            favicon.ico
+            favicon_io
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0, Node 24
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Synchronize and embed canonical browser icons
+        id: icons
+        run: |
+          set -euo pipefail
+          mkdir -p assets/docs-icons
+          cp .atlas-icon-source/favicon.ico assets/docs-icons/favicon.ico
+          cp .atlas-icon-source/favicon_io/favicon-16x16.png assets/docs-icons/favicon-16x16.png
+          cp .atlas-icon-source/favicon_io/favicon-32x32.png assets/docs-icons/favicon-32x32.png
+          cp .atlas-icon-source/favicon_io/apple-touch-icon.png assets/docs-icons/apple-touch-icon.png
+          cp .atlas-icon-source/favicon_io/android-chrome-192x192.png assets/docs-icons/android-chrome-192x192.png
+          cp .atlas-icon-source/favicon_io/android-chrome-512x512.png assets/docs-icons/android-chrome-512x512.png
+          rm -rf .atlas-icon-source
+          node scripts/embed-docs-icons.mjs
+
+          if git diff --quiet -- assets/docs-icons src/routes/docs-icons.generated.js; then
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add assets/docs-icons src/routes/docs-icons.generated.js
+            git commit -m "assets: synchronize canonical browser icons"
+            git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+            echo "changed=true" >> "${GITHUB_OUTPUT}"
+          fi
+          echo "commit=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate API, privacy, OpenAPI, Trace, and docs contracts
+        run: |
+          set -euo pipefail
+          npm run lint
+          node scripts/project-public-topology-evidence.mjs \
+            --write \
+            evidence/topology/2026-07-22T102913Z.json \
+            data/estate.manifest.json \
+            data/public-repository-classifications.json \
+            /tmp/public-topology-evidence.json
+          diff -u data/public-topology-evidence.json /tmp/public-topology-evidence.json
+          npm test
+          test -s assets/docs-icons/favicon.ico
+          test -s assets/docs-icons/favicon-16x16.png
+          test -s assets/docs-icons/favicon-32x32.png
+          test -s assets/docs-icons/apple-touch-icon.png
+          test -s assets/docs-icons/android-chrome-192x192.png
+          test -s assets/docs-icons/android-chrome-512x512.png
+          test -s assets/docs-icons/site.webmanifest
+          grep -q '"/v1/docs/assets/favicon.ico"' src/routes/docs-icons.generated.js
+          grep -q '"/v1/docs/assets/site.webmanifest"' src/routes/docs-icons.generated.js
+          npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/wrangler-dry-run"
+          git diff --check
+
+      - name: Check bundled Worker contracts
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        with:
+          repository: AtlasReaper311/atlas-infra
+          ref: f971172dc258c93dffa53b8b7a3532c5be55883d
+          path: .atlas-infra-contracts
+          persist-credentials: false
+
+      - name: Validate exact Wrangler bundle
+        run: |
+          set -euo pipefail
+          python3 .atlas-infra-contracts/scripts/worker_contract.py check \
+            --bundle-dir "$RUNNER_TEMP/wrangler-dry-run" \
+            --require-meta \
+            --require-openapi
+
+      - name: Guard production boundary
+        run: |
+          set -euo pipefail
+          test "${{ github.event.pull_request.head.ref }}" = "feat/public-api-docs-shell-v1"
+          test "${PREVIEW_ALIAS}" != "production"
+          test "${PREVIEW_ALIAS}" != "main"
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path(".github/workflows/interface-preview.yml").read_text(encoding="utf-8")
+          for line in text.splitlines():
+              command = line.strip()
+              if command.startswith("npx wrangler deploy") and "--dry-run" not in command:
+                  raise SystemExit(f"production deploy command found: {command}")
+              if command.startswith("npx wrangler versions deploy"):
+                  raise SystemExit(f"version deployment command found: {command}")
+          PY
+
+      - name: Upload non-production Worker version
+        id: deploy
+        run: |
+          set -euo pipefail
+          output_file="${RUNNER_TEMP}/wrangler-version-upload.log"
+          npx wrangler versions upload \
+            --preview-alias "${PREVIEW_ALIAS}" \
+            --message "Public API docs interface preview for PR ${{ github.event.pull_request.number }}" \
+            2>&1 | tee "${output_file}"
+          preview_url="$(grep -Eo 'https://[A-Za-z0-9._-]+\.workers\.dev' "${output_file}" | tail -n 1)"
+          test -n "${preview_url}"
+          echo "preview_url=${preview_url}" >> "${GITHUB_OUTPUT}"
+
+      - name: Attach live preview to the draft pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+          PREVIEW_COMMIT: ${{ steps.icons.outputs.commit }}
+        run: |
+          set -euo pipefail
+          marker="<!-- atlas-public-interface-preview -->"
+          body="${marker}
+          ## Live interface preview
+
+          - Human docs preview: ${PREVIEW_URL}/v1/docs
+          - Worker version root: ${PREVIEW_URL}
+          - Commit: \`${PREVIEW_COMMIT}\`
+          - Production: unchanged
+
+          The preview is an uploaded Worker version. It is not deployed to \`api.atlas-systems.uk\`. Machine endpoints were validated by the existing test and Worker-contract suites."
+          existing_id="$(gh api "/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.pull_request.number }}/comments" --paginate --jq ".[] | select(.body | contains(\"${marker}\")) | .id" | head -n 1)"
+          if [ -n "${existing_id}" ]; then
+            gh api --method PATCH "/repos/${GITHUB_REPOSITORY}/issues/comments/${existing_id}" -f body="${body}"
+          else
+            gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
+          fi
