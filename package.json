@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:docs-icons": "node scripts/embed-docs-icons.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "lint": "eslint .",
