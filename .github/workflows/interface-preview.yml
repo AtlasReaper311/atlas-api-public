@@ -9,6 +9,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "wrangler.toml"
+      - "wrangler.interface-preview.toml"
       - "src/index.js"
       - "src/routes/docs.js"
       - "src/routes/docs-shell.js"
@@ -27,7 +28,7 @@ concurrency:
 
 jobs:
   preview:
-    name: Validate and upload API docs preview version
+    name: Validate and publish isolated API docs preview
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.head.ref == 'feat/public-api-docs-shell-v1'
@@ -38,7 +39,7 @@ jobs:
       url: ${{ steps.deploy.outputs.preview_url }}
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      PREVIEW_ALIAS: interface-pr-${{ github.event.pull_request.number }}
+      PREVIEW_WORKER: atlas-api-docs-interface-pr-${{ github.event.pull_request.number }}
     steps:
       - name: Check out preview branch
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
@@ -113,6 +114,7 @@ jobs:
           grep -q '"/v1/docs/assets/favicon.ico"' src/routes/docs-icons.generated.js
           grep -q '"/v1/docs/assets/site.webmanifest"' src/routes/docs-icons.generated.js
           npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/wrangler-dry-run"
+          npx wrangler deploy --config wrangler.interface-preview.toml --dry-run --outdir "$RUNNER_TEMP/interface-preview-dry-run"
           git diff --check
 
       - name: Check bundled Worker contracts
@@ -123,7 +125,7 @@ jobs:
           path: .atlas-infra-contracts
           persist-credentials: false
 
-      - name: Validate exact Wrangler bundle
+      - name: Validate exact production-shaped Wrangler bundle
         run: |
           set -euo pipefail
           python3 .atlas-infra-contracts/scripts/worker_contract.py check \
@@ -135,26 +137,19 @@ jobs:
         run: |
           set -euo pipefail
           test "${{ github.event.pull_request.head.ref }}" = "feat/public-api-docs-shell-v1"
-          test "${PREVIEW_ALIAS}" != "production"
-          test "${PREVIEW_ALIAS}" != "main"
-          python3 - <<'PY'
-          from pathlib import Path
-          text = Path(".github/workflows/interface-preview.yml").read_text(encoding="utf-8")
-          for line in text.splitlines():
-              command = line.strip()
-              if command.startswith("npx wrangler deploy") and "--dry-run" not in command:
-                  raise SystemExit(f"production deploy command found: {command}")
-              if command.startswith("npx wrangler versions deploy"):
-                  raise SystemExit(f"version deployment command found: {command}")
-          PY
+          test "${PREVIEW_WORKER}" = "atlas-api-docs-interface-pr-${{ github.event.pull_request.number }}"
+          grep -q '^workers_dev = true$' wrangler.interface-preview.toml
+          grep -q '^preview_urls = false$' wrangler.interface-preview.toml
+          ! grep -Eq '^(route|routes|\[\[routes\]\]|\[triggers\]|\[\[services\]\]|\[\[kv_namespaces\]\]|\[\[unsafe\.bindings\]\])' wrangler.interface-preview.toml
 
-      - name: Upload non-production Worker version
+      - name: Publish isolated workers.dev preview
         id: deploy
         run: |
           set -euo pipefail
-          output_file="${RUNNER_TEMP}/wrangler-version-upload.log"
-          npx wrangler versions upload \
-            --preview-alias "${PREVIEW_ALIAS}" \
+          output_file="${RUNNER_TEMP}/wrangler-preview-deploy.log"
+          npx wrangler deploy \
+            --config wrangler.interface-preview.toml \
+            --name "${PREVIEW_WORKER}" \
             2>&1 | tee "${output_file}"
           preview_url="$(grep -Eo 'https://[A-Za-z0-9._-]+\.workers\.dev' "${output_file}" | tail -n 1)"
           test -n "${preview_url}"
@@ -172,11 +167,11 @@ jobs:
           ## Live interface preview
 
           - Human docs preview: ${PREVIEW_URL}/v1/docs
-          - Worker version root: ${PREVIEW_URL}
+          - Isolated Worker root: ${PREVIEW_URL}
           - Commit: \`${PREVIEW_COMMIT}\`
           - Production: unchanged
 
-          The preview is an uploaded Worker version. It is not deployed to \`api.atlas-systems.uk\`. Machine endpoints were validated by the existing test and Worker-contract suites."
+          This isolated workers.dev Worker has no production routes, service bindings, KV bindings, rate-limit bindings, or schedules. The production-shaped bundle was validated separately before preview publication."
           existing_id="$(gh api "/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.pull_request.number }}/comments" --paginate --jq ".[] | select(.body | contains(\"${marker}\")) | .id" | head -n 1)"
           if [ -n "${existing_id}" ]; then
             gh api --method PATCH "/repos/${GITHUB_REPOSITORY}/issues/comments/${existing_id}" -f body="${body}"
