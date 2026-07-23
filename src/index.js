@@ -34,6 +34,7 @@ import {
 } from "./routes/reliability.js";
 import { handleBadge } from "./routes/badge.js";
 import { handleDocs } from "./routes/docs.js";
+import { handleDocsAsset } from "./routes/docs-shell.js";
 import { handleTopology } from "./routes/topology.js";
 import { handleTraceIndex, handleTraceService } from "./routes/trace.js";
 import { buildOpenApi } from "./openapi-trace.js";
@@ -56,6 +57,11 @@ export default {
 
     if (path === "/notify/recent" && request.method === "GET") {
       return handlePublicEvents(request, env);
+    }
+
+    if (request.method === "GET") {
+      const docsAsset = handleDocsAsset(path);
+      if (docsAsset) return docsAsset;
     }
 
     const meta = handleMeta(url, META);
