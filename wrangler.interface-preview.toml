@@ -1,0 +1,10 @@
+name = "atlas-api-docs-interface-preview"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+workers_dev = true
+preview_urls = false
+
+[vars]
+CORPUS_ORIGIN = "https://corpus.atlas-systems.uk"
+STALE_AFTER_SECONDS = "1200"
+UPTIME_WINDOW_DAYS = "30"
