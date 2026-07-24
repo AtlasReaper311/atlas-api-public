@@ -1,8 +1,9 @@
 name: Patch and validate API Docs product landmark
 
 on:
-  push:
-    branches: [feat/security-txt]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
     paths:
       - ".github/workflows/phase3-patch-landmark.yml"
 
@@ -10,18 +11,21 @@ permissions:
   contents: write
 
 concurrency:
-  group: ${{ github.repository }}-phase3-api-landmark-${{ github.ref }}
+  group: ${{ github.repository }}-phase3-api-landmark-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
   patch:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feat/security-txt'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - name: Check out exact branch
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
         with:
-          ref: feat/security-txt
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0, Node 24
@@ -72,4 +76,4 @@ test("Public API product identity is a named landmark", async () => {
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "fix: expose API Docs product identity as a landmark"
-          git push origin HEAD:feat/security-txt
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
