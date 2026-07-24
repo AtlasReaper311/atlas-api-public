@@ -38,6 +38,7 @@ import { handleDocs } from "./routes/docs.js";
 import { handleDocsAsset } from "./routes/docs-shell.js";
 import { handleTopology } from "./routes/topology.js";
 import { handleTraceIndex, handleTraceService } from "./routes/trace.js";
+import { handleSecurityText } from "./routes/security-txt.js";
 import { buildOpenApi } from "./openapi-trace.js";
 import { runCron } from "./cron.js";
 
@@ -66,6 +67,10 @@ async function routeRequest(request, env, ctx) {
 
     const meta = handleMeta(url, META);
     if (meta) return meta;
+
+    if (path === "/.well-known/security.txt" && request.method === "GET") {
+      return handleSecurityText();
+    }
 
     if (path === "/v1/badge/status" && request.method === "GET") {
       return handleBadge(request, env, ctx);
