@@ -41,7 +41,10 @@ test("docs have the global header, search, status, metadata, and local icons", (
   assert.match(html, /data-state="checking"/);
   assert.match(html, /data-estate-status-label>Checking</);
   assert.match(html, /rel="canonical" href="https:\/\/api\.atlas-systems\.uk\/v1\/docs"/);
-  assert.match(html, /property="og:image:alt"/);
+  assert.match(html, /property="og:image" content="https:\/\/atlas-systems\.uk\/og\/api-docs\.png"/);
+  assert.match(html, /name="twitter:image" content="https:\/\/atlas-systems\.uk\/og\/api-docs\.png"/);
+  assert.match(html, /property="og:image:alt" content="The Atlas Systems API\. \/\/ Atlas Systems"/);
+  assert.match(html, /name="twitter:image:alt" content="The Atlas Systems API\. \/\/ Atlas Systems"/);
   assert.match(html, /href="\/v1\/docs\/assets\/favicon\.ico"/);
   assert.match(html, /href="\/v1\/docs\/assets\/fonts\.css"/);
   assert.match(html, /href="\/v1\/docs\/assets\/interface-kit\.css"/);
