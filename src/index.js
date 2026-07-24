@@ -40,6 +40,7 @@ import { handleTopology } from "./routes/topology.js";
 import { handleTraceIndex, handleTraceService } from "./routes/trace.js";
 import { buildOpenApi } from "./openapi-trace.js";
 import { runCron } from "./cron.js";
+import { handleSecurityTxt } from "./security-txt.js";
 
 const EVIDENCE_PATH = /^\/v1\/evidence\/(conformance|chaos)$/;
 const EVIDENCE_REPORT_PATH = /^\/v1\/evidence\/(conformance|chaos)\/report$/;
@@ -53,6 +54,11 @@ async function routeRequest(request, env, ctx) {
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+
+    if (request.method === "GET") {
+      const securityTxt = handleSecurityTxt(path);
+      if (securityTxt) return securityTxt;
     }
 
     if (path === "/notify/recent" && request.method === "GET") {
@@ -104,6 +110,7 @@ async function routeRequest(request, env, ctx) {
             description: META.description,
             endpoints: META.endpoints,
             docs: "https://api.atlas-systems.uk/v1/docs",
+            security: "https://api.atlas-systems.uk/.well-known/security.txt",
             generated_at: nowIso(),
           });
         case "/v1/docs":
