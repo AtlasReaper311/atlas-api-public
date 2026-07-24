@@ -24,13 +24,13 @@ const DOCS_CONTENT_SECURITY_POLICY = [
   "default-src 'none'",
   "base-uri 'self'",
   "connect-src 'self'",
-  "font-src 'self' https://fonts.gstatic.com",
+  "font-src 'self'",
   "form-action 'none'",
   "frame-ancestors 'none'",
   "img-src 'self' data:",
   "manifest-src 'self'",
   "script-src 'self'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "style-src 'self' 'unsafe-inline'",
 ].join("; ");
 
 export function secureResponse(response) {

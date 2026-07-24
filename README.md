@@ -82,11 +82,12 @@ Unknown components fail closed.
 `GET /v1/openapi.json`. Endpoint cards are derived during request rendering;
 there is no second hand-maintained endpoint inventory.
 
-The page consumes Atlas Interface Kit `0.1.1` from
-`assets/docs-interface/v0.1.1/`. The Worker embeds and serves the pinned
-stylesheet at `GET /v1/docs/assets/interface-kit.css`, so the interface has no
-cross-domain runtime dependency. Verify and rebuild the deterministic local
-bundle with:
+The page consumes Atlas Interface Kit `0.2.0` from
+`assets/docs-interface/v0.2.0/`. The Worker embeds and serves the pinned
+stylesheet and WOFF2 typefaces from `GET /v1/docs/assets/`, so the interface
+has no runtime dependency on Google Fonts or the kit repository. The matching
+OFL licence texts remain in the verified vendored bundle. Verify and rebuild
+the deterministic local bundle with:
 
 ```bash
 npm run verify:docs-interface

@@ -3,11 +3,13 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const version = "0.1.1";
+const version = "0.2.0";
 const source = path.join(root, "assets", "docs-interface", `v${version}`);
 const manifestPath = path.join(source, "manifest.json");
 const output = path.join(root, "src", "routes", "docs-interface.generated.js");
 const stylesheet = "atlas-interface-kit.css";
+const fontStylesheet = "atlas-fonts.css";
+const fontRoot = "/v1/docs/assets/fonts/";
 
 function sha256(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
@@ -28,6 +30,25 @@ for (const [filename, record] of Object.entries(manifest.files || {})) {
 }
 
 const css = fs.readFileSync(path.join(source, stylesheet));
+const fontCss = fs
+  .readFileSync(path.join(source, fontStylesheet), "utf8")
+  .replaceAll("./fonts/", fontRoot);
+const fontAssets = Object.fromEntries(
+  Object.entries(manifest.files)
+    .filter(([filename]) => filename.startsWith("fonts/"))
+    .map(([filename, record]) => {
+      const route = `${fontRoot}${path.basename(filename)}`;
+      const buffer = fs.readFileSync(path.join(source, filename));
+      return [
+        route,
+        {
+          contentType: "font/woff2",
+          sha256: record.sha256,
+          base64: buffer.toString("base64"),
+        },
+      ];
+    }),
+);
 fs.writeFileSync(
   output,
   [
@@ -38,6 +59,12 @@ fs.writeFileSync(
     `  sha256: ${JSON.stringify(manifest.files[stylesheet].sha256)},`,
     `  base64: ${JSON.stringify(css.toString("base64"))},`,
     "});",
+    "export const DOCS_INTERFACE_FONT_STYLESHEET = Object.freeze({",
+    '  contentType: "text/css; charset=utf-8",',
+    `  sha256: ${JSON.stringify(manifest.files[fontStylesheet].sha256)},`,
+    `  base64: ${JSON.stringify(Buffer.from(fontCss).toString("base64"))},`,
+    "});",
+    `export const DOCS_INTERFACE_FONT_ASSETS = Object.freeze(${JSON.stringify(fontAssets, null, 2)});`,
     "",
   ].join("\n"),
   "utf8",

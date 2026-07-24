@@ -140,9 +140,7 @@ export function handleDocs() {
 <meta name="twitter:title" content="Public API // Atlas Systems">
 <meta name="twitter:description" content="Human-readable documentation for the versioned Atlas Systems public API, rendered directly from the OpenAPI authority.">
 <meta name="twitter:image" content="https://atlas-systems.uk/og-default.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/v1/docs/assets/fonts.css">
 <link rel="stylesheet" href="/v1/docs/assets/interface-kit.css">
 <style>${CSS}</style>
 </head>

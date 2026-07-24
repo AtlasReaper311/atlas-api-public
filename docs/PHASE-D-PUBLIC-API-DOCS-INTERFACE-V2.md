@@ -67,9 +67,11 @@ The phase must not:
 
 ### Local interface bundle
 
-- Pin Atlas Interface Kit `0.1.1`.
-- Store the copied CSS and JSON contract files in this repository.
-- Serve the shared stylesheet from `/v1/docs/assets/` through this Worker.
+- Pin Atlas Interface Kit `0.2.0`.
+- Store the copied CSS, JSON contracts, typefaces, and licence files in this
+  repository.
+- Serve the shared stylesheets and typefaces from `/v1/docs/assets/` through
+  this Worker.
 - Verify file sizes and SHA-256 fingerprints against the pinned manifest.
 - Generation and verification are deterministic and idempotent.
 

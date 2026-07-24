@@ -43,9 +43,10 @@ test("human documentation receives a route-specific browser policy", () => {
 
   assert.match(policy, /connect-src 'self'/);
   assert.match(policy, /script-src 'self'/);
-  assert.match(policy, /style-src 'self' 'unsafe-inline' https:\/\/fonts\.googleapis\.com/);
-  assert.match(policy, /font-src 'self' https:\/\/fonts\.gstatic\.com/);
+  assert.match(policy, /style-src 'self' 'unsafe-inline'/);
+  assert.match(policy, /font-src 'self'/);
   assert.match(policy, /frame-ancestors 'none'/);
+  assert.doesNotMatch(policy, /fonts\.(?:googleapis|gstatic)\.com/);
 });
 
 test("the Worker wraps every routed response at its fetch boundary", () => {
