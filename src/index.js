@@ -47,6 +47,26 @@ const EVIDENCE_REPORT_PATH = /^\/v1\/evidence\/(conformance|chaos)\/report$/;
 const RELIABILITY_SERVICE_PATH = /^\/v1\/reliability\/services\/([a-z0-9-]{1,64})$/;
 const RELIABILITY_BASELINE_PATH = /^\/v1\/reliability\/baseline\/([a-z0-9-]{1,64})$/;
 const TRACE_SERVICE_PATH = /^\/v1\/trace\/services\/([a-z0-9-]{1,64})$/;
+const DOCS_PRODUCT_STRIP =
+  '<div class="atlas-product-strip api-product-strip"><strong>Public API</strong><span>versioned read surface rendered from OpenAPI</span>';
+const DOCS_PRODUCT_LANDMARK =
+  '<section class="atlas-product-strip api-product-strip" aria-label="Public API product identity"><strong>Public API</strong><span>versioned read surface rendered from OpenAPI</span>';
+
+export async function handlePublicDocs() {
+  const response = handleDocs();
+  const html = await response.text();
+  if (!html.includes(DOCS_PRODUCT_STRIP)) {
+    throw new Error("Public API docs product strip contract is missing");
+  }
+  const rendered = html
+    .replace(DOCS_PRODUCT_STRIP, DOCS_PRODUCT_LANDMARK)
+    .replace("</div>\n<main>", "</section>\n<main>");
+  return new Response(rendered, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
 
 async function routeRequest(request, env, ctx) {
     const url = new URL(request.url);
@@ -114,7 +134,7 @@ async function routeRequest(request, env, ctx) {
             generated_at: nowIso(),
           });
         case "/v1/docs":
-          return handleDocs();
+          return handlePublicDocs();
         case "/v1/openapi.json":
           return json(buildOpenApi(), 200, {
             "cache-control": "public, max-age=300",
