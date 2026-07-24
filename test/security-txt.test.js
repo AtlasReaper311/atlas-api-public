@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import worker from "../src/index.js";
@@ -17,4 +18,13 @@ test("public API serves the canonical Atlas Systems security contact", async () 
   assert.match(body, /^Expires: 2027-07-24T23:59:59Z$/m);
   assert.match(body, /^Preferred-Languages: en$/m);
   assert.match(body, /^Canonical: https:\/\/api\.atlas-systems\.uk\/\.well-known\/security\.txt$/m);
+});
+
+test("production routing sends the canonical security contact to this Worker", async () => {
+  const wrangler = await readFile(new URL("../wrangler.toml", import.meta.url), "utf8");
+
+  assert.match(
+    wrangler,
+    /pattern = "api\.atlas-systems\.uk\/\.well-known\/security\.txt"/,
+  );
 });
