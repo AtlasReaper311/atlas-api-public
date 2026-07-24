@@ -1,5 +1,7 @@
 import { DOCS_ICONS } from "./docs-icons.generated.js";
 import {
+  DOCS_INTERFACE_FONT_ASSETS,
+  DOCS_INTERFACE_FONT_STYLESHEET,
   DOCS_INTERFACE_STYLESHEET,
 } from "./docs-interface.generated.js";
 
@@ -267,6 +269,17 @@ const DOCS_SHELL_JS = String.raw`
 `;
 
 export function handleDocsAsset(pathname) {
+  if (pathname === "/v1/docs/assets/fonts.css") {
+    return new Response(decodeBase64(DOCS_INTERFACE_FONT_STYLESHEET.base64), {
+      headers: {
+        "content-type": DOCS_INTERFACE_FONT_STYLESHEET.contentType,
+        "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+        "x-content-type-options": "nosniff",
+        "x-atlas-interface-sha256": DOCS_INTERFACE_FONT_STYLESHEET.sha256,
+      },
+    });
+  }
+
   if (pathname === "/v1/docs/assets/interface-kit.css") {
     return new Response(decodeBase64(DOCS_INTERFACE_STYLESHEET.base64), {
       headers: {
@@ -284,6 +297,18 @@ export function handleDocsAsset(pathname) {
         "content-type": "text/javascript; charset=utf-8",
         "cache-control": "public, max-age=300",
         "x-content-type-options": "nosniff",
+      },
+    });
+  }
+
+  const font = DOCS_INTERFACE_FONT_ASSETS[pathname];
+  if (font) {
+    return new Response(decodeBase64(font.base64), {
+      headers: {
+        "content-type": font.contentType,
+        "cache-control": "public, max-age=31536000, immutable",
+        "x-content-type-options": "nosniff",
+        "x-atlas-interface-sha256": font.sha256,
       },
     });
   }

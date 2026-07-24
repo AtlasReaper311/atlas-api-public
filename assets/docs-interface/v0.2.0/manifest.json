@@ -1,0 +1,48 @@
+{
+  "component_role_count": 25,
+  "contract_version": "2.0.0",
+  "files": {
+    "atlas-fonts.css": {
+      "bytes": 1555,
+      "sha256": "1539e39908d5ffd447c4f976a36dc5aa0085f5daf15b967734fb24ec1a7251ce"
+    },
+    "atlas-interface-kit.css": {
+      "bytes": 11566,
+      "sha256": "514a046dc5aa9a304778515a7d008afd58b3512f18bb58bbaa88de807e92bb44"
+    },
+    "components.json": {
+      "bytes": 2257,
+      "sha256": "5594ea07cdfda5040dd17e27c01b6c53f1a17d7cb83777d9e64d6e19b18ba4b1"
+    },
+    "fonts/dm-serif-display-400-italic.woff2": {
+      "bytes": 24572,
+      "sha256": "ed8b291611e32fa2d2900488dd48fc95faf0957b2ef7ddf1527e8d21dd9cf2df"
+    },
+    "fonts/dm-serif-display-400.woff2": {
+      "bytes": 24744,
+      "sha256": "fdf61e20fd2c0108e0ea28da4daca0035205b4b7fc031a3974b865b704de160a"
+    },
+    "fonts/ibm-plex-mono-400.woff2": {
+      "bytes": 14708,
+      "sha256": "08949f728dc52d528e69b1667d15c89a5686a4ee9a296ff90983985f99c380f7"
+    },
+    "fonts/ibm-plex-mono-500.woff2": {
+      "bytes": 14888,
+      "sha256": "01d285447409c8a588692162439a038b8cbd7871309ee20267b0d2d91c6e8e22"
+    },
+    "licenses/DM-Serif-Display-OFL.txt": {
+      "bytes": 4605,
+      "sha256": "a3e5cdd67d4571dd0a24fcc968de0efde7ae97ef752daf0906e4767619dd7231"
+    },
+    "licenses/IBM-Plex-Mono-OFL.txt": {
+      "bytes": 4456,
+      "sha256": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da"
+    },
+    "tokens.json": {
+      "bytes": 1735,
+      "sha256": "9cdd6486fc1e2f5d36aef47656efcdd189ddf2306656b844ff4a1e49148cffc6"
+    }
+  },
+  "schema_version": "atlas-interface-kit/bundle/v1",
+  "version": "0.2.0"
+}

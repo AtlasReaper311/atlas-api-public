@@ -1,4 +1,4 @@
-/* Atlas Interface Kit v0.1.1 generated tokens. */
+/* Atlas Interface Kit v0.2.0 generated tokens. */
 :root {
   color-scheme: dark;
   --atlas-bg: #0a0a0f;
@@ -62,7 +62,7 @@
   --atlas-font-display: 'DM Serif Display', Georgia, serif;
   --atlas-font-body: 'IBM Plex Mono', monospace;
 }
-/* Atlas Interface Kit v0.1.1 component foundations. */
+/* Atlas Interface Kit v0.2.0 component foundations. */
 .atlas-global-header {
   position: sticky;
   top: 0;

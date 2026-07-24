@@ -3,12 +3,19 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const version = "0.1.1";
+const version = "0.2.0";
 const bundle = path.join(root, "assets", "docs-interface", `v${version}`);
 const manifest = JSON.parse(fs.readFileSync(path.join(bundle, "manifest.json"), "utf8"));
 const expectedFiles = new Set([
+  "atlas-fonts.css",
   "atlas-interface-kit.css",
   "components.json",
+  "fonts/dm-serif-display-400-italic.woff2",
+  "fonts/dm-serif-display-400.woff2",
+  "fonts/ibm-plex-mono-400.woff2",
+  "fonts/ibm-plex-mono-500.woff2",
+  "licenses/DM-Serif-Display-OFL.txt",
+  "licenses/IBM-Plex-Mono-OFL.txt",
   "tokens.json",
 ]);
 
@@ -29,8 +36,17 @@ requireValue(
   "interface bundle file set drifted",
 );
 
+function listFiles(directory, prefix = "") {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const relative = path.posix.join(prefix, entry.name);
+    return entry.isDirectory()
+      ? listFiles(path.join(directory, entry.name), relative)
+      : [relative];
+  });
+}
+
 const actualFiles = new Set(
-  fs.readdirSync(bundle).filter((filename) => filename !== "manifest.json"),
+  listFiles(bundle).filter((filename) => filename !== "manifest.json"),
 );
 requireValue(
   JSON.stringify([...actualFiles].sort()) === JSON.stringify([...expectedFiles].sort()),
@@ -48,6 +64,9 @@ const css = fs.readFileSync(path.join(bundle, "atlas-interface-kit.css"), "utf8"
 requireValue(!css.includes("http://") && !css.includes("https://"), "interface CSS has a remote dependency");
 requireValue(css.includes(":focus-visible"), "interface CSS is missing visible focus");
 requireValue(css.includes("prefers-reduced-motion"), "interface CSS is missing reduced-motion handling");
+const fontsCss = fs.readFileSync(path.join(bundle, "atlas-fonts.css"), "utf8");
+requireValue(fontsCss.includes("@font-face"), "font CSS is missing local font faces");
+requireValue(!fontsCss.includes("https://"), "font CSS has a remote runtime dependency");
 
 const components = JSON.parse(fs.readFileSync(path.join(bundle, "components.json"), "utf8"));
 requireValue(

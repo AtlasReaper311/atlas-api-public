@@ -247,7 +247,11 @@ async function capture(context, browserName, viewportName) {
     await openWithRetry(page);
     const stylesheet = await context.request.get(new URL("/v1/docs/assets/interface-kit.css", base).toString());
     if (!stylesheet.ok()) failures.push(`${browserName}/${viewportName}/docs: interface stylesheet HTTP ${stylesheet.status()}`);
-    if (stylesheet.headers()["x-atlas-interface-sha256"] !== "b2f97652efc8a10b075594b0622b1cceb46d114ee36cf862eca685ce9201b935") {
+    // interface-kit.css fingerprint. This script is sparse-checked-out and run in
+    // isolation, so it cannot import the Worker source; update this literal to match
+    // DOCS_INTERFACE_STYLESHEET.sha256 in src/routes/docs-interface.generated.js
+    // whenever the Atlas Interface Kit bundle is bumped.
+    if (stylesheet.headers()["x-atlas-interface-sha256"] !== "514a046dc5aa9a304778515a7d008afd58b3512f18bb58bbaa88de807e92bb44") {
       failures.push(`${browserName}/${viewportName}/docs: interface stylesheet fingerprint drifted`);
     }
     await verifySearchDialog(page, browserName, viewportName);
