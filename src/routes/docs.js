@@ -132,14 +132,15 @@ export function handleDocs() {
 <meta property="og:description" content="Human-readable documentation for the versioned Atlas Systems public API, rendered directly from the OpenAPI authority.">
 <meta property="og:url" content="https://api.atlas-systems.uk/v1/docs">
 <meta property="og:site_name" content="Atlas Systems">
-<meta property="og:image" content="https://atlas-systems.uk/og-default.png">
+<meta property="og:image" content="https://atlas-systems.uk/og/api-docs.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Atlas Systems public API documentation">
+<meta property="og:image:alt" content="The Atlas Systems API. // Atlas Systems">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Public API // Atlas Systems">
 <meta name="twitter:description" content="Human-readable documentation for the versioned Atlas Systems public API, rendered directly from the OpenAPI authority.">
-<meta name="twitter:image" content="https://atlas-systems.uk/og-default.png">
+<meta name="twitter:image" content="https://atlas-systems.uk/og/api-docs.png">
+<meta name="twitter:image:alt" content="The Atlas Systems API. // Atlas Systems">
 <link rel="stylesheet" href="/v1/docs/assets/fonts.css">
 <link rel="stylesheet" href="/v1/docs/assets/interface-kit.css">
 <style>${CSS}</style>
