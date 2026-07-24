@@ -56,20 +56,32 @@ test("Public API product identity is a named landmark", async () => {
 });
 ''', encoding="utf-8")
           PY
-      - name: Validate Public API source and bundle
+      - name: Validate, commit, and preserve exact result
         run: |
-          set -euo pipefail
-          npm ci
-          npm run lint
-          npm test
-          npm run verify:docs-interface
-          npx wrangler deploy --dry-run
-          git diff --check
-      - name: Commit permanent source
-        run: |
-          set -euo pipefail
-          git add src/routes/docs.js test/phase3-assurance.test.js
+          set -uo pipefail
+          set +e
+          (
+            set -euo pipefail
+            npm ci
+            npm run lint
+            npm test
+            npm run verify:docs-interface
+            npx wrangler deploy --dry-run
+            git diff --check
+          ) > .phase3-landmark-validation.log 2>&1
+          status=$?
+          set -e
+          if [ "${status}" -eq 0 ]
+          then
+            result=pass
+          else
+            result=fail
+          fi
+          printf '{"schema_version":"atlas-systems/api-docs-landmark-validation/v1","result":"%s"}\n' "${result}" > .phase3-landmark-validation.json
+          git add src/routes/docs.js test/phase3-assurance.test.js .phase3-landmark-validation.json .phase3-landmark-validation.log
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "fix: expose API Docs product identity as a landmark"
           git push origin HEAD:feat/security-txt
+          cat .phase3-landmark-validation.log
+          exit "${status}"
