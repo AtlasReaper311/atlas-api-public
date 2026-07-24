@@ -144,6 +144,12 @@ npm run lint
 
 Tests include regression coverage for the public registry, topology, and recent-event privacy boundaries.
 
+## Interface conformance
+
+Phase G adds a read-only human-docs declaration and pinned Atlas Infra
+validation without changing OpenAPI or Worker ownership. See
+[`docs/PHASE-G-INTERFACE-CONFORMANCE.md`](docs/PHASE-G-INTERFACE-CONFORMANCE.md).
+
 ## How it fits into Atlas Systems
 
 `atlas-api-public` is the publication membrane between internal evidence producers and the public portfolio. It reads approved public registry data, bounded telemetry, public repository inventory, and reliability evidence, then exposes stable public contracts consumed by the Lab, Status surface, and profile badge.

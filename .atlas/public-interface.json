@@ -1,0 +1,53 @@
+{
+  "schema_version": "atlas-control-plane/public-interface-surface/v1",
+  "repository": "AtlasReaper311/atlas-api-public",
+  "surfaces": [
+    {
+      "url": "https://api.atlas-systems.uk/v1/docs",
+      "source": "src/routes/docs-shell.js",
+      "kind": "api-docs",
+      "indexing": "index",
+      "global_header": true,
+      "search": true,
+      "status_indicator": "aggregate-link",
+      "icons": [
+        "favicon.ico",
+        "favicon-16x16.png",
+        "favicon-32x32.png",
+        "apple-touch-icon.png",
+        "android-chrome-192x192.png",
+        "android-chrome-512x512.png",
+        "site.webmanifest"
+      ],
+      "metadata": [
+        "title",
+        "description",
+        "canonical",
+        "theme-color",
+        "icons",
+        "og:type",
+        "og:title",
+        "og:description",
+        "og:url",
+        "og:site_name",
+        "og:image",
+        "og:image:width",
+        "og:image:height",
+        "og:image:alt",
+        "twitter:card",
+        "twitter:title",
+        "twitter:description",
+        "twitter:image"
+      ],
+      "footer": "OpenAPI authority and Atlas estate escape",
+      "link_policy": "atlas-owned-same-tab-external-safe-new-tab",
+      "generated_owner": "AtlasReaper311/atlas-api-public",
+      "notes": [
+        "The human documentation shell remains derived from repository-owned OpenAPI authority."
+      ]
+    }
+  ],
+  "machine_surface_exclusions": [
+    "OpenAPI, JSON API, health, metadata, topology, trace, and badge responses"
+  ]
+}
