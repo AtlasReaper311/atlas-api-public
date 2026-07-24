@@ -76,6 +76,29 @@ Unknown components fail closed.
 | `POST /v1/rag/report` | Authenticated corpus summary ingest |
 | `POST /v1/reliability/objectives/report` | Authenticated reliability policy ingest |
 
+## Human docs interface
+
+`GET /v1/docs` is the human-facing view of the same OpenAPI authority served at
+`GET /v1/openapi.json`. Endpoint cards are derived during request rendering;
+there is no second hand-maintained endpoint inventory.
+
+The page consumes Atlas Interface Kit `0.1.1` from
+`assets/docs-interface/v0.1.1/`. The Worker embeds and serves the pinned
+stylesheet at `GET /v1/docs/assets/interface-kit.css`, so the interface has no
+cross-domain runtime dependency. Verify and rebuild the deterministic local
+bundle with:
+
+```bash
+npm run verify:docs-interface
+npm run build:docs-interface
+git diff --exit-code -- src/routes/docs-interface.generated.js
+```
+
+Interface pull requests publish an isolated `workers.dev` preview with no
+production routes or bindings. Chrome and Firefox evidence covers 320, 375,
+768, 1024, and 1440 px before manual visual approval. Preview approval does not
+authorize a production deploy.
+
 ## Sanitized event projection
 
 The operational event router can retain richer evidence for authenticated internal consumers. The public `/notify/recent` route is owned by this Worker and filters events before they reach the site or Status page.

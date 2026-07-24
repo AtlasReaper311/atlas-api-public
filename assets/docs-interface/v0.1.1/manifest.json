@@ -1,0 +1,20 @@
+{
+  "component_role_count": 25,
+  "contract_version": "2.0.0",
+  "files": {
+    "atlas-interface-kit.css": {
+      "bytes": 11566,
+      "sha256": "b2f97652efc8a10b075594b0622b1cceb46d114ee36cf862eca685ce9201b935"
+    },
+    "components.json": {
+      "bytes": 2257,
+      "sha256": "27cfd51e7eee66880d92c86c217a71ff0db521efaeea9acdb1591e91e415ad31"
+    },
+    "tokens.json": {
+      "bytes": 1735,
+      "sha256": "0450cd15ac09953a8db6be5af232fe5d3d6a17d7cba2095a309873ce11c072a4"
+    }
+  },
+  "schema_version": "atlas-interface-kit/bundle/v1",
+  "version": "0.1.1"
+}

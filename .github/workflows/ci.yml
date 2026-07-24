@@ -26,6 +26,15 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
+      - name: Validate deterministic local docs assets
+        run: |
+          set -euo pipefail
+          npm run verify:docs-interface
+          npm run build:docs-interface
+          npm run build:docs-icons
+          git diff --exit-code -- \
+            src/routes/docs-interface.generated.js \
+            src/routes/docs-icons.generated.js
       - name: Lint
         run: npm run lint
       - name: Generate public topology evidence projection
