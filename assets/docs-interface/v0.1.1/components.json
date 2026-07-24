@@ -1,0 +1,106 @@
+{
+  "roles": [
+    {
+      "role": "global-header",
+      "selector": ".atlas-global-header"
+    },
+    {
+      "role": "product-strip",
+      "selector": ".atlas-product-strip"
+    },
+    {
+      "role": "page-introduction",
+      "selector": ".atlas-page-intro"
+    },
+    {
+      "role": "section-heading",
+      "selector": ".atlas-section-heading"
+    },
+    {
+      "role": "primary-action",
+      "selector": ".atlas-button--primary"
+    },
+    {
+      "role": "secondary-action",
+      "selector": ".atlas-button--secondary"
+    },
+    {
+      "role": "text-action",
+      "selector": ".atlas-text-action"
+    },
+    {
+      "role": "status-chip",
+      "selector": ".atlas-status"
+    },
+    {
+      "role": "type-badge",
+      "selector": ".atlas-badge--type"
+    },
+    {
+      "role": "maturity-badge",
+      "selector": ".atlas-badge--maturity"
+    },
+    {
+      "role": "metric-grid",
+      "selector": ".atlas-metric-grid"
+    },
+    {
+      "role": "standard-card",
+      "selector": ".atlas-card"
+    },
+    {
+      "role": "editorial-card",
+      "selector": ".atlas-card--editorial"
+    },
+    {
+      "role": "data-card",
+      "selector": ".atlas-card--data"
+    },
+    {
+      "role": "interactive-card-frame",
+      "selector": ".atlas-card--interactive"
+    },
+    {
+      "role": "tag-list",
+      "selector": ".atlas-tag-list"
+    },
+    {
+      "role": "filter-bar",
+      "selector": ".atlas-filter-bar"
+    },
+    {
+      "role": "table-wrapper",
+      "selector": ".atlas-table-wrap"
+    },
+    {
+      "role": "search-dialog",
+      "selector": ".atlas-search-dialog"
+    },
+    {
+      "role": "loading-state",
+      "selector": ".atlas-state[data-state='loading']"
+    },
+    {
+      "role": "empty-state",
+      "selector": ".atlas-state[data-state='empty']"
+    },
+    {
+      "role": "unavailable-state",
+      "selector": ".atlas-state[data-state='unavailable']"
+    },
+    {
+      "role": "unknown-state",
+      "selector": ".atlas-state[data-state='unknown']"
+    },
+    {
+      "role": "error-state",
+      "selector": ".atlas-state[data-state='error']"
+    },
+    {
+      "role": "footer",
+      "selector": ".atlas-footer"
+    }
+  ],
+  "schema_version": "atlas-interface-kit/components/v1",
+  "version": "0.1.1"
+}

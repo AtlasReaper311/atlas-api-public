@@ -14,6 +14,7 @@
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-dora","runtime_service":true,"scope":"public"},
     {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-gardener","runtime_service":false,"scope":"public"},
     {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-infra","runtime_service":false,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-interface-kit","runtime_service":false,"scope":"public"},
     {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-journey-watch","runtime_service":false,"scope":"public"},
     {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-kit-python-rag","runtime_service":false,"scope":"public"},
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-notify","runtime_service":true,"scope":"internal"},
@@ -33,9 +34,9 @@
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/status","runtime_service":true,"scope":"public"},
     {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/worker-meta-kit","runtime_service":false,"scope":"public"}
   ],
-  "repository_count": 31,
+  "repository_count": 32,
   "schema_version": "atlas-public-repository-classifications/projection/v1",
-  "source_fingerprint": "sha256:6ff626f48e4d43a464e7410bb14ec67069fe82c03c3c4af5f12d8a997d1a38df",
+  "source_fingerprint": "sha256:339e3c4b191adcb1bde167505896e593c8f25cfbe6e4129d5712dd31515d0709",
   "sources": {
     "public_non_runtime": "policy/public-assurance-repositories.json",
     "runtime_registry": "policy/estate-registry.json"

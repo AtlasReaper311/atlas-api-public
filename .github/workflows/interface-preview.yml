@@ -6,92 +6,63 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - ".github/workflows/interface-preview.yml"
+      - ".github/workflows/ci.yml"
+      - "assets/docs-icons/**"
+      - "assets/docs-interface/**"
+      - "docs/PHASE-D-PUBLIC-API-DOCS-INTERFACE-V2.md"
       - "package.json"
       - "package-lock.json"
-      - "wrangler.toml"
-      - "wrangler.interface-preview.toml"
-      - "src/index.js"
-      - "src/routes/docs.js"
-      - "src/routes/docs-shell.js"
-      - "src/routes/docs-icons.generated.js"
+      - "scripts/capture-docs-interface-evidence.mjs"
       - "scripts/embed-docs-icons.mjs"
-      - "assets/docs-icons/site.webmanifest"
+      - "scripts/embed-docs-interface.mjs"
+      - "scripts/verify-docs-interface.mjs"
+      - "src/index.js"
+      - "src/routes/docs-icons.generated.js"
+      - "src/routes/docs-interface.generated.js"
+      - "src/routes/docs-shell.js"
+      - "src/routes/docs.js"
       - "test/docs-interface.test.js"
+      - "wrangler.interface-preview.toml"
+      - "wrangler.toml"
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: ${{ github.repository }}-public-interface-preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  preview:
-    name: Validate and publish isolated API docs preview
-    if: >-
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'feat/public-api-docs-shell-v1'
+  validate:
+    name: Validate Public API docs preview candidate
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment:
-      name: public-interface-preview
-      url: ${{ steps.deploy.outputs.preview_url }}
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_WORKERS_DEPLOY_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-      PREVIEW_WORKER: atlas-api-docs-interface-pr-${{ github.event.pull_request.number }}
     steps:
-      - name: Check out preview branch
+      - name: Check out exact pull request head
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Check out canonical browser icons
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
-        with:
-          repository: AtlasReaper311/atlas-systems
-          ref: main
-          path: .atlas-icon-source
-          sparse-checkout: |
-            favicon.ico
-            favicon_io
-          sparse-checkout-cone-mode: false
-
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0, Node 24
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0, Node 24
         with:
           node-version: "22"
           cache: npm
 
-      - name: Synchronize and embed canonical browser icons
-        id: icons
-        run: |
-          set -euo pipefail
-          mkdir -p assets/docs-icons
-          cp .atlas-icon-source/favicon.ico assets/docs-icons/favicon.ico
-          cp .atlas-icon-source/favicon_io/favicon-16x16.png assets/docs-icons/favicon-16x16.png
-          cp .atlas-icon-source/favicon_io/favicon-32x32.png assets/docs-icons/favicon-32x32.png
-          cp .atlas-icon-source/favicon_io/apple-touch-icon.png assets/docs-icons/apple-touch-icon.png
-          cp .atlas-icon-source/favicon_io/android-chrome-192x192.png assets/docs-icons/android-chrome-192x192.png
-          cp .atlas-icon-source/favicon_io/android-chrome-512x512.png assets/docs-icons/android-chrome-512x512.png
-          rm -rf .atlas-icon-source
-          node scripts/embed-docs-icons.mjs
-
-          if git diff --quiet -- assets/docs-icons src/routes/docs-icons.generated.js; then
-            echo "changed=false" >> "${GITHUB_OUTPUT}"
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add assets/docs-icons src/routes/docs-icons.generated.js
-            git commit -m "assets: synchronize canonical browser icons"
-            git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
-            echo "changed=true" >> "${GITHUB_OUTPUT}"
-          fi
-          echo "commit=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
-
       - name: Install dependencies
         run: npm ci
+
+      - name: Validate deterministic local interface assets
+        run: |
+          set -euo pipefail
+          npm run verify:docs-interface
+          npm run build:docs-interface
+          npm run build:docs-icons
+          git diff --exit-code -- \
+            src/routes/docs-interface.generated.js \
+            src/routes/docs-icons.generated.js
 
       - name: Validate API, privacy, OpenAPI, Trace, and docs contracts
         run: |
@@ -105,17 +76,12 @@ jobs:
             /tmp/public-topology-evidence.json
           diff -u data/public-topology-evidence.json /tmp/public-topology-evidence.json
           npm test
-          test -s assets/docs-icons/favicon.ico
-          test -s assets/docs-icons/favicon-16x16.png
-          test -s assets/docs-icons/favicon-32x32.png
-          test -s assets/docs-icons/apple-touch-icon.png
-          test -s assets/docs-icons/android-chrome-192x192.png
-          test -s assets/docs-icons/android-chrome-512x512.png
-          test -s assets/docs-icons/site.webmanifest
-          grep -q '"/v1/docs/assets/favicon.ico"' src/routes/docs-icons.generated.js
-          grep -q '"/v1/docs/assets/site.webmanifest"' src/routes/docs-icons.generated.js
+          node --check scripts/capture-docs-interface-evidence.mjs
           npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/wrangler-dry-run"
-          npx wrangler deploy --config wrangler.interface-preview.toml --dry-run --outdir "$RUNNER_TEMP/interface-preview-dry-run"
+          npx wrangler deploy \
+            --config wrangler.interface-preview.toml \
+            --dry-run \
+            --outdir "$RUNNER_TEMP/interface-preview-dry-run"
           git diff --check
 
       - name: Check bundled Worker contracts
@@ -134,10 +100,47 @@ jobs:
             --require-meta \
             --require-openapi
 
+  deploy-preview:
+    name: Publish isolated Public API docs preview
+    needs: validate
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: public-interface-preview
+      url: ${{ steps.deploy.outputs.preview_url }}
+    outputs:
+      preview_url: ${{ steps.deploy.outputs.preview_url }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_WORKERS_DEPLOY_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      PREVIEW_WORKER: atlas-api-docs-interface-pr-${{ github.event.pull_request.number }}
+      SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
+    steps:
+      - name: Check out exact pull request head
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0, Node 24
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Guard production boundary
         run: |
           set -euo pipefail
-          test "${{ github.event.pull_request.head.ref }}" = "feat/public-api-docs-shell-v1"
+          test "${{ github.event.pull_request.base.ref }}" = "main"
+          test "${SOURCE_BRANCH}" != "main"
+          test "${SOURCE_BRANCH}" != "production"
           test "${PREVIEW_WORKER}" = "atlas-api-docs-interface-pr-${{ github.event.pull_request.number }}"
           grep -q '^workers_dev = true$' wrangler.interface-preview.toml
           grep -q '^preview_urls = false$' wrangler.interface-preview.toml
@@ -156,26 +159,73 @@ jobs:
           test -n "${preview_url}"
           echo "preview_url=${preview_url}" >> "${GITHUB_OUTPUT}"
 
-      - name: Attach live preview to the draft pull request
+      - name: Attach exact preview to the pull request
         env:
           GH_TOKEN: ${{ github.token }}
           PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
-          PREVIEW_COMMIT: ${{ steps.icons.outputs.commit }}
         run: |
           set -euo pipefail
-          marker="<!-- atlas-public-interface-preview -->"
+          marker="<!-- atlas-public-api-docs-interface-preview -->"
           body="${marker}
-          ## Live interface preview
+          ## Live Public API docs interface preview
 
           - Human docs preview: ${PREVIEW_URL}/v1/docs
           - Isolated Worker root: ${PREVIEW_URL}
-          - Commit: \`${PREVIEW_COMMIT}\`
+          - Commit: \`${{ github.event.pull_request.head.sha }}\`
           - Production: unchanged
 
-          This isolated workers.dev Worker has no production routes, service bindings, KV bindings, rate-limit bindings, or schedules. The production-shaped bundle was validated separately before preview publication."
+          This isolated workers.dev Worker has no production routes, service bindings, KV bindings, rate-limit bindings, or schedules. Browser and accessibility evidence is captured from this exact deployment."
           existing_id="$(gh api "/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.pull_request.number }}/comments" --paginate --jq ".[] | select(.body | contains(\"${marker}\")) | .id" | head -n 1)"
           if [ -n "${existing_id}" ]; then
             gh api --method PATCH "/repos/${GITHUB_REPOSITORY}/issues/comments/${existing_id}" -f body="${body}"
           else
             gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
           fi
+
+  capture-evidence:
+    name: Capture deterministic Public API docs evidence
+    needs: deploy-preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PREVIEW_URL: ${{ needs.deploy-preview.outputs.preview_url }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Check out exact evidence runner
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          sparse-checkout: scripts/capture-docs-interface-evidence.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0, Node 24
+        with:
+          node-version: "22"
+
+      - name: Install pinned browser and accessibility tooling
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/api-docs-interface-evidence"
+          cp scripts/capture-docs-interface-evidence.mjs "${RUNNER_TEMP}/api-docs-interface-evidence/"
+          cd "${RUNNER_TEMP}/api-docs-interface-evidence"
+          npm init -y >/dev/null
+          npm install --save-exact playwright@1.61.1 @axe-core/playwright@4.12.1
+          npm audit --audit-level=high
+          npx playwright install --with-deps firefox
+
+      - name: Capture governed browser and viewport matrix
+        working-directory: ${{ runner.temp }}/api-docs-interface-evidence
+        run: node capture-docs-interface-evidence.mjs
+
+      - name: Upload visual and accessibility evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: public-api-docs-interface-preview-evidence
+          path: |
+            ${{ runner.temp }}/api-docs-interface-evidence/evidence.json
+            ${{ runner.temp }}/api-docs-interface-evidence/capture-error.txt
+            ${{ runner.temp }}/api-docs-interface-evidence/screenshots/*.png
+          if-no-files-found: error
+          retention-days: 14

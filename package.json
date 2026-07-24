@@ -3,11 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:docs-interface": "node scripts/embed-docs-interface.mjs",
     "build:docs-icons": "node scripts/embed-docs-icons.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "lint": "eslint .",
-    "test": "node --test"
+    "test": "node --test",
+    "verify:docs-interface": "node scripts/verify-docs-interface.mjs"
   },
   "devDependencies": {
     "eslint": "^10.7.0",

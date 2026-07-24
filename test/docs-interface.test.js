@@ -5,6 +5,10 @@ import test from "node:test";
 import { documentedEndpointKeys, handleDocs } from "../src/routes/docs.js";
 import { handleDocsAsset } from "../src/routes/docs-shell.js";
 import { DOCS_ICONS } from "../src/routes/docs-icons.generated.js";
+import {
+  DOCS_INTERFACE_STYLESHEET,
+  DOCS_INTERFACE_VERSION,
+} from "../src/routes/docs-interface.generated.js";
 import { buildOpenApi } from "../src/openapi-trace.js";
 
 const response = handleDocs();
@@ -24,20 +28,27 @@ test("human API docs remain rendered from the OpenAPI authority", () => {
 });
 
 test("docs have the global header, search, status, metadata, and local icons", () => {
-  for (const route of ["/work/", "/writing/", "/lab/", "/about/"]) {
+  for (const route of ["/work/", "/writing/", "/lab/", "/systems/", "/about/"]) {
     assert.ok(html.includes(`https://atlas-systems.uk${route}`));
   }
+  assert.match(html, /class="atlas-global-header api-global-header"/);
+  assert.match(html, /class="atlas-bottom-nav api-bottom-nav" aria-label="Mobile navigation"/);
+  assert.match(html, /class="atlas-product-strip api-product-strip"/);
   assert.match(html, /data-estate-search-open/);
   assert.match(html, /data-estate-status/);
+  assert.match(html, /data-state="checking"/);
+  assert.match(html, /data-estate-status-label>Checking</);
   assert.match(html, /rel="canonical" href="https:\/\/api\.atlas-systems\.uk\/v1\/docs"/);
   assert.match(html, /property="og:image:alt"/);
   assert.match(html, /href="\/v1\/docs\/assets\/favicon\.ico"/);
+  assert.match(html, /href="\/v1\/docs\/assets\/interface-kit\.css"/);
   assert.match(html, /src="\/v1\/docs\/assets\/shell\.js"/);
 });
 
 test("docs expose purpose-specific route escape and readable tables", () => {
   assert.match(html, /Atlas Systems \/\/ Public API/);
-  assert.match(html, /class="table-wrap"/);
+  assert.match(html, /class="atlas-table-wrap table-wrap" tabindex="0"/);
+  assert.match(html, /<pre tabindex="0" aria-label="Quick start commands/);
   assert.match(html, /Estate home/);
   assert.match(html, /Status/);
 });
@@ -49,8 +60,31 @@ test("docs shell script is local and consumes only bounded public APIs", async (
   assert.match(script, /const statusUrl = "\/v1\/stats"/);
   assert.match(script, /const searchUrl = "\/v1\/search"/);
   assert.match(script, /1200000/);
+  assert.match(script, /operational: "Operational"/);
+  assert.match(script, /return \["operational", detail\]/);
+  assert.doesNotMatch(script, /return \["nominal", detail\]/);
   assert.match(script, /noopener noreferrer/);
   assert.doesNotMatch(script, /corpus\.atlas-systems\.uk/);
+});
+
+test("pinned Interface V2 stylesheet is repository-local and fingerprinted", async () => {
+  assert.equal(DOCS_INTERFACE_VERSION, "0.1.1");
+  assert.equal(
+    DOCS_INTERFACE_STYLESHEET.sha256,
+    "b2f97652efc8a10b075594b0622b1cceb46d114ee36cf862eca685ce9201b935",
+  );
+  const asset = handleDocsAsset("/v1/docs/assets/interface-kit.css");
+  assert.ok(asset instanceof Response);
+  assert.equal(asset.headers.get("content-type"), "text/css; charset=utf-8");
+  assert.equal(
+    asset.headers.get("x-atlas-interface-sha256"),
+    DOCS_INTERFACE_STYLESHEET.sha256,
+  );
+  const stylesheet = await asset.text();
+  assert.match(stylesheet, /Atlas Interface Kit v0\.1\.1/);
+  assert.match(stylesheet, /\.atlas-global-header/);
+  assert.match(stylesheet, /\.atlas-bottom-nav/);
+  assert.doesNotMatch(stylesheet, /https?:\/\//);
 });
 
 test("machine endpoint authority is not expanded with presentation assets", () => {

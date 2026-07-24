@@ -1,4 +1,7 @@
 import { DOCS_ICONS } from "./docs-icons.generated.js";
+import {
+  DOCS_INTERFACE_STYLESHEET,
+} from "./docs-interface.generated.js";
 
 function decodeBase64(value) {
   const binary = atob(value);
@@ -13,6 +16,13 @@ const DOCS_SHELL_JS = String.raw`
   const statusUrl = "/v1/stats";
   const searchUrl = "/v1/search";
   const owned = new Set(["api.atlas-systems.uk", "atlas-systems.uk", "cv.atlas-systems.uk", "ramone.atlas-systems.uk", "status.atlas-systems.uk"]);
+  const statusLabels = Object.freeze({
+    checking: "Checking",
+    operational: "Operational",
+    degraded: "Degraded",
+    unavailable: "Unavailable",
+    unknown: "Unknown",
+  });
   const chip = document.querySelector("[data-estate-status]");
   let searchUi = null;
   let request = null;
@@ -21,9 +31,10 @@ const DOCS_SHELL_JS = String.raw`
 
   function setStatus(state, detail) {
     if (!chip) return;
+    const label = statusLabels[state] || statusLabels.unknown;
     chip.dataset.state = state;
-    chip.querySelector("span:last-child").textContent = state;
-    chip.setAttribute("aria-label", "Atlas Systems status: " + state);
+    chip.querySelector("[data-estate-status-label]").textContent = label;
+    chip.setAttribute("aria-label", "Atlas Systems status: " + label);
     chip.title = detail;
   }
 
@@ -38,7 +49,7 @@ const DOCS_SHELL_JS = String.raw`
     const age = Date.now() - checked;
     if (age < 0 || age > 1200000) return ["unknown", "Status evidence is stale."];
     const detail = operational + " of " + total + " monitored components operational.";
-    if (operational === total) return ["nominal", detail];
+    if (operational === total) return ["operational", detail];
     if (operational > total / 2) return ["degraded", detail];
     return ["unavailable", detail];
   }
@@ -256,6 +267,17 @@ const DOCS_SHELL_JS = String.raw`
 `;
 
 export function handleDocsAsset(pathname) {
+  if (pathname === "/v1/docs/assets/interface-kit.css") {
+    return new Response(decodeBase64(DOCS_INTERFACE_STYLESHEET.base64), {
+      headers: {
+        "content-type": DOCS_INTERFACE_STYLESHEET.contentType,
+        "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+        "x-content-type-options": "nosniff",
+        "x-atlas-interface-sha256": DOCS_INTERFACE_STYLESHEET.sha256,
+      },
+    });
+  }
+
   if (pathname === "/v1/docs/assets/shell.js") {
     return new Response(DOCS_SHELL_JS, {
       headers: {
