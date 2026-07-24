@@ -6,7 +6,7 @@ import worker from "../src/index.js";
 
 test("public API serves the canonical Atlas Systems security contact", async () => {
   const response = await worker.fetch(
-    new Request("https://api.atlas-systems.uk/.well-known/security.txt"),
+    new Request("https://api.atlas-systems.uk/.well-known/security.txt?phase3=verification"),
     {},
     { waitUntil() {} },
   );
@@ -20,11 +20,11 @@ test("public API serves the canonical Atlas Systems security contact", async () 
   assert.match(body, /^Canonical: https:\/\/api\.atlas-systems\.uk\/\.well-known\/security\.txt$/m);
 });
 
-test("production routing sends the canonical security contact to this Worker", async () => {
+test("production routing sends bare and cache-busted security contact requests to this Worker", async () => {
   const wrangler = await readFile(new URL("../wrangler.toml", import.meta.url), "utf8");
 
   assert.match(
     wrangler,
-    /pattern = "api\.atlas-systems\.uk\/\.well-known\/security\.txt"/,
+    /pattern = "api\.atlas-systems\.uk\/\.well-known\/security\.txt\*"/,
   );
 });
