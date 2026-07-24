@@ -14,76 +14,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  phase3-materialize:
-    name: Materialize Phase 3 API Docs source
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'feat/security-txt'
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - name: Check out exact branch
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0, Node 24
-        with:
-          node-version: "22"
-          cache: npm
-      - name: Materialize named product landmark
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path("src/routes/docs.js")
-          source = path.read_text(encoding="utf-8")
-          old = '<div class="atlas-product-strip api-product-strip"><strong>Public API</strong><span>versioned read surface rendered from OpenAPI</span><span>v${escapeHtml(spec.info.version)}</span></div>'
-          new = '<section class="atlas-product-strip api-product-strip" aria-label="Public API product identity"><strong>Public API</strong><span>versioned read surface rendered from OpenAPI</span><span>v${escapeHtml(spec.info.version)}</span></section>'
-          if new not in source:
-              if source.count(old) != 1:
-                  raise SystemExit(f"expected one API product-strip block, found {source.count(old)}")
-              path.write_text(source.replace(old, new), encoding="utf-8")
-          Path("test/phase3-assurance.test.js").write_text('''import assert from "node:assert/strict";
-import test from "node:test";
-
-import { handleDocs } from "../src/routes/docs.js";
-
-test("Public API product identity is a named landmark", async () => {
-  const html = await handleDocs().text();
-  assert.match(
-    html,
-    /<section class="atlas-product-strip api-product-strip" aria-label="Public API product identity">/,
-  );
-  assert.doesNotMatch(html, /<div class="atlas-product-strip api-product-strip">/);
-});
-''', encoding="utf-8")
-          PY
-          npm ci
-          npm run lint
-          npm test
-          npm run verify:docs-interface
-          npx wrangler deploy --dry-run
-          git diff --check
-      - name: Commit permanent source when changed
-        run: |
-          set -euo pipefail
-          git add src/routes/docs.js test/phase3-assurance.test.js
-          if git diff --cached --quiet
-          then
-            echo "API Docs Phase 3 source is already materialized"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "fix: expose API Docs product identity as a landmark"
-          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
-
   test:
     name: Test (node --test)
     runs-on: ubuntu-latest
@@ -190,6 +120,8 @@ test("Public API product identity is a named landmark", async () => {
             data/adr-runtime-index.json \
             /tmp/adr-runtime-index.json
 
+  # CI result reported through the reusable atlas-notify workflow:
+  # routes to #ci-cd via signal_class, failures mirror to #alerts.
   notify:
     needs: test
     if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
