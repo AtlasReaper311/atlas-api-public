@@ -10,6 +10,7 @@ import {
   tooMany,
   clientIp,
   nowIso,
+  secureResponse,
 } from "./lib/http.js";
 import { handleMeta } from "./_meta.js";
 import { META } from "./meta.js";
@@ -46,8 +47,7 @@ const RELIABILITY_SERVICE_PATH = /^\/v1\/reliability\/services\/([a-z0-9-]{1,64}
 const RELIABILITY_BASELINE_PATH = /^\/v1\/reliability\/baseline\/([a-z0-9-]{1,64})$/;
 const TRACE_SERVICE_PATH = /^\/v1\/trace\/services\/([a-z0-9-]{1,64})$/;
 
-export default {
-  async fetch(request, env, ctx) {
+async function routeRequest(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, "") || "/";
 
@@ -155,6 +155,11 @@ export default {
       "no such endpoint",
       "GET /v1 lists the surface; /v1/docs is the human version",
     );
+}
+
+export default {
+  async fetch(request, env, ctx) {
+    return secureResponse(await routeRequest(request, env, ctx));
   },
 
   async scheduled(_event, env, ctx) {
