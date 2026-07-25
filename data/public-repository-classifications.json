@@ -1,6 +1,7 @@
 {
   "authority": "AtlasReaper311/atlas-infra",
   "repositories": [
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/.github","runtime_service":false,"scope":"public"},
     {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/AtlasReaper311","runtime_service":false,"scope":"public"},
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-api-index","runtime_service":true,"scope":"public"},
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-api-public","runtime_service":true,"scope":"public"},
@@ -34,9 +35,9 @@
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/status","runtime_service":true,"scope":"public"},
     {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/worker-meta-kit","runtime_service":false,"scope":"public"}
   ],
-  "repository_count": 32,
+  "repository_count": 33,
   "schema_version": "atlas-public-repository-classifications/projection/v1",
-  "source_fingerprint": "sha256:339e3c4b191adcb1bde167505896e593c8f25cfbe6e4129d5712dd31515d0709",
+  "source_fingerprint": "sha256:30f47de465c1117fda375b70b7d156d73f4b39622873133c756f7fa06539c6a0",
   "sources": {
     "public_non_runtime": "policy/public-assurance-repositories.json",
     "runtime_registry": "policy/estate-registry.json"
