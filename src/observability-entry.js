@@ -4,6 +4,8 @@ const DORA_COMPONENT = "atlas_dora";
 const DORA_SOURCE = "service-binding:atlas-dora/dora/health";
 const DORA_URL = "https://atlas-dora/dora/health";
 const PROBE_TIMEOUT_MS = 5000;
+const PROBE_CACHE_MS = 60 * 1000;
+const doraCache = new WeakMap();
 
 function measuredAt(body, fallback) {
   const candidate = body?.at ?? body?.checked_at ?? body?.generated_at;
@@ -11,21 +13,10 @@ function measuredAt(body, fallback) {
   return Number.isFinite(parsed) ? candidate : fallback;
 }
 
-export async function probeDora(env, { now = () => new Date().toISOString() } = {}) {
-  if (!env.ATLAS_DORA || typeof env.ATLAS_DORA.fetch !== "function") {
-    return {
-      ok: false,
-      status: "unknown",
-      detail: "binding missing",
-      evidence_source: DORA_SOURCE,
-      measured_at: null,
-      latency_ms: null,
-    };
-  }
-
+async function probeDoraBinding(binding, now) {
   const started = Date.now();
   try {
-    const response = await env.ATLAS_DORA.fetch(DORA_URL, {
+    const response = await binding.fetch(DORA_URL, {
       signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
     });
     const latencyMs = Date.now() - started;
@@ -72,6 +63,37 @@ export async function probeDora(env, { now = () => new Date().toISOString() } = 
       latency_ms: Date.now() - started,
     };
   }
+}
+
+export async function probeDora(
+  env,
+  {
+    now = () => new Date().toISOString(),
+    nowMs = () => Date.now(),
+  } = {},
+) {
+  const binding = env.ATLAS_DORA;
+  if (!binding || typeof binding.fetch !== "function") {
+    return {
+      ok: false,
+      status: "unknown",
+      detail: "binding missing",
+      evidence_source: DORA_SOURCE,
+      measured_at: null,
+      latency_ms: null,
+    };
+  }
+
+  const currentMs = nowMs();
+  const cached = doraCache.get(binding);
+  if (cached && cached.expiresAt > currentMs) return cached.value;
+
+  const value = await probeDoraBinding(binding, now);
+  doraCache.set(binding, {
+    expiresAt: currentMs + PROBE_CACHE_MS,
+    value,
+  });
+  return value;
 }
 
 export function augmentStatsPayload(payload, dora) {
