@@ -1,6 +1,6 @@
 # atlas-api-public :: the versioned public surface of the estate.
 name = "atlas-api-public"
-main = "src/index.js"
+main = "src/observability-entry.js"
 compatibility_date = "2026-06-01"
 account_id = "49e221b7e55a9e5c45b88d08efca5771"
 preview_urls = true
@@ -62,6 +62,10 @@ service = "atlas-quota-watch"
 [[services]]
 binding = "RAMONE_EDGE"
 service = "ramone-edge"
+
+[[services]]
+binding = "ATLAS_DORA"
+service = "atlas-dora"
 
 [[unsafe.bindings]]
 name = "RL_GENERAL"
