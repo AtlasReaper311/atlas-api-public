@@ -4,6 +4,7 @@ export const META = {
     "Versioned public API for registry, topology, Atlas Trace proof chains, search, health, SLOs, and scored assurance evidence",
   version: "1.4.0",
   endpoints: [
+    { method: "GET", path: "/.well-known/security.txt", description: "Public security contact metadata" },
     { method: "GET", path: "/v1", description: "Endpoint index" },
     { method: "GET", path: "/v1/docs", description: "Human documentation" },
     { method: "GET", path: "/v1/openapi.json", description: "OpenAPI 3.0 spec" },
