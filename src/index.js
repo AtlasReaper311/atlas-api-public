@@ -35,6 +35,7 @@ import {
 } from "./routes/reliability.js";
 import { handleBadge } from "./routes/badge.js";
 import { handleDocs } from "./routes/docs.js";
+import { handleDocsNotFound } from "./routes/docs-error.js";
 import { handleDocsAsset } from "./routes/docs-shell.js";
 import { handleTopology } from "./routes/topology.js";
 import { handleTraceIndex, handleTraceService } from "./routes/trace.js";
@@ -50,6 +51,13 @@ const TRACE_SERVICE_PATH = /^\/v1\/trace\/services\/([a-z0-9-]{1,64})$/;
 const DOCS_PRODUCT_STRIP = '<div class="atlas-product-strip api-product-strip">';
 const DOCS_PRODUCT_LANDMARK =
   '<section class="atlas-product-strip api-product-strip" aria-label="Public API product identity">';
+
+function wantsHtml(request) {
+  if (request.method !== "GET") return false;
+  const accept = request.headers.get("accept") || "";
+  const mode = request.headers.get("sec-fetch-mode") || "";
+  return accept.toLowerCase().includes("text/html") || mode.toLowerCase() === "navigate";
+}
 
 export async function handlePublicDocs() {
   const response = handleDocs();
@@ -99,6 +107,9 @@ async function routeRequest(request, env, ctx) {
     if (!rl.allowed) return tooMany();
 
     if (request.method === "GET") {
+      if (path.startsWith("/v1/docs/") && wantsHtml(request)) {
+        return handleDocsNotFound();
+      }
       if (path === "/v1/evidence") {
         return handleEvidenceIndex(request, env);
       }
