@@ -17,7 +17,7 @@ test("OpenAPI remains the documentation endpoint authority", async () => {
   }
 });
 
-test("Public API docs expose the governed product footer", async () => {
+test("Public API docs expose a complete and bounded governed product footer", async () => {
   const response = handleDocs();
   const html = await response.text();
   const match = html.match(
@@ -32,15 +32,19 @@ test("Public API docs expose the governed product footer", async () => {
   assert.match(footer, /atlas-footer__escape/);
   assert.match(footer, /OpenAPI contract/);
   assert.match(footer, /Atlas Systems home/);
+  assert.equal((footer.match(/<a\b/g) || []).length, 4);
+  assert.doesNotMatch(footer, /Systems directory/);
   assert.doesNotMatch(footer, /atlas-footer__sequence/);
   assert.doesNotMatch(footer, /article-footer/);
 });
 
-test("Public API footer keeps a compact two-band desktop rail and the v0.4.0 responsive contract locally", async () => {
+test("Public API footer keeps a single underlined rail and the v0.4.0 responsive contract locally", async () => {
   const html = await handleDocs().text();
-  assert.match(html, /grid-template-areas:"identity escape" "context evidence"/);
+  assert.match(html, /\.api-footer\{[\s\S]*display:flex/);
+  assert.match(html, /flex-wrap:wrap/);
   assert.match(html, /margin-top:var\(--atlas-space-7\)/);
-  assert.match(html, /padding:var\(--atlas-space-5\) 0/);
+  assert.match(html, /padding:var\(--atlas-space-4\) 0/);
+  assert.match(html, /text-decoration:underline/);
   assert.match(html, /min-width:var\(--atlas-touch-min\)/);
   assert.match(html, /min-height:var\(--atlas-touch-min\)/);
   assert.match(html, /safe-area-inset-bottom/);
