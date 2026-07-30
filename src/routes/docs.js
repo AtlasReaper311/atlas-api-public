@@ -181,8 +181,7 @@ curl https://api.atlas-systems.uk/v1/search?q=tunnel
 curl https://api.atlas-systems.uk/v1/evidence</code></pre>
 
 <h2>Endpoints</h2>
-${endpoints.map(endpointCard).join("
-")}
+${endpoints.map(endpointCard).join(String.fromCharCode(10))}
 
 <h2>Rate limits</h2>
 <div class="atlas-table-wrap table-wrap" tabindex="0" aria-label="Rate limit table; scroll horizontally when needed"><table>
