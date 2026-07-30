@@ -52,12 +52,13 @@ test("docs have the global header, search, status, metadata, and local icons", (
   assert.doesNotMatch(html, /fonts\.(?:googleapis|gstatic)\.com/);
 });
 
-test("docs expose purpose-specific route escape and readable tables", () => {
-  assert.match(html, /Atlas Systems \/\/ Public API/);
+test("docs expose the governed product footer and readable tables", () => {
+  assert.match(html, /Atlas Systems Public API/);
+  assert.match(html, /class="atlas-footer atlas-footer--product api-footer"/);
+  assert.match(html, /Atlas Systems home/);
+  assert.match(html, /Estate status/);
   assert.match(html, /class="atlas-table-wrap table-wrap" tabindex="0"/);
   assert.match(html, /<pre tabindex="0" aria-label="Quick start commands/);
-  assert.match(html, /Estate home/);
-  assert.match(html, /Status/);
 });
 
 test("docs shell script is local and consumes only bounded public APIs", async () => {
