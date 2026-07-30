@@ -36,9 +36,12 @@ test("Public API docs expose the governed product footer", async () => {
   assert.doesNotMatch(footer, /article-footer/);
 });
 
-test("Public API footer keeps the v0.4.0 responsive contract locally", async () => {
+test("Public API footer keeps a compact two-band desktop rail and the v0.4.0 responsive contract locally", async () => {
   const html = await handleDocs().text();
-  assert.match(html, /grid-template-areas:"identity escape" "context context" "evidence evidence"/);
+  assert.match(html, /grid-template-areas:"identity escape" "context evidence"/);
+  assert.match(html, /margin-top:var\(--atlas-space-7\)/);
+  assert.match(html, /padding:var\(--atlas-space-5\) 0/);
+  assert.match(html, /min-width:var\(--atlas-touch-min\)/);
   assert.match(html, /min-height:var\(--atlas-touch-min\)/);
   assert.match(html, /safe-area-inset-bottom/);
   assert.match(html, /@media\(max-width:767px\)/);
