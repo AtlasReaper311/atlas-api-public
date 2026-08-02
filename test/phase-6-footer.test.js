@@ -49,4 +49,9 @@ test("Public API footer keeps a single underlined rail and the v0.4.0 responsive
   assert.match(html, /min-height:var\(--atlas-touch-min\)/);
   assert.match(html, /safe-area-inset-bottom/);
   assert.match(html, /@media\(max-width:767px\)/);
+  assert.match(html, /\.api-footer \.atlas-footer__identity\{[^}]*flex:0 0 auto/);
+  assert.match(
+    html,
+    /\.api-footer \.atlas-footer__context,[\s\S]*?\.api-footer \.atlas-footer__escape\{[^}]*flex:0 0 auto/,
+  );
 });
