@@ -35,6 +35,8 @@ test("docs have the global header, search, status, metadata, and local icons", (
   }
   assert.match(html, /class="atlas-global-header api-global-header"/);
   assert.match(html, /class="atlas-bottom-nav api-bottom-nav" aria-label="Mobile navigation"/);
+  assert.match(html, /\.api-bottom-nav a\{letter-spacing:0\}/);
+  assert.doesNotMatch(html, /letter-spacing:-/);
   assert.match(html, /class="atlas-product-strip api-product-strip"/);
   assert.match(html, /data-estate-search-open/);
   assert.match(html, /data-estate-status/);
