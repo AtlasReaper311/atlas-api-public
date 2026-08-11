@@ -3,7 +3,7 @@ name: Public interface preview
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
     paths:
       - ".github/workflows/interface-preview.yml"
       - ".github/workflows/ci.yml"
@@ -22,6 +22,7 @@ on:
       - "src/routes/docs-shell.js"
       - "src/routes/docs.js"
       - "test/docs-interface.test.js"
+      - "test/phase-6-footer.test.js"
       - "wrangler.interface-preview.toml"
       - "wrangler.toml"
 
@@ -40,7 +41,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out exact pull request head
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0, Node 24
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
@@ -85,7 +86,7 @@ jobs:
           git diff --check
 
       - name: Check bundled Worker contracts
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0, Node 24
         with:
           repository: AtlasReaper311/atlas-infra
           ref: f971172dc258c93dffa53b8b7a3532c5be55883d
@@ -103,7 +104,9 @@ jobs:
   deploy-preview:
     name: Publish isolated Public API docs preview
     needs: validate
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'interface-preview-approved')
     permissions:
       contents: read
       pull-requests: write
@@ -121,7 +124,7 @@ jobs:
       SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
     steps:
       - name: Check out exact pull request head
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0, Node 24
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
@@ -192,7 +195,7 @@ jobs:
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
       - name: Check out exact evidence runner
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0, Node 24
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           sparse-checkout: scripts/capture-docs-interface-evidence.mjs

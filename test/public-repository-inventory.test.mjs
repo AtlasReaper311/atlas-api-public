@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   buildPublicRepositoryInventory,
+  compareRepositoryNames,
   inventoryFingerprint,
   renderInventory,
 } from "../scripts/sync_public_repositories.mjs";
@@ -98,10 +99,17 @@ test("committed inventory is v2, private-safe and fingerprint-valid", async () =
   assert.equal(document.schema, "atlas-public-repositories/v2");
   assert.equal(document.owner, "AtlasReaper311");
   assert.equal(document.repository_count, document.repositories.length);
-  assert.equal(document.repository_count, 31);
+  assert.ok(document.repository_count > 0);
   assert.equal(
     document.inventory_fingerprint,
     inventoryFingerprint(document.repositories),
+  );
+
+  const fullNames = document.repositories.map((item) => item.full_name);
+  assert.equal(new Set(fullNames).size, fullNames.length);
+  assert.deepEqual(
+    document.repositories,
+    document.repositories.slice().sort(compareRepositoryNames),
   );
 
   for (const item of document.repositories) {

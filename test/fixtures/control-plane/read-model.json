@@ -1,0 +1,186 @@
+{
+  "summary": {
+    "schema_version": "atlas-control-plane/control-plane-summary/v1",
+    "generated_at": "2026-07-14T10:30:00Z",
+    "stale_after": "2026-07-14T10:40:00Z",
+    "request_id": "phase9-372de5e1a8d0f48c1e4c",
+    "state": "failed",
+    "health": {
+      "state": "healthy",
+      "components_total": 34,
+      "components_healthy": 34,
+      "active_incidents": 0
+    },
+    "journeys": {
+      "state": "failed",
+      "total": 12,
+      "failed": 1
+    },
+    "release": {
+      "state": "healthy",
+      "repository": "AtlasReaper311/atlas-api-public",
+      "environment": "production",
+      "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "completed_at": "2026-07-14T09:58:00Z",
+      "evidence_ref": "https://github.com/AtlasReaper311/atlas-journey-watch/actions/runs/100"
+    },
+    "contract_registry": {
+      "state": "warning",
+      "contracts_total": 26,
+      "contracts_valid": 24,
+      "drift_count": 2
+    },
+    "quota": {
+      "state": "warning",
+      "used_percent": 73.4,
+      "projected_percent": 88.2,
+      "highest_meter": "workers-requests",
+      "period_ends_at": "2026-08-01T00:00:00Z"
+    },
+    "findings": {
+      "state": "warning",
+      "total": 3,
+      "by_severity": {
+        "info": 1,
+        "warning": 2,
+        "failure": 0,
+        "critical": 0
+      },
+      "oldest_detected_at": "2026-07-13T08:00:00Z"
+    },
+    "gardener_proposals": {
+      "state": "warning",
+      "total": 2,
+      "validation_failed": 0,
+      "open_pull_requests": 1
+    },
+    "secret_hygiene": {
+      "state": "unknown",
+      "required": 12,
+      "present": 11,
+      "stale": 0,
+      "unknown": 1
+    },
+    "backups": {
+      "state": "warning",
+      "total": 4,
+      "healthy": 3,
+      "stale": 0,
+      "failed": 0,
+      "unknown": 1
+    },
+    "runbooks": {
+      "state": "unknown",
+      "valid": 0,
+      "invalid": 0,
+      "stale": 0
+    },
+    "evidence": {
+      "state": "healthy",
+      "searchable_records": 42,
+      "newest_record_at": "2026-07-14T09:59:00Z",
+      "expiring_soon": 0
+    }
+  },
+  "source_refs": [
+    "https://github.com/AtlasReaper311/atlas-infra",
+    "https://github.com/AtlasReaper311/atlas-journey-watch"
+  ],
+  "services": [
+    {
+      "service_id": "atlas-api-public",
+      "display_name": "Atlas public API",
+      "state": "warning",
+      "release_state": "healthy",
+      "dependencies": ["atlas-api-index", "atlas-corpus"],
+      "runbook_refs": [
+        "https://github.com/AtlasReaper311/atlas-infra/blob/main/docs/runbooks/contract-registry-service-triage.md"
+      ],
+      "evidence_refs": [
+        "https://github.com/AtlasReaper311/atlas-journey-watch/actions/runs/100"
+      ]
+    }
+  ],
+  "releases": [
+    {
+      "repository": "atlas-api-public",
+      "environment": "production",
+      "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "release_state": "live",
+      "state": "healthy",
+      "journey_result": "passed",
+      "completed_at": "2026-07-14T09:58:00Z",
+      "evidence_ref": "https://github.com/AtlasReaper311/atlas-journey-watch/actions/runs/100"
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "finding-contract-drift-001",
+      "service_id": "atlas-api-public",
+      "category": "contract-drift",
+      "severity": "warning",
+      "state": "warning",
+      "summary": "Two declared contract observations require owner review.",
+      "detected_at": "2026-07-13T08:00:00Z",
+      "runbook_ref": "https://github.com/AtlasReaper311/atlas-infra/blob/main/docs/runbooks/contract-registry-service-triage.md"
+    }
+  ],
+  "quota": [
+    {
+      "meter_id": "workers-requests",
+      "state": "warning",
+      "used_percent": 73.4,
+      "projected_percent": 88.2,
+      "period_ends_at": "2026-08-01T00:00:00Z",
+      "source_timestamp": "2026-07-14T10:00:00Z"
+    }
+  ],
+  "backups": [
+    {
+      "target_id": "atlas-vault-metadata",
+      "service_id": "atlas-vault",
+      "state": "warning",
+      "freshness": "unknown",
+      "method": "json-export",
+      "last_successful_backup_at": null,
+      "last_restore_test_at": "2026-07-14T09:00:00Z",
+      "retention_days": 30,
+      "evidence_ref": "https://github.com/AtlasReaper311/atlas-infra/actions/runs/101"
+    }
+  ],
+  "gardener_proposals": [
+    {
+      "proposal_id": "proposal-workflow-timeout-001",
+      "repository": "atlas-api-public",
+      "fixer_id": "workflow-timeout",
+      "files_count": 1,
+      "risk_class": "low",
+      "proposal_state": "draft_pr",
+      "state": "warning",
+      "validation_state": "passed",
+      "review_url": "https://github.com/AtlasReaper311/atlas-api-public/pull/1"
+    }
+  ],
+  "runbooks": [
+    {
+      "runbook_id": "contract-registry-service-triage",
+      "service_id": "atlas-api-public",
+      "state": "healthy",
+      "title": "Contract registry service triage",
+      "summary": "Review declaration, source, and observed contract drift without changing a route.",
+      "reference": "https://github.com/AtlasReaper311/atlas-infra/blob/main/docs/runbooks/contract-registry-service-triage.md"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "release-evidence-001",
+      "producer": "atlas-journey-watch",
+      "subject": "atlas-api-public",
+      "evidence_type": "release-verification",
+      "state": "healthy",
+      "summary": "Public API release identity and targeted journey passed.",
+      "timestamp": "2026-07-14T09:58:00Z",
+      "reference": "https://github.com/AtlasReaper311/atlas-journey-watch/actions/runs/100"
+    }
+  ]
+}
