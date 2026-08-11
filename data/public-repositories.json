@@ -1,9 +1,25 @@
 {
   "schema": "atlas-public-repositories/v2",
   "owner": "AtlasReaper311",
-  "repository_count": 31,
-  "inventory_fingerprint": "sha256:8a44b64841fbedc83e642653c102fc348ae26fb23b6b11cc45449972bc11d541",
+  "repository_count": 34,
+  "inventory_fingerprint": "sha256:4b183d8c06091cc0427c215698d3412feb3e7cf4064c7f5371d8a4edc9807bf3",
   "repositories": [
+    {
+      "name": ".github",
+      "full_name": "AtlasReaper311/.github",
+      "html_url": "https://github.com/AtlasReaper311/.github",
+      "description": "Default community-health files for the Atlas Systems GitHub estate",
+      "homepage": null,
+      "language": null,
+      "topics": [
+        "atlas-systems"
+      ],
+      "fork": false,
+      "archived": false,
+      "disabled": false,
+      "visibility": "public",
+      "created_at": "2026-07-24T21:06:26Z"
+    },
     {
       "name": "atlas-api-index",
       "full_name": "AtlasReaper311/atlas-api-index",
@@ -93,7 +109,7 @@
       "html_url": "https://github.com/AtlasReaper311/atlas-bootstrap",
       "description": "Cross-platform bootstrap tooling that reconstructs the Atlas Systems development and local AI environment from a bare machine.",
       "homepage": "https://atlas-systems.uk",
-      "language": "PowerShell",
+      "language": "Shell",
       "topics": [
         "atlas-systems",
         "automation",
@@ -181,7 +197,7 @@
       "html_url": "https://github.com/AtlasReaper311/atlas-doc-viewer",
       "description": "A secure, mobile-responsive document viewer wrapper for static deployments.",
       "homepage": "https://cv.atlas-systems.uk",
-      "language": "HTML",
+      "language": "JavaScript",
       "topics": [
         "atlas-systems",
         "cloudflare-pages",
@@ -260,6 +276,22 @@
       "created_at": "2026-05-26T19:28:49Z"
     },
     {
+      "name": "atlas-interface-kit",
+      "full_name": "AtlasReaper311/atlas-interface-kit",
+      "html_url": "https://github.com/AtlasReaper311/atlas-interface-kit",
+      "description": "Versioned browser interface foundations for Atlas Systems",
+      "homepage": null,
+      "language": "Python",
+      "topics": [
+        "atlas-systems"
+      ],
+      "fork": false,
+      "archived": false,
+      "disabled": false,
+      "visibility": "public",
+      "created_at": "2026-07-23T14:15:52Z"
+    },
+    {
       "name": "atlas-journey-watch",
       "full_name": "AtlasReaper311/atlas-journey-watch",
       "html_url": "https://github.com/AtlasReaper311/atlas-journey-watch",
@@ -301,6 +333,25 @@
       "disabled": false,
       "visibility": "public",
       "created_at": "2026-06-02T16:43:37Z"
+    },
+    {
+      "name": "atlas-model-lab",
+      "full_name": "AtlasReaper311/atlas-model-lab",
+      "html_url": "https://github.com/AtlasReaper311/atlas-model-lab",
+      "description": "Experimental neural-network and transformer implementations built from first principles, with reproducible tests and benchmarks.",
+      "homepage": "https://atlas-systems.uk",
+      "language": "Python",
+      "topics": [
+        "atlas-systems",
+        "llm",
+        "local-ai",
+        "python"
+      ],
+      "fork": false,
+      "archived": false,
+      "disabled": false,
+      "visibility": "public",
+      "created_at": "2026-08-09T21:17:43Z"
     },
     {
       "name": "atlas-notify",
@@ -631,7 +682,7 @@
       "html_url": "https://github.com/AtlasReaper311/status",
       "description": "Public Atlas Systems status surface combining live checks, SLO error-budget evidence and recent estate activity.",
       "homepage": "https://status.atlas-systems.uk",
-      "language": "HTML",
+      "language": "JavaScript",
       "topics": [
         "atlas-systems",
         "cloudflare-pages",
