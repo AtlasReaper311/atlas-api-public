@@ -12,7 +12,7 @@
     "verify:docs-interface": "node scripts/verify-docs-interface.mjs"
   },
   "devDependencies": {
-    "eslint": "^10.7.0",
-    "wrangler": "^4.112.0"
+    "eslint": "^10.8.1",
+    "wrangler": "^4.120.0"
   }
 }
