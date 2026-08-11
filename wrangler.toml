@@ -84,3 +84,6 @@ simple = { limit = 10, period = 60 }
 #   RAG_REPORT_KEY
 #   EVIDENCE_REPORT_KEY
 #   NOTIFY_TOKEN
+#   RAMONE_CONTROL_PLANE_READ_TOKEN
+#     dedicated read-only bearer for the future OpenWebUI external-tool
+#     connection; no provider API permission

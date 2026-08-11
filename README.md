@@ -71,6 +71,9 @@ Unknown components fail closed.
 | `GET /v1/reliability/services/{id}` | One public measured service result |
 | `GET /v1/reliability/objectives` | Published reliability policy |
 | `GET /v1/reliability/baseline/{id}` | Release baseline when evidence supports one |
+| `GET /v1/control-plane/summary` | Public, redacted control-plane summary; unavailable until a schema-valid bounded read model exists |
+| `GET /v1/control-plane/tools/openapi.json` | Bearer-protected OpenAPI document with exactly nine read-only Ramone operations |
+| `GET /v1/control-plane/tools/**` | Nine allowlisted GET operations over the bounded fixture/KV read model |
 | `GET /notify/recent` | Sanitized public recent-event projection |
 | `POST /v1/infra/report` | Authenticated infrastructure evidence ingest |
 | `POST /v1/rag/report` | Authenticated corpus summary ingest |
@@ -144,6 +147,32 @@ npm run lint
 ```
 
 Tests include regression coverage for the public registry, topology, and recent-event privacy boundaries.
+
+### Phase 9 control-plane fixture mode
+
+The control-plane routes read either the injected test fixture or the single
+bounded KV document at `control-plane:read-model:v1`. This phase adds no writer,
+provider client, deployment, schedule, or automatic OpenWebUI assignment. If
+the document is missing or fails leak/shape validation, the public summary and
+tools return `503`; absence is never healthy.
+
+```bash
+npm test -- --test-name-pattern='control-plane'
+```
+
+Tests use a fixture-only bearer value. The future deployed connection uses the
+secret name `RAMONE_CONTROL_PLANE_READ_TOKEN`; no value belongs in Git, model
+context, request parameters, diagnostics, or logs. OpenWebUI will hold it in
+an administrator-owned external-tool connection after a separate live
+inventory and enablement approval.
+
+The dedicated tool document is deliberately separate from `/v1/openapi.json`.
+It contains exactly `GetEstateSummary`, `GetServiceStatus`,
+`GetReleaseStatus`, `ListActiveFindings`, `GetQuotaProjection`,
+`GetBackupStatus`, `ListGardenerProposals`, `FindRunbook`, and
+`SearchEvidence`. See
+[`docs/control-plane-tool-server.md`](docs/control-plane-tool-server.md) and
+the [unavailable-read-model runbook](docs/runbooks/control-plane-read-model-unavailable.md).
 
 ## Interface conformance
 
