@@ -5,7 +5,7 @@
  * Ownership:
  * - atlas-infra docs/adrs remains the decision authority
  * - data/adr-runtime-index.json is a deterministic projection only
- * - .github/workflows/ci.yml Trace authority pin must match the emitted projection
+ * - data/adr-trace-authority.json pins the exact atlas-infra commit for CI
  *
  * This script never merges, deploys, or mutates live state.
  */
@@ -18,15 +18,15 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const FULL_SHA = /^[0-9a-f]{40}$/;
-const TRACE_PIN_BLOCK =
-  /(name:\s*Check out exact Atlas Infra ADR Trace authority[\s\S]*?\n\s+ref:\s*)([0-9a-f]{40})(\n\s+path:\s*\.trace-authority\b)/;
+const AUTHORITY_SCHEMA = "atlas-public-trace-authority-pin/v1";
+const AUTHORITY_REPOSITORY = "AtlasReaper311/atlas-infra";
 
 export function parseArgs(argv = process.argv.slice(2)) {
   const options = {
     authorityRoot: null,
     authoritySha: null,
     output: "data/adr-runtime-index.json",
-    ciWorkflow: ".github/workflows/ci.yml",
+    authorityPin: "data/adr-trace-authority.json",
     checkOnly: false,
   };
 
@@ -42,8 +42,8 @@ export function parseArgs(argv = process.argv.slice(2)) {
     } else if (arg === "--output") {
       options.output = next;
       index += 1;
-    } else if (arg === "--ci-workflow") {
-      options.ciWorkflow = next;
+    } else if (arg === "--authority-pin") {
+      options.authorityPin = next;
       index += 1;
     } else if (arg === "--check-only") {
       options.checkOnly = true;
@@ -64,24 +64,30 @@ export function assertAuthoritySha(sha) {
   return sha;
 }
 
-export function updateTraceAuthorityPin(workflowText, authoritySha) {
-  const sha = assertAuthoritySha(authoritySha);
-  if (!TRACE_PIN_BLOCK.test(workflowText)) {
-    throw new Error(
-      "CI workflow is missing the exact Atlas Infra ADR Trace authority pin block",
-    );
-  }
-  return workflowText.replace(TRACE_PIN_BLOCK, `$1${sha}$3`);
+export function buildAuthorityPinDocument(authoritySha) {
+  return {
+    schema_version: AUTHORITY_SCHEMA,
+    repository: AUTHORITY_REPOSITORY,
+    authority_sha: assertAuthoritySha(authoritySha),
+  };
 }
 
-export function readCurrentTraceAuthorityPin(workflowText) {
-  const match = workflowText.match(TRACE_PIN_BLOCK);
-  if (!match) {
-    throw new Error(
-      "CI workflow is missing the exact Atlas Infra ADR Trace authority pin block",
-    );
+export function serializeAuthorityPin(document) {
+  return `${JSON.stringify(document)}\n`;
+}
+
+export function readAuthorityPin(fileContents) {
+  const document = JSON.parse(fileContents);
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    throw new Error("authority pin must be a JSON object");
   }
-  return match[2];
+  if (document.schema_version !== AUTHORITY_SCHEMA) {
+    throw new Error("authority pin has unsupported schema_version");
+  }
+  if (document.repository !== AUTHORITY_REPOSITORY) {
+    throw new Error("authority pin has unexpected repository");
+  }
+  return assertAuthoritySha(document.authority_sha);
 }
 
 function resolvePath(root, value) {
@@ -133,14 +139,14 @@ export function refreshAdrRuntimeIndex({
   authorityRoot,
   authoritySha,
   outputPath,
-  ciWorkflowPath,
+  authorityPinPath,
   checkOnly = false,
   emit = emitAuthorityIndex,
 }) {
   const sha = assertAuthoritySha(authoritySha);
   const absoluteAuthorityRoot = resolvePath(repoRoot, authorityRoot);
   const absoluteOutput = resolvePath(repoRoot, outputPath);
-  const absoluteWorkflow = resolvePath(repoRoot, ciWorkflowPath);
+  const absolutePin = resolvePath(repoRoot, authorityPinPath);
 
   const temporaryOutput = path.join(
     os.tmpdir(),
@@ -157,13 +163,13 @@ export function refreshAdrRuntimeIndex({
     emitted = `${emitted}\n`;
   }
 
+  const nextPin = serializeAuthorityPin(buildAuthorityPinDocument(sha));
   const currentProjection = readTextOrEmpty(absoluteOutput);
-  const currentWorkflow = fs.readFileSync(absoluteWorkflow, "utf8");
-  const currentPin = readCurrentTraceAuthorityPin(currentWorkflow);
-  const nextWorkflow = updateTraceAuthorityPin(currentWorkflow, sha);
+  const currentPinContents = readTextOrEmpty(absolutePin);
+  const currentPin = currentPinContents ? readAuthorityPin(currentPinContents) : "";
 
   const projectionChanged = currentProjection !== emitted;
-  const pinChanged = currentPin !== sha;
+  const pinChanged = currentPin !== sha || currentPinContents !== nextPin;
   const changed = projectionChanged || pinChanged;
 
   if (checkOnly) {
@@ -174,7 +180,7 @@ export function refreshAdrRuntimeIndex({
       authoritySha: sha,
       currentPin,
       outputPath: absoluteOutput,
-      ciWorkflowPath: absoluteWorkflow,
+      authorityPinPath: absolutePin,
     };
   }
 
@@ -182,7 +188,7 @@ export function refreshAdrRuntimeIndex({
     writeTextAtomic(absoluteOutput, emitted);
   }
   if (pinChanged) {
-    writeTextAtomic(absoluteWorkflow, nextWorkflow);
+    writeTextAtomic(absolutePin, nextPin);
   }
 
   return {
@@ -192,7 +198,7 @@ export function refreshAdrRuntimeIndex({
     authoritySha: sha,
     currentPin,
     outputPath: absoluteOutput,
-    ciWorkflowPath: absoluteWorkflow,
+    authorityPinPath: absolutePin,
   };
 }
 
@@ -202,7 +208,7 @@ function printHelp() {
     --authority-root <atlas-infra-checkout> \\
     --authority-sha <40-char-sha> \\
     [--output data/adr-runtime-index.json] \\
-    [--ci-workflow .github/workflows/ci.yml] \\
+    [--authority-pin data/adr-trace-authority.json] \\
     [--check-only]`);
 }
 
@@ -223,7 +229,7 @@ function main() {
     authorityRoot: options.authorityRoot,
     authoritySha: options.authoritySha,
     outputPath: options.output,
-    ciWorkflowPath: options.ciWorkflow,
+    authorityPinPath: options.authorityPin,
     checkOnly: options.checkOnly,
   });
 

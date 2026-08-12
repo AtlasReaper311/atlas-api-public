@@ -102,7 +102,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          if git diff --quiet -- data/adr-runtime-index.json .github/workflows/ci.yml
+          if git diff --quiet -- data/adr-runtime-index.json data/adr-trace-authority.json
           then
             echo "ADR runtime projection and Trace pin already match ${AUTHORITY_SHA}."
             exit 0
@@ -113,7 +113,7 @@ jobs:
           git config user.name "atlas-estate-bot"
           git config user.email "atlas@atlas-systems.uk"
           git switch -C "$branch"
-          git add data/adr-runtime-index.json .github/workflows/ci.yml
+          git add data/adr-runtime-index.json data/adr-trace-authority.json
           git commit -m "Refresh ADR runtime Trace projection"
           git push --force-with-lease origin "$branch"
 
@@ -130,7 +130,7 @@ jobs:
 
           - Authority: \`AtlasReaper311/atlas-infra@${AUTHORITY_SHA}\`
           - Projection: \`data/adr-runtime-index.json\`
-          - CI pin: exact Trace authority checkout in \`.github/workflows/ci.yml\`
+          - CI pin: \`data/adr-trace-authority.json\`
 
           This pull request is draft by design. It does not merge itself and does not deploy the Worker.
           Review the ADR scope diff, then mark ready and merge with explicit owner approval."
