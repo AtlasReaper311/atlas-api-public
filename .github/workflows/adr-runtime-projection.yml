@@ -1,0 +1,149 @@
+name: ADR runtime projection
+
+on:
+  workflow_dispatch:
+    inputs:
+      authority_sha:
+        description: Exact atlas-infra commit SHA. Leave empty to use current atlas-infra main.
+        required: false
+        type: string
+  repository_dispatch:
+    types: [adr-runtime-projection]
+
+permissions: {}
+
+concurrency:
+  group: adr-runtime-projection
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Refresh ADR runtime projection
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out atlas-api-public main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0, Node 24
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Resolve Atlas Infra authority SHA
+        id: authority
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_SHA: ${{ github.event.inputs.authority_sha || github.event.client_payload.authority_sha || '' }}
+        run: |
+          set -euo pipefail
+          sha="$(printf '%s' "${INPUT_SHA}" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+          if [ -z "${sha}" ]
+          then
+            sha="$(gh api repos/AtlasReaper311/atlas-infra/commits/main --jq .sha)"
+          fi
+          case "${sha}" in
+            *[!0-9a-f]* | "")
+              echo "authority SHA must be a full lowercase commit hash" >&2
+              exit 1
+              ;;
+          esac
+          if [ "${#sha}" -ne 40 ]
+          then
+            echo "authority SHA must be a full 40-character commit hash" >&2
+            exit 1
+          fi
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+          echo "Using atlas-infra authority ${sha}"
+
+      - name: Check out exact Atlas Infra ADR authority
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0, Node 24
+        with:
+          repository: AtlasReaper311/atlas-infra
+          ref: ${{ steps.authority.outputs.sha }}
+          path: .trace-authority
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0, Node 24
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Refresh ADR runtime projection and Trace pin
+        run: |
+          set -euo pipefail
+          node scripts/refresh-adr-runtime-index.mjs \
+            --authority-root .trace-authority \
+            --authority-sha "${{ steps.authority.outputs.sha }}"
+
+      - name: Validate refreshed projection
+        run: |
+          set -euo pipefail
+          python3 .trace-authority/scripts/adr_trace.py emit \
+            --root .trace-authority \
+            --output /tmp/adr-runtime-index.json
+          node scripts/verify-adr-runtime-index.mjs \
+            data/adr-runtime-index.json \
+            /tmp/adr-runtime-index.json
+          node --test \
+            test/refresh-adr-runtime-index.test.mjs \
+            test/trace.test.js
+          npm test
+
+      - name: Open or refresh draft projection pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUTHORITY_SHA: ${{ steps.authority.outputs.sha }}
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet -- data/adr-runtime-index.json .github/workflows/ci.yml
+          then
+            echo "ADR runtime projection and Trace pin already match ${AUTHORITY_SHA}."
+            exit 0
+          fi
+
+          branch="automation/adr-runtime-projection"
+
+          git config user.name "atlas-estate-bot"
+          git config user.email "atlas@atlas-systems.uk"
+          git switch -C "$branch"
+          git add data/adr-runtime-index.json .github/workflows/ci.yml
+          git commit -m "Refresh ADR runtime Trace projection"
+          git push --force-with-lease origin "$branch"
+
+          existing="$(
+            gh pr list \
+              --head "$branch" \
+              --base main \
+              --state open \
+              --json url \
+              --jq '.[0].url // empty'
+          )"
+
+          body="Automated refresh of the deterministic ADR runtime projection consumed by public Trace / Proof Chain.
+
+          - Authority: \`AtlasReaper311/atlas-infra@${AUTHORITY_SHA}\`
+          - Projection: \`data/adr-runtime-index.json\`
+          - CI pin: exact Trace authority checkout in \`.github/workflows/ci.yml\`
+
+          This pull request is draft by design. It does not merge itself and does not deploy the Worker.
+          Review the ADR scope diff, then mark ready and merge with explicit owner approval."
+
+          if [ -z "${existing}" ]
+          then
+            gh pr create \
+              --draft \
+              --base main \
+              --head "$branch" \
+              --title "Refresh ADR runtime Trace projection" \
+              --body "${body}"
+          else
+            echo "Updated existing pull request: ${existing}"
+            gh pr edit "${existing}" --body "${body}" || true
+          fi

@@ -109,7 +109,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0, Node 24
         with:
           repository: AtlasReaper311/atlas-infra
-          ref: 24a4771f69ce5a0fb61c220360e9c4327a82607c
+          ref: adfefd380730656f99ff9e832a27d4877a7b11d2
           path: .trace-authority
           persist-credentials: false
       - name: Verify ADR runtime projection
