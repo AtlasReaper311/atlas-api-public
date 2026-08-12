@@ -107,6 +107,27 @@ function emitAuthorityIndex(authorityRoot, temporaryOutput) {
   return fs.readFileSync(temporaryOutput, "utf8");
 }
 
+function readTextOrEmpty(filePath) {
+  try {
+    return fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    if (error && typeof error === "object" && error.code === "ENOENT") {
+      return "";
+    }
+    throw error;
+  }
+}
+
+function writeTextAtomic(filePath, contents) {
+  const directory = path.dirname(filePath);
+  const temporaryPath = path.join(
+    directory,
+    `.${path.basename(filePath)}.${process.pid}.tmp`,
+  );
+  fs.writeFileSync(temporaryPath, contents, "utf8");
+  fs.renameSync(temporaryPath, filePath);
+}
+
 export function refreshAdrRuntimeIndex({
   repoRoot,
   authorityRoot,
@@ -136,9 +157,7 @@ export function refreshAdrRuntimeIndex({
     emitted = `${emitted}\n`;
   }
 
-  const currentProjection = fs.existsSync(absoluteOutput)
-    ? fs.readFileSync(absoluteOutput, "utf8")
-    : "";
+  const currentProjection = readTextOrEmpty(absoluteOutput);
   const currentWorkflow = fs.readFileSync(absoluteWorkflow, "utf8");
   const currentPin = readCurrentTraceAuthorityPin(currentWorkflow);
   const nextWorkflow = updateTraceAuthorityPin(currentWorkflow, sha);
@@ -160,10 +179,10 @@ export function refreshAdrRuntimeIndex({
   }
 
   if (projectionChanged) {
-    fs.writeFileSync(absoluteOutput, emitted, "utf8");
+    writeTextAtomic(absoluteOutput, emitted);
   }
   if (pinChanged) {
-    fs.writeFileSync(absoluteWorkflow, nextWorkflow, "utf8");
+    writeTextAtomic(absoluteWorkflow, nextWorkflow);
   }
 
   return {

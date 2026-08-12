@@ -10,9 +10,7 @@ on:
   repository_dispatch:
     types: [adr-runtime-projection]
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 concurrency:
   group: adr-runtime-projection
@@ -23,6 +21,9 @@ jobs:
     name: Refresh ADR runtime projection
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Check out atlas-api-public main
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0, Node 24
