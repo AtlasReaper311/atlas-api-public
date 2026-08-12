@@ -105,10 +105,11 @@ jobs:
             data/public-repository-classifications.json \
             .classification-authority/policy/public-repository-classifications.json
       - name: Check out exact Atlas Infra ADR Trace authority
+        # Pin must be the atlas-infra commit that produced data/adr-runtime-index.json.
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0, Node 24
         with:
           repository: AtlasReaper311/atlas-infra
-          ref: 8ce372fe7c97e2cd17b16ed72550c3507ab0e751
+          ref: 24a4771f69ce5a0fb61c220360e9c4327a82607c
           path: .trace-authority
           persist-credentials: false
       - name: Verify ADR runtime projection

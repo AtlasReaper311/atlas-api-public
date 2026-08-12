@@ -69,21 +69,37 @@ function validClassificationAuthority() {
   );
 }
 
+function validAdrRelationship(relationship) {
+  return (
+    relationship?.schema_version ===
+      "atlas-control-plane/adr-runtime-relationship/v1" &&
+    (relationship?.visibility === "public" ||
+      relationship?.visibility === "internal" ||
+      relationship?.visibility === "restricted-metadata") &&
+    /^adrrel:sha256:[0-9a-f]{64}$/.test(
+      String(relationship.relationship_id || ""),
+    ) &&
+    relationship?.adr?.status === "accepted" &&
+    /^ADR-[0-9]{4}$/.test(String(relationship?.adr?.id || ""))
+  );
+}
+
 function validAdrAuthority() {
   return (
     adrRuntimeIndex?.schema_version === ADR_INDEX_SCHEMA &&
     Array.isArray(adrRuntimeIndex.relationships) &&
-    adrRuntimeIndex.relationships.every(
-      (relationship) =>
-        relationship?.schema_version ===
-          "atlas-control-plane/adr-runtime-relationship/v1" &&
-        relationship?.visibility === "public" &&
-        /^adrrel:sha256:[0-9a-f]{64}$/.test(
-          String(relationship.relationship_id || ""),
-        ) &&
-        relationship?.adr?.status === "accepted" &&
-        /^ADR-[0-9]{4}$/.test(String(relationship?.adr?.id || "")),
+    adrRuntimeIndex.relationships.length > 0 &&
+    adrRuntimeIndex.relationships.every(validAdrRelationship) &&
+    adrRuntimeIndex.relationships.some(
+      (relationship) => relationship?.visibility === "public",
     )
+  );
+}
+
+function publicAdrRelationships() {
+  if (!validAdrAuthority()) return [];
+  return adrRuntimeIndex.relationships.filter(
+    (relationship) => relationship?.visibility === "public",
   );
 }
 
@@ -104,7 +120,7 @@ function publicServices() {
 }
 
 function adrRelationshipsFor(serviceId, repository) {
-  return adrRuntimeIndex.relationships
+  return publicAdrRelationships()
     .filter((relationship) => {
       const services = relationship?.affects?.services || [];
       const repositories = relationship?.affects?.repositories || [];
