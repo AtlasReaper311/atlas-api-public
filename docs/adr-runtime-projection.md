@@ -5,16 +5,23 @@
 `data/adr-runtime-index.json` is the deterministic ADR-to-runtime projection
 consumed by public Trace and the Proof Chain surface.
 
-`atlas-infra/docs/adrs/` remains the decision authority. This file is only a
-validated projection of accepted ADR frontmatter. It is not a second place to
-author architecture decisions.
+`data/adr-trace-authority.json` pins the exact `AtlasReaper311/atlas-infra`
+commit that produced that projection. CI checks out that commit and verifies the
+projection byte-for-byte.
+
+`atlas-infra/docs/adrs/` remains the decision authority. These files are only a
+validated projection plus pin. They are not a second place to author architecture
+decisions.
 
 ## Refresh behaviour
 
 `.github/workflows/adr-runtime-projection.yml` refreshes:
 
 - `data/adr-runtime-index.json`
-- the exact Trace authority pin in `.github/workflows/ci.yml`
+- `data/adr-trace-authority.json`
+
+It does not modify workflow YAML, so the default `GITHUB_TOKEN` can open the
+draft pull request without `workflows` permission.
 
 Triggers:
 
@@ -34,10 +41,6 @@ An unchanged projection and pin produce no commit and no pull request update.
 ## Local refresh
 
 ```bash
-python3 /path/to/atlas-infra/scripts/adr_trace.py emit \
-  --root /path/to/atlas-infra \
-  --output /tmp/adr-runtime-index.json
-
 node scripts/refresh-adr-runtime-index.mjs \
   --authority-root /path/to/atlas-infra \
   --authority-sha <full-40-char-sha>
@@ -58,11 +61,11 @@ npm test
 - repository: `AtlasReaper311/atlas-api-public`
 - permissions: `Actions: write`, `Metadata: read`
 
-Preferred call shape is `workflow_dispatch`. `repository_dispatch` remains
-supported for compatibility but needs `Contents: write` on this repository.
+Preferred call shape is `workflow_dispatch` against
+`adr-runtime-projection.yml`.
 
 ## Rollback
 
 Revert the focused projection pull request or restore the previous
-`data/adr-runtime-index.json` and CI pin together. Do not edit relationship
-fingerprints by hand.
+`data/adr-runtime-index.json` and `data/adr-trace-authority.json` together. Do
+not edit relationship fingerprints by hand.

@@ -104,12 +104,18 @@ jobs:
           node scripts/verify-repository-classifications.mjs \
             data/public-repository-classifications.json \
             .classification-authority/policy/public-repository-classifications.json
+      - name: Resolve pinned ADR Trace authority SHA
+        id: adr_pin
+        run: |
+          set -euo pipefail
+          sha="$(node -e 'const pin=require("./data/adr-trace-authority.json"); if(!/^[0-9a-f]{40}$/.test(pin.authority_sha||"")) process.exit(1); process.stdout.write(pin.authority_sha)')"
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
       - name: Check out exact Atlas Infra ADR Trace authority
-        # Pin must be the atlas-infra commit that produced data/adr-runtime-index.json.
+        # Pin lives in data/adr-trace-authority.json and must match data/adr-runtime-index.json.
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0, Node 24
         with:
           repository: AtlasReaper311/atlas-infra
-          ref: adfefd380730656f99ff9e832a27d4877a7b11d2
+          ref: ${{ steps.adr_pin.outputs.sha }}
           path: .trace-authority
           persist-credentials: false
       - name: Verify ADR runtime projection
@@ -120,6 +126,7 @@ jobs:
           node scripts/verify-adr-runtime-index.mjs \
             data/adr-runtime-index.json \
             /tmp/adr-runtime-index.json
+          test "$(node -e 'process.stdout.write(require("./data/adr-trace-authority.json").authority_sha)')" = "${{ steps.adr_pin.outputs.sha }}"
 
   # CI result reported through the reusable atlas-notify workflow:
   # routes to #ci-cd via signal_class, failures mirror to #alerts.
