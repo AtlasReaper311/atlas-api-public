@@ -83,6 +83,30 @@ test("one public service returns deterministic source and governance proof", asy
         node.kind === "adr" && node.identity.external_id === "ADR-0004",
     ),
   );
+  assert.ok(
+    first.graph.nodes.some(
+      (node) =>
+        node.kind === "adr" && node.identity.external_id === "ADR-0007",
+    ),
+  );
+  assert.ok(
+    first.graph.nodes.some(
+      (node) =>
+        node.kind === "adr" && node.identity.external_id === "ADR-0008",
+    ),
+  );
+  assert.ok(
+    !first.graph.nodes.some(
+      (node) =>
+        node.kind === "adr" && node.identity.external_id === "ADR-0010",
+    ),
+  );
+  assert.ok(
+    !first.graph.nodes.some(
+      (node) =>
+        node.kind === "adr" && node.identity.external_id === "ADR-0011",
+    ),
+  );
 
   const serviceNode = first.graph.nodes.find(
     (node) => node.kind === "service",
@@ -105,6 +129,40 @@ test("public Pages services receive bounded live evidence", async () => {
   assert.equal(detail.live_topology.state, "healthy");
   assert.equal(detail.live_topology.provider_kind, "pages-project");
   assert.equal(detail.live_topology.metadata, null);
+  assert.ok(
+    detail.graph.nodes.some(
+      (node) =>
+        node.kind === "adr" && node.identity.external_id === "ADR-0007",
+    ),
+  );
+  assert.ok(
+    detail.graph.nodes.some(
+      (node) =>
+        node.kind === "adr" && node.identity.external_id === "ADR-0008",
+    ),
+  );
+  assert.ok(
+    detail.graph.nodes.some(
+      (node) =>
+        node.kind === "adr" && node.identity.external_id === "ADR-0009",
+    ),
+  );
+});
+
+test("Trace index counts interface ADR governance on public surfaces", async () => {
+  const index = await buildPublicTraceIndex({ nowMs: EVIDENCE_NOW });
+  const byId = Object.fromEntries(
+    index.services.map((service) => [service.service_id, service]),
+  );
+
+  assert.equal(byId["atlas-api-public"].governance_count, 5);
+  assert.equal(byId["atlas-systems"].governance_count, 3);
+  assert.equal(byId["atlas-doc-viewer"].governance_count, 2);
+  assert.equal(byId.status.governance_count, 3);
+  assert.equal(
+    index.services.filter((service) => service.governance_count > 0).length,
+    5,
+  );
 });
 
 test("non-public and unknown service identifiers fail closed", async () => {
