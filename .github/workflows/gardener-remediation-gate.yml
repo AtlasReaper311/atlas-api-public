@@ -12,19 +12,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  gardener:
-    uses: AtlasReaper311/atlas-gardener/.github/workflows/gardener-automerge-gate.yml@3939393a1f202f6e755c0c1f8e888f0d7ca27f4c
-    permissions:
-      contents: write
-      pull-requests: write
-      checks: read
-      statuses: read
-    with:
-      enabled: ${{ vars.ATLAS_GARDENER_AUTOMERGE_ENABLED == 'true' && startsWith(github.event.pull_request.head.ref, 'gardener/') }}
-      expected_app_login: atlas-gardener-w37-atlasreaper[bot]
-      required_checks_json: '["Test (node --test)"]'
-      authority_ref: 1c9e37055818a6141d46e92ecf15ec40922279b8
-
   gardener-native-automerge-barrier:
     name: Gardener native auto-merge barrier
     runs-on: ubuntu-latest
@@ -38,7 +25,7 @@ jobs:
       - name: Hold the native auto-merge barrier
         env:
           GH_TOKEN: ${{ github.token }}
-          AUTOMERGE_ENABLED: ${{ vars.ATLAS_GARDENER_AUTOMERGE_ENABLED == 'true' && startsWith(github.event.pull_request.head.ref, 'gardener/') }}
+          AUTOMERGE_ENABLED: "false"
           PR_URL: ${{ github.event.pull_request.html_url }}
           GATE_CHECK_NAME: gardener / Validate Gardener automatic merge
         run: |
