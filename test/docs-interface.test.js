@@ -34,10 +34,12 @@ test("docs have the global header, search, status, metadata, and local icons", (
     assert.ok(html.includes(`https://atlas-systems.uk${route}`));
   }
   assert.match(html, /class="atlas-global-header api-global-header"/);
-  assert.match(html, /--atlas-shell-gutter:max\(24px,calc\(\(100% - 1280px\)\/2\)\)/);
+  assert.match(html, /class="atlas-header__inner"/);
+  assert.match(html, /width:min\(calc\(100% - 48px\),1280px\)/);
   assert.match(html, /grid-template-columns:minmax\(230px,1fr\) auto minmax\(230px,1fr\)/);
   assert.match(html, /\.api-global-header \.atlas-global-header__nav\{gap:24px\}/);
-  assert.match(html, /\.api-global-header \.atlas-global-header__link\{padding:0;font-size:12px;letter-spacing:\.06em;text-transform:uppercase\}/);
+  assert.match(html, /\.api-global-header \.atlas-global-header__link\{padding-inline:12px;font-size:12px;letter-spacing:\.06em;text-transform:uppercase\}/);
+  assert.doesNotMatch(html, /\.api-global-header \.atlas-global-header__link\{padding:0;font-size:12px;letter-spacing:\.06em;text-transform:uppercase\}/);
   assert.doesNotMatch(html, /\.api-global-header \.atlas-global-header__nav\{gap:0\}/);
   assert.match(html, /class="atlas-bottom-nav api-bottom-nav" aria-label="Mobile navigation"/);
   assert.match(html, /\.api-bottom-nav a\{letter-spacing:0\}/);

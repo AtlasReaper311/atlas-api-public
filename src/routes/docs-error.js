@@ -3,13 +3,14 @@ const CSS = `
 html{min-height:100%;background:var(--atlas-bg)}
 body{min-height:100vh;margin:0;display:flex;flex-direction:column;background:var(--atlas-bg);color:var(--atlas-text);font-family:var(--atlas-font-body)}
 a{color:inherit}
-.error-header{--atlas-shell-gutter:max(24px,calc((100% - 1280px)/2));min-height:56px;grid-template-columns:minmax(230px,1fr) auto minmax(230px,1fr);padding-inline:var(--atlas-shell-gutter);background:rgba(10,10,15,.96)}
+.error-header.atlas-global-header{display:block;padding:0;min-height:56px;background:rgba(10,10,15,.96)}
+.error-header .atlas-header__inner{width:min(calc(100% - 48px),1280px);min-height:56px;margin-inline:auto;display:grid;grid-template-columns:minmax(230px,1fr) auto minmax(230px,1fr);align-items:center;gap:24px}
 .error-brand{display:flex;align-items:center;gap:var(--atlas-space-3)}
 .error-wordmark{min-height:var(--atlas-touch-min);display:inline-flex;align-items:center;color:var(--atlas-text);font-size:13px;font-weight:500;letter-spacing:.12em;text-decoration:none;text-transform:uppercase}.error-wordmark span{color:var(--atlas-accent)}
 .error-status{min-height:var(--atlas-control-compact);display:inline-flex;align-items:center;gap:var(--atlas-space-2);padding-inline:var(--atlas-space-3);border:1px solid var(--atlas-border);border-radius:var(--atlas-radius-md);color:var(--atlas-text-dim);font-size:var(--atlas-type-meta);text-decoration:none}.error-status i{width:7px;height:7px;border-radius:50%;background:var(--atlas-unknown)}
 .error-header .atlas-global-header__nav{gap:24px}
-.error-header .atlas-global-header__link{padding:0;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
-.error-strip{display:grid;grid-template-columns:auto minmax(0,1fr) auto;min-height:44px;align-items:center;gap:var(--atlas-space-3);padding-inline:clamp(var(--atlas-space-4),4vw,var(--atlas-space-7));border-bottom:1px solid var(--atlas-border);color:var(--atlas-text-dim);font-size:var(--atlas-type-meta);letter-spacing:.08em;text-transform:uppercase}.error-strip strong{color:var(--atlas-accent);font-weight:500}.error-strip span:last-child{color:var(--atlas-unavailable)}
+.error-header .atlas-global-header__link{padding-inline:12px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.error-strip{display:grid;grid-template-columns:auto minmax(0,1fr) auto;min-height:44px;align-items:center;gap:var(--atlas-space-3);padding-inline:max(24px,calc((100% - 1280px)/2));border-bottom:1px solid var(--atlas-border);color:var(--atlas-text-dim);font-size:var(--atlas-type-meta);letter-spacing:.08em;text-transform:uppercase}.error-strip strong{color:var(--atlas-accent);font-weight:500}.error-strip span:last-child{color:var(--atlas-unavailable)}
 .error-main{width:min(100%,920px);margin:0 auto;flex:1;display:grid;align-items:center;padding:clamp(48px,10vw,120px) clamp(16px,5vw,48px)}
 .error-panel{max-width:760px;border:1px solid var(--atlas-border-hi);border-radius:var(--atlas-radius-lg);padding:clamp(24px,5vw,48px);background:var(--atlas-bg-1)}
 .error-code{margin:0 0 var(--atlas-space-3);color:var(--atlas-unavailable);font-size:var(--atlas-type-meta);letter-spacing:.14em;text-transform:uppercase}
@@ -19,7 +20,7 @@ a{color:inherit}
 .error-actions a{min-height:var(--atlas-touch-min);display:inline-flex;align-items:center;padding:0 var(--atlas-space-4);border:1px solid var(--atlas-border-hi);border-radius:var(--atlas-radius-sm);color:var(--atlas-text);text-decoration:none}.error-actions a:first-child{border-color:var(--atlas-accent);color:var(--atlas-accent)}.error-actions a:hover{background:var(--atlas-bg-2)}
 .error-footer{max-width:920px;margin:var(--atlas-space-7) auto 0;padding:var(--atlas-space-4) clamp(var(--atlas-space-4),4vw,var(--atlas-space-7));display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--atlas-space-4);border-top:1px solid var(--atlas-border-hi);color:var(--atlas-text-faint);font-size:var(--atlas-type-meta)}.error-footer .atlas-footer__identity{min-width:min(100%,220px);flex:1 1 260px;display:grid;gap:2px;color:var(--atlas-text)}.error-footer .atlas-footer__identity strong{font-weight:500;letter-spacing:.06em;text-transform:uppercase}.error-footer .atlas-footer__identity span{color:var(--atlas-text-faint)}.error-footer .atlas-footer__context,.error-footer .atlas-footer__evidence,.error-footer .atlas-footer__escape{display:flex;align-items:center;gap:var(--atlas-space-3);white-space:nowrap}.error-footer .atlas-footer__evidence,.error-footer .atlas-footer__escape{border-left:1px solid var(--atlas-border);padding-left:var(--atlas-space-4)}.error-footer a{min-height:var(--atlas-touch-min);display:inline-flex;align-items:center;color:var(--atlas-text-dim);text-underline-offset:.22em}
 :where(a):focus-visible{outline:2px solid var(--atlas-focus);outline-offset:3px}
-@media(max-width:767px){.error-header{grid-template-columns:minmax(0,1fr);padding-inline:var(--atlas-space-4)}.error-header .atlas-global-header__nav{display:none}.error-strip{grid-template-columns:1fr auto}.error-strip span:nth-child(2){grid-column:1/-1;grid-row:2}.error-main{padding-bottom:var(--atlas-space-8)}.error-footer{flex-direction:column;align-items:flex-start;padding-bottom:calc(var(--atlas-space-8) + env(safe-area-inset-bottom))}.error-footer .atlas-footer__identity,.error-footer .atlas-footer__context,.error-footer .atlas-footer__evidence,.error-footer .atlas-footer__escape{width:100%;border-left:0;padding-left:0;white-space:normal}}
+@media(max-width:767px){.error-header.atlas-global-header{padding:0}.error-header .atlas-header__inner{width:min(calc(100% - 32px),1280px);grid-template-columns:minmax(0,1fr);gap:12px}.error-header .atlas-global-header__nav{display:none}.error-strip{grid-template-columns:1fr auto;padding-inline:16px}.error-strip span:nth-child(2){grid-column:1/-1;grid-row:2}.error-main{padding-bottom:var(--atlas-space-8)}.error-footer{flex-direction:column;align-items:flex-start;padding-bottom:calc(var(--atlas-space-8) + env(safe-area-inset-bottom))}.error-footer .atlas-footer__identity,.error-footer .atlas-footer__context,.error-footer .atlas-footer__evidence,.error-footer .atlas-footer__escape{width:100%;border-left:0;padding-left:0;white-space:normal}}
 `;
 
 export function handleDocsNotFound() {
@@ -43,6 +44,7 @@ export function handleDocsNotFound() {
 </head>
 <body>
 <header class="atlas-global-header error-header">
+  <div class="atlas-header__inner">
   <div class="atlas-global-header__identity error-brand">
     <a class="error-wordmark" href="https://atlas-systems.uk/">Atlas<span>_</span>Systems</a>
     <a class="error-status" href="https://status.atlas-systems.uk/"><i aria-hidden="true"></i><span>Status</span></a>
@@ -54,6 +56,7 @@ export function handleDocsNotFound() {
     <a class="atlas-global-header__link" href="https://atlas-systems.uk/systems/">Systems</a>
     <a class="atlas-global-header__link" href="https://atlas-systems.uk/about/">About</a>
   </nav>
+  </div>
 </header>
 <div class="error-strip"><strong>Public API</strong><span>Versioned read surface rendered from OpenAPI</span><span>docs route unavailable</span></div>
 <main class="error-main">
