@@ -15,7 +15,7 @@ jobs:
   gardener:
     uses: AtlasReaper311/atlas-gardener/.github/workflows/gardener-automerge-gate.yml@3939393a1f202f6e755c0c1f8e888f0d7ca27f4c
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
       checks: read
       statuses: read
