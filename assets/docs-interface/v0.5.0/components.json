@@ -1,4 +1,35 @@
 {
+  "evidence_mode": {
+    "mode_attribute": "data-evidence-mode",
+    "mode_label_selector": ".atlas-evidence-mode",
+    "mode_selectors": {
+      "measured": "[data-evidence-mode='measured']",
+      "not-applicable-unscored": "[data-evidence-mode='not-applicable-unscored']",
+      "recorded-replay": "[data-evidence-mode='recorded-replay']",
+      "simulated": "[data-evidence-mode='simulated']",
+      "stale-measured": "[data-evidence-mode='stale-measured']",
+      "unavailable": "[data-evidence-mode='unavailable']",
+      "unknown": "[data-evidence-mode='unknown']"
+    },
+    "surface_selector": ".atlas-evidence-surface",
+    "value_selector": ".atlas-evidence-value"
+  },
+  "footer": {
+    "base_selector": ".atlas-footer",
+    "slot_selectors": {
+      "context": ".atlas-footer__context",
+      "estate_escape": ".atlas-footer__escape",
+      "evidence": ".atlas-footer__evidence",
+      "identity": ".atlas-footer__identity",
+      "sequence": ".atlas-footer__sequence"
+    },
+    "variant_selectors": {
+      "editorial": ".atlas-footer--editorial",
+      "estate": ".atlas-footer--estate",
+      "product": ".atlas-footer--product",
+      "tool": ".atlas-footer--tool"
+    }
+  },
   "roles": [
     {
       "role": "global-header",
@@ -73,6 +104,26 @@
       "selector": ".atlas-table-wrap"
     },
     {
+      "role": "breadcrumb-navigation",
+      "selector": ".atlas-breadcrumbs"
+    },
+    {
+      "role": "status-announcement",
+      "selector": ".atlas-status-announcement"
+    },
+    {
+      "role": "evidence-mode",
+      "selector": ".atlas-evidence-mode"
+    },
+    {
+      "role": "evidence-surface",
+      "selector": ".atlas-evidence-surface"
+    },
+    {
+      "role": "evidence-value",
+      "selector": ".atlas-evidence-value"
+    },
+    {
       "role": "search-dialog",
       "selector": ".atlas-search-dialog"
     },
@@ -102,5 +153,5 @@
     }
   ],
   "schema_version": "atlas-interface-kit/components/v1",
-  "version": "0.2.0"
+  "version": "0.5.0"
 }

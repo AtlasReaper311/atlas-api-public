@@ -251,7 +251,7 @@ async function capture(context, browserName, viewportName) {
     // isolation, so it cannot import the Worker source; update this literal to match
     // DOCS_INTERFACE_STYLESHEET.sha256 in src/routes/docs-interface.generated.js
     // whenever the Atlas Interface Kit bundle is bumped.
-    if (stylesheet.headers()["x-atlas-interface-sha256"] !== "514a046dc5aa9a304778515a7d008afd58b3512f18bb58bbaa88de807e92bb44") {
+    if (stylesheet.headers()["x-atlas-interface-sha256"] !== "573781fc06b0e52f9d1691597d1defd9e1a1575dbc96e15a58cd5c92bc30221e") {
       failures.push(`${browserName}/${viewportName}/docs: interface stylesheet fingerprint drifted`);
     }
     await verifySearchDialog(page, browserName, viewportName);

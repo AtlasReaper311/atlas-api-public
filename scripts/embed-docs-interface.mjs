@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const version = "0.2.0";
+const version = "0.5.0";
 const source = path.join(root, "assets", "docs-interface", `v${version}`);
 const manifestPath = path.join(source, "manifest.json");
 const output = path.join(root, "src", "routes", "docs-interface.generated.js");
