@@ -14,7 +14,7 @@ const CSS = `
 html{scroll-padding-top:calc(var(--nav-h) + var(--atlas-space-5))}
 body{margin:0;min-height:100vh;overflow-x:hidden;background:var(--bg);background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:80px 80px;color:var(--text);font:400 var(--atlas-type-body)/1.75 var(--mono)}
 a{color:var(--accent);text-underline-offset:.22em}
-.api-global-header{min-height:var(--nav-h);padding-inline:clamp(var(--atlas-space-4),4vw,var(--atlas-space-7));background:rgba(10,10,15,.96)}
+.api-global-header{--atlas-shell-gutter:max(24px,calc((100% - 1280px)/2));min-height:var(--nav-h);grid-template-columns:minmax(230px,1fr) auto minmax(230px,1fr);padding-inline:var(--atlas-shell-gutter);background:rgba(10,10,15,.96)}
 .api-global-header .atlas-global-header__identity{min-width:0}
 .wordmark{flex:none;color:var(--text);font-size:13px;font-weight:500;letter-spacing:.12em;text-decoration:none;text-transform:uppercase;white-space:nowrap}.wordmark span{color:var(--accent)}
 .api-global-header .atlas-global-header__nav{gap:var(--atlas-space-3)}

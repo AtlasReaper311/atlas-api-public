@@ -34,6 +34,8 @@ test("docs have the global header, search, status, metadata, and local icons", (
     assert.ok(html.includes(`https://atlas-systems.uk${route}`));
   }
   assert.match(html, /class="atlas-global-header api-global-header"/);
+  assert.match(html, /--atlas-shell-gutter:max\(24px,calc\(\(100% - 1280px\)\/2\)\)/);
+  assert.match(html, /grid-template-columns:minmax\(230px,1fr\) auto minmax\(230px,1fr\)/);
   assert.match(html, /class="atlas-bottom-nav api-bottom-nav" aria-label="Mobile navigation"/);
   assert.match(html, /\.api-bottom-nav a\{letter-spacing:0\}/);
   assert.doesNotMatch(html, /letter-spacing:-/);
@@ -78,10 +80,10 @@ test("docs shell script is local and consumes only bounded public APIs", async (
 });
 
 test("pinned Interface V2 stylesheet is repository-local and fingerprinted", async () => {
-  assert.equal(DOCS_INTERFACE_VERSION, "0.2.0");
+  assert.equal(DOCS_INTERFACE_VERSION, "0.5.0");
   assert.equal(
     DOCS_INTERFACE_STYLESHEET.sha256,
-    "514a046dc5aa9a304778515a7d008afd58b3512f18bb58bbaa88de807e92bb44",
+    "573781fc06b0e52f9d1691597d1defd9e1a1575dbc96e15a58cd5c92bc30221e",
   );
   const asset = handleDocsAsset("/v1/docs/assets/interface-kit.css");
   assert.ok(asset instanceof Response);
@@ -91,7 +93,7 @@ test("pinned Interface V2 stylesheet is repository-local and fingerprinted", asy
     DOCS_INTERFACE_STYLESHEET.sha256,
   );
   const stylesheet = await asset.text();
-  assert.match(stylesheet, /Atlas Interface Kit v0\.2\.0/);
+  assert.match(stylesheet, /Atlas Interface Kit v0\.5\.0/);
   assert.match(stylesheet, /\.atlas-global-header/);
   assert.match(stylesheet, /\.atlas-bottom-nav/);
   assert.doesNotMatch(stylesheet, /https?:\/\//);

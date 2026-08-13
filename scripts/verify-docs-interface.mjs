@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const version = "0.2.0";
+const version = "0.5.0";
 const bundle = path.join(root, "assets", "docs-interface", `v${version}`);
 const manifest = JSON.parse(fs.readFileSync(path.join(bundle, "manifest.json"), "utf8"));
 const expectedFiles = new Set([
@@ -16,6 +16,7 @@ const expectedFiles = new Set([
   "fonts/ibm-plex-mono-500.woff2",
   "licenses/DM-Serif-Display-OFL.txt",
   "licenses/IBM-Plex-Mono-OFL.txt",
+  "semantics.json",
   "tokens.json",
 ]);
 
@@ -30,7 +31,7 @@ function sha256(buffer) {
 requireValue(manifest.schema_version === "atlas-interface-kit/bundle/v1", "unsupported interface manifest");
 requireValue(manifest.version === version, "unexpected interface version");
 requireValue(manifest.contract_version === "2.0.0", "unexpected interface contract version");
-requireValue(manifest.component_role_count === 25, "unexpected component role count");
+requireValue(manifest.component_role_count === 30, "unexpected component role count");
 requireValue(
   JSON.stringify(Object.keys(manifest.files || {}).sort()) === JSON.stringify([...expectedFiles].sort()),
   "interface bundle file set drifted",
