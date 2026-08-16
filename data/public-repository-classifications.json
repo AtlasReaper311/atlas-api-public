@@ -21,6 +21,7 @@
     {"lifecycle":"experimental","provenance":"original","repository":"AtlasReaper311/atlas-model-lab","runtime_service":false,"scope":"public"},
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-notify","runtime_service":true,"scope":"internal"},
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-quota-watch","runtime_service":true,"scope":"public"},
+    {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-request-xray","runtime_service":false,"scope":"public"},
     {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/atlas-resource-audit","runtime_service":false,"scope":"public"},
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/atlas-systems","runtime_service":true,"scope":"public"},
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/deploy-watch","runtime_service":true,"scope":"internal"},
@@ -36,9 +37,9 @@
     {"lifecycle":"production","provenance":"original","repository":"AtlasReaper311/status","runtime_service":true,"scope":"public"},
     {"lifecycle":"active","provenance":"original","repository":"AtlasReaper311/worker-meta-kit","runtime_service":false,"scope":"public"}
   ],
-  "repository_count": 34,
+  "repository_count": 35,
   "schema_version": "atlas-public-repository-classifications/projection/v1",
-  "source_fingerprint": "sha256:fc650a524d39a9569c674ceb002df34419b9f7467bf3ddfaf4f7c1a087b21958",
+  "source_fingerprint": "sha256:fbb4172ca2e55070ceb1ac29d6cd7ea1380a9b19f4207da2aa4c1c250a9aacbd",
   "sources": {
     "public_non_runtime": "policy/public-assurance-repositories.json",
     "runtime_registry": "policy/estate-registry.json"
