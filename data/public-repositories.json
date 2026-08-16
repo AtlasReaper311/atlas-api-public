@@ -1,8 +1,8 @@
 {
   "schema": "atlas-public-repositories/v2",
   "owner": "AtlasReaper311",
-  "repository_count": 34,
-  "inventory_fingerprint": "sha256:4b183d8c06091cc0427c215698d3412feb3e7cf4064c7f5371d8a4edc9807bf3",
+  "repository_count": 35,
+  "inventory_fingerprint": "sha256:d9356aa4fb717c865a9fb815139562e1da7def171609b674e8123105c936c501",
   "repositories": [
     {
       "name": ".github",
@@ -394,6 +394,25 @@
       "disabled": false,
       "visibility": "public",
       "created_at": "2026-07-13T23:05:10Z"
+    },
+    {
+      "name": "atlas-request-xray",
+      "full_name": "AtlasReaper311/atlas-request-xray",
+      "html_url": "https://github.com/AtlasReaper311/atlas-request-xray",
+      "description": "Browser-based simulator for a seven-layer request pipeline. Toggle retries, timeouts, caching, and rate limiting and watch the outcome change.",
+      "homepage": "https://xray.atlas-systems.uk",
+      "language": "JavaScript",
+      "topics": [
+        "atlas-systems",
+        "javascript",
+        "portfolio",
+        "reliability"
+      ],
+      "fork": false,
+      "archived": false,
+      "disabled": false,
+      "visibility": "public",
+      "created_at": "2026-08-13T08:55:55Z"
     },
     {
       "name": "atlas-resource-audit",
