@@ -8,6 +8,8 @@ const CLASSIFICATION_AUTHORITY = "AtlasReaper311/atlas-infra";
 const CLASSIFICATION_SCHEMA =
   "atlas-public-repository-classifications/projection/v1";
 const ADR_INDEX_SCHEMA = "atlas-control-plane/adr-runtime-index/v1";
+const ADR_RELATIONSHIP_SCHEMA = "atlas-control-plane/adr-runtime-relationship/v1";
+const ADR_STATUSES = new Set(["proposed", "accepted", "superseded"]);
 const NODE_SCHEMA = "atlas-control-plane/evidence-node/v1";
 const EDGE_SCHEMA = "atlas-control-plane/evidence-edge/v1";
 const CLASSIFICATION_URI =
@@ -69,18 +71,25 @@ function validClassificationAuthority() {
   );
 }
 
-function validAdrRelationship(relationship) {
+export function isValidAdrRelationship(relationship) {
   return (
-    relationship?.schema_version ===
-      "atlas-control-plane/adr-runtime-relationship/v1" &&
+    relationship?.schema_version === ADR_RELATIONSHIP_SCHEMA &&
     (relationship?.visibility === "public" ||
       relationship?.visibility === "internal" ||
       relationship?.visibility === "restricted-metadata") &&
     /^adrrel:sha256:[0-9a-f]{64}$/.test(
       String(relationship.relationship_id || ""),
     ) &&
-    relationship?.adr?.status === "accepted" &&
+    ADR_STATUSES.has(relationship?.adr?.status) &&
     /^ADR-[0-9]{4}$/.test(String(relationship?.adr?.id || ""))
+  );
+}
+
+export function isActivePublicAdrRelationship(relationship) {
+  return (
+    isValidAdrRelationship(relationship) &&
+    relationship.visibility === "public" &&
+    relationship.adr.status === "accepted"
   );
 }
 
@@ -89,18 +98,14 @@ function validAdrAuthority() {
     adrRuntimeIndex?.schema_version === ADR_INDEX_SCHEMA &&
     Array.isArray(adrRuntimeIndex.relationships) &&
     adrRuntimeIndex.relationships.length > 0 &&
-    adrRuntimeIndex.relationships.every(validAdrRelationship) &&
-    adrRuntimeIndex.relationships.some(
-      (relationship) => relationship?.visibility === "public",
-    )
+    adrRuntimeIndex.relationships.every(isValidAdrRelationship) &&
+    adrRuntimeIndex.relationships.some(isActivePublicAdrRelationship)
   );
 }
 
 function publicAdrRelationships() {
   if (!validAdrAuthority()) return [];
-  return adrRuntimeIndex.relationships.filter(
-    (relationship) => relationship?.visibility === "public",
-  );
+  return adrRuntimeIndex.relationships.filter(isActivePublicAdrRelationship);
 }
 
 function publicServices() {
