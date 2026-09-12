@@ -64,6 +64,7 @@ Unknown components fail closed.
 | `GET /v1/topology` | Declared public repository and component topology |
 | `GET /v1/search?q=` | Public corpus search projection |
 | `GET /v1/stats` | Public component verdicts and measured estate evidence |
+| `GET /v1/evidence/twin-impact` | Static public Twin impact projection |
 | `GET /v1/infra/status` | Bounded public infrastructure health projection |
 | `GET /v1/rag/stats` | Aggregate corpus query counts |
 | `GET /v1/badge/status` | Public estate status badge |
@@ -120,6 +121,12 @@ Targets arrive through fingerprint-verified policy ingest. State transitions can
 ## Public evidence surface
 
 `GET /v1/evidence` indexes the latest scored public conformance and chaos-assurance records. Authenticated producer routes validate the versioned evidence contracts and fingerprints before accepting writes.
+
+`GET /v1/evidence/twin-impact` serves the static, public-safe
+`atlas-control-plane/twin-impact-projection/v1` projection produced by Atlas
+Twin. It reports only `could-be-affected` context within its stated public
+coverage; it is not merge, release, publication, deployment, runtime, failure,
+live-state, or estate-completeness evidence.
 
 Evidence producers remain separate from this public read boundary. The API stores and presents approved public evidence; it does not gain deployment authority by doing so.
 

@@ -465,6 +465,22 @@ export function buildOpenApi() {
           },
         },
       },
+      "/v1/evidence/twin-impact": {
+        get: {
+          summary: "Public Twin impact projection",
+          description:
+            "Static atlas-control-plane/twin-impact-projection/v1 context describing what a bounded offline Twin analysis says could be affected. It does not claim merge, approval, release, publication, deployment, runtime, failure, live state, or estate completeness.",
+          responses: {
+            200: {
+              description:
+                "Static public Twin impact projection (atlas-control-plane/twin-impact-projection/v1)",
+            },
+            503: {
+              description: "The static Twin impact projection is unavailable",
+            },
+          },
+        },
+      },
       "/v1/reliability": {
         get: {
           summary: "Derived reliability results for every measured service",

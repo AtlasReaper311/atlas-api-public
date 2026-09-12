@@ -1,0 +1,179 @@
+{
+  "analysis": {
+    "mode": "offline-twin-analysis",
+    "passport_generated_at": "2026-09-12T22:42:15Z",
+    "passport_request_fingerprint": "48b61a17e77f04b738dc4947e08f9f8eb70099ddd0b0420beb68262d623d65da",
+    "passport_schema_version": "atlas-change-passport/v1"
+  },
+  "distribution": {
+    "mode": "static-public-projection",
+    "path": "data/twin-impact-projection.json",
+    "route": "/v1/evidence/twin-impact",
+    "serving_repository": "AtlasReaper311/atlas-api-public"
+  },
+  "generated_at": "2026-09-12T22:42:15Z",
+  "impact": {
+    "conclusion": "could-be-affected",
+    "coverage": "known-public-scope",
+    "relationships": [
+      {
+        "evidence_class": "twin-impact",
+        "id": "atlas-api-public",
+        "identity_authority": "atlas-api-public-topology-exporter",
+        "kind": "component",
+        "relation": "changed"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "atlas-dep-audit",
+        "identity_authority": "atlas-api-public-topology-exporter",
+        "kind": "component",
+        "relation": "direct-consumer"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "atlas-dora",
+        "identity_authority": "atlas-api-public-topology-exporter",
+        "kind": "component",
+        "relation": "direct-consumer"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "atlas-journey-watch",
+        "identity_authority": "atlas-api-public-topology-exporter",
+        "kind": "component",
+        "relation": "direct-consumer"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "atlas-systems",
+        "identity_authority": "atlas-api-public-topology-exporter",
+        "kind": "component",
+        "relation": "direct-consumer"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "status",
+        "identity_authority": "atlas-api-public-topology-exporter",
+        "kind": "component",
+        "relation": "direct-consumer"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "AtlasReaper311/atlas-api-public",
+        "identity_authority": "atlas-infra-public-classification",
+        "kind": "repository",
+        "relation": "changed"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "AtlasReaper311/atlas-dep-audit",
+        "identity_authority": "atlas-infra-public-classification",
+        "kind": "repository",
+        "relation": "direct-consumer"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "AtlasReaper311/atlas-dora",
+        "identity_authority": "atlas-infra-public-classification",
+        "kind": "repository",
+        "relation": "direct-consumer"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "AtlasReaper311/atlas-journey-watch",
+        "identity_authority": "atlas-infra-public-classification",
+        "kind": "repository",
+        "relation": "direct-consumer"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "AtlasReaper311/atlas-systems",
+        "identity_authority": "atlas-infra-public-classification",
+        "kind": "repository",
+        "relation": "direct-consumer"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "AtlasReaper311/status",
+        "identity_authority": "atlas-infra-public-classification",
+        "kind": "repository",
+        "relation": "direct-consumer"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "atlas-api-public",
+        "identity_authority": "atlas-api-public-topology-exporter",
+        "kind": "service",
+        "relation": "declared-service"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "atlas-dora",
+        "identity_authority": "atlas-api-public-topology-exporter",
+        "kind": "service",
+        "relation": "declared-service"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "atlas-systems",
+        "identity_authority": "atlas-api-public-topology-exporter",
+        "kind": "service",
+        "relation": "declared-service"
+      },
+      {
+        "evidence_class": "twin-impact",
+        "id": "status",
+        "identity_authority": "atlas-api-public-topology-exporter",
+        "kind": "service",
+        "relation": "declared-service"
+      }
+    ],
+    "scope": "public-only",
+    "unknowns": []
+  },
+  "limitations": [
+    "could-be-affected-only",
+    "no-merge-approval",
+    "no-deployment-claim",
+    "no-runtime-claim",
+    "no-live-claim",
+    "no-publication-claim",
+    "no-failure-claim",
+    "no-estate-completeness-claim",
+    "private-or-unclassified-evidence-may-be-unknown"
+  ],
+  "privacy": {
+    "mode": "public-safe",
+    "private_data_excluded": true,
+    "public_identities_only": true,
+    "redaction": "drop-private-or-unclassified",
+    "unknown_data_not_inferred": true
+  },
+  "projection_fingerprint": "sha256:6b757a9c08a913aa73b4d60200485fb40d5968b923b5ec017160392df4366618",
+  "provenance": {
+    "authority_commit": "de3b182eae9effe06753affa5dcff1945d87c1eb",
+    "authority_repository": "AtlasReaper311/atlas-infra",
+    "classification_source": {
+      "fingerprint": "sha256:fbb4172ca2e55070ceb1ac29d6cd7ea1380a9b19f4207da2aa4c1c250a9aacbd",
+      "path": "policy/public-repository-classifications.json",
+      "repository": "AtlasReaper311/atlas-infra"
+    },
+    "producer_contract": "atlas-change-passport/v1",
+    "producer_id": "atlas-twin",
+    "producer_version": "1.1.0",
+    "projection_policy": "ADR-0017",
+    "topology_source": {
+      "commit": "8ff638f92cfc3a3ec5e2243ecb6464c964bd8e65",
+      "path": "data/estate.manifest.json",
+      "repository": "AtlasReaper311/atlas-api-public"
+    }
+  },
+  "schema_version": "atlas-control-plane/twin-impact-projection/v1",
+  "subject": {
+    "base_oid": "8ff638f92cfc3a3ec5e2243ecb6464c964bd8e65",
+    "head_oid": "02a0e6a7bfac66ea85cff536d0c89e6406abee5f",
+    "repository": "AtlasReaper311/atlas-api-public",
+    "visibility": "public"
+  }
+}
