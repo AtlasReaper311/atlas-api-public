@@ -24,6 +24,7 @@ export const META = {
     { method: "GET", path: "/v1/evidence", description: "Public assurance evidence index" },
     { method: "GET", path: "/v1/evidence/conformance", description: "Latest scored estate conformance report" },
     { method: "GET", path: "/v1/evidence/chaos", description: "Latest chaos assurance report set" },
+    { method: "GET", path: "/v1/evidence/twin-impact", description: "Static public Twin impact projection" },
     { method: "GET", path: "/v1/badge/status", description: "SVG status badge" },
     { method: "GET", path: "/v1/control-plane/summary", description: "Bounded public control-plane summary" },
     { method: "GET", path: "/v1/control-plane/tools/openapi.json", description: "Authenticated nine-operation Ramone tool spec" },

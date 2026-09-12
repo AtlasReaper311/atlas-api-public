@@ -41,6 +41,7 @@ import { handleTopology } from "./routes/topology.js";
 import { handleTraceIndex, handleTraceService } from "./routes/trace.js";
 import { handleSecurityText } from "./routes/security-txt.js";
 import { handleControlPlane } from "./routes/control-plane.js";
+import { handleTwinImpact } from "./routes/twin-impact.js";
 import { buildOpenApi } from "./openapi-trace.js";
 import { runCron } from "./cron.js";
 
@@ -172,6 +173,8 @@ async function routeRequest(request, env, ctx) {
           return handleInfraStatus(request, env);
         case "/v1/rag/stats":
           return handleRagStats(request, env);
+        case "/v1/evidence/twin-impact":
+          return handleTwinImpact();
       }
     }
 
