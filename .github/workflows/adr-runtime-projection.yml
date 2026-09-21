@@ -10,7 +10,8 @@ on:
   repository_dispatch:
     types: [adr-runtime-projection]
 
-permissions: {}
+permissions:
+  contents: read
 
 concurrency:
   group: adr-runtime-projection
