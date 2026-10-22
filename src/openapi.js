@@ -269,15 +269,56 @@ export function buildOpenApi() {
         get: {
           summary: "Estate statistics",
           description:
-            "Repository totals, nineteen component verdicts, and uptime measured from the ten-minute estate probe. The additive component_details map preserves healthy, degraded, down, and unknown with evidence source, measurement time, detail, and latency; the original boolean components map remains for compatibility. Uptime accrues from first deploy inside a rolling window rather than inventing history.",
-          responses: { 200: { description: "Stats document" } },
+            "Repository totals, nineteen scored component verdicts, and uptime measured from the ten-minute estate probe. The additive component_details map preserves healthy, degraded, down, and unknown with evidence source, measurement time, detail, and latency; the original boolean components map remains for compatibility. Supplemental health checks such as atlas_dora are shown separately and do not change the scored roster or uptime. Uptime accrues from first deploy inside a rolling window rather than inventing history.",
+          responses: {
+            200: {
+              description: "Stats document",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      estate: {
+                        type: "object",
+                        nullable: true,
+                        properties: {
+                          operational: { type: "integer" },
+                          total_components: { type: "integer" },
+                          components: {
+                            type: "object",
+                            additionalProperties: { type: "boolean" },
+                          },
+                          component_details: {
+                            type: "object",
+                            additionalProperties: {
+                              $ref: "#/components/schemas/HealthEvidence",
+                            },
+                          },
+                          supplemental_health: {
+                            type: "object",
+                            description:
+                              "Health checks that are visible but are not members of the scored component roster or its uptime history.",
+                            additionalProperties: {
+                              $ref: "#/components/schemas/HealthEvidence",
+                            },
+                          },
+                        },
+                        additionalProperties: true,
+                      },
+                    },
+                    additionalProperties: true,
+                  },
+                },
+              },
+            },
+          },
         },
       },
       "/v1/slo": {
         get: {
           summary: "Per-day probe counters for error budget maths",
           description:
-            "The raw per-day ok/total counters behind the uptime numbers, one probe pass every ten minutes, pruned past the rolling window. Successful probes also carry round-trip milliseconds (ms_sum, ms_count) so consumers can show a measured average latency. Targets are deliberately not here; they live with the status page, so tuning a target never touches this Worker.",
+            "The per-day ok/total counters behind the uptime numbers, one probe pass every ten minutes, pruned past the rolling window. Successful probes carry round-trip milliseconds. Failed probes add fixed safe reason categories, never raw error text or URLs. Each component also exposes at most six recent timestamped probe samples; this short history starts with the deployment that adds it. Targets remain with the status page, so tuning a target never touches this Worker.",
           responses: {
             200: {
               description: "SLO source document",
@@ -307,6 +348,10 @@ export function buildOpenApi() {
                                   total: { type: "integer" },
                                   ms_sum: { type: "integer" },
                                   ms_count: { type: "integer" },
+                                  failures_by_reason: {
+                                    type: "object",
+                                    additionalProperties: { type: "integer", minimum: 0 },
+                                  },
                                 },
                               },
                             },
@@ -314,6 +359,31 @@ export function buildOpenApi() {
                             first_day: { type: "string", nullable: true },
                             ok: { type: "integer" },
                             total: { type: "integer" },
+                            failures: { type: "integer", minimum: 0 },
+                            failure_reasons: {
+                              type: "object",
+                              additionalProperties: { type: "integer", minimum: 0 },
+                            },
+                            recent_probes: {
+                              type: "array",
+                              maxItems: 6,
+                              items: {
+                                type: "object",
+                                required: ["checked_at", "ok", "status"],
+                                properties: {
+                                  checked_at: { type: "string", format: "date-time" },
+                                  ok: { type: "boolean" },
+                                  status: {
+                                    type: "string",
+                                    enum: ["healthy", "degraded", "down", "unknown"],
+                                  },
+                                  reason: {
+                                    type: "string",
+                                    pattern: "^(http_[1-5][0-9][0-9]|missing_binding|quota_breach|timeout|invalid_health_response|upstream_degraded|probe_error)$",
+                                  },
+                                },
+                              },
+                            },
                             avg_ms: { type: "integer", nullable: true },
                           },
                         },
@@ -625,6 +695,21 @@ export function buildOpenApi() {
       },
     },
     components: {
+      schemas: {
+        HealthEvidence: {
+          type: "object",
+          properties: {
+            status: {
+              type: "string",
+              enum: ["healthy", "degraded", "down", "unknown"],
+            },
+            detail: { type: "string", nullable: true },
+            latency_ms: { type: "integer", nullable: true },
+            evidence_source: { type: "string", nullable: true },
+            measured_at: { type: "string", format: "date-time", nullable: true },
+          },
+        },
+      },
       securitySchemes: {
         bearer: { type: "http", scheme: "bearer" },
       },

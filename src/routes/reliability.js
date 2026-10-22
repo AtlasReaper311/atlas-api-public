@@ -15,7 +15,11 @@
 
 import { bearerOk, errorResponse, json, nowIso, readJson } from "../lib/http.js";
 import { notify } from "../lib/notify.js";
-import { readUptime } from "../lib/status.js";
+import {
+  readUptime,
+  SAFE_FAILURE_REASON,
+  RECENT_PROBE_LIMIT,
+} from "../lib/status.js";
 import {
   buildReleaseBaseline,
   canonicalJson,
@@ -292,14 +296,145 @@ const RUNBOOKS = {
   unavailable_source: "docs/runbooks/reliability-source-unavailable.md",
 };
 
-function renderEvent(item) {
+function objectiveFor(entry, policy) {
+  return policy?.objectives?.find(
+    (objective) => objective.objective_id === entry?.objective_id
+      || objective.service_id === entry?.service_id,
+  ) ?? null;
+}
+
+function probeEvidence(objective, uptime, now) {
+  const component = objective?.measurement_source?.component;
+  const days = uptime?.components?.[component];
+  const windowDays = Math.max(1, Number(objective?.window_days) || 30);
+  if (!component || !days || typeof days !== "object") {
+    return { component, windowDays, hasHistory: false, failures: 0, reasons: {}, recent: [] };
+  }
+
+  const today = now.toISOString().slice(0, 10);
+  const firstDay = new Date(now.getTime() - (windowDays - 1) * 86400000)
+    .toISOString()
+    .slice(0, 10);
+  let failures = 0;
+  let observedDays = 0;
+  const reasons = {};
+  for (const [day, bucket] of Object.entries(days)) {
+    if (day < firstDay || day > today) continue;
+    observedDays += 1;
+    failures += Math.max(0, (bucket.total || 0) - (bucket.ok || 0));
+    for (const [reason, count] of Object.entries(bucket.failures_by_reason ?? {})) {
+      if (SAFE_FAILURE_REASON.test(reason) && Number.isFinite(count) && count > 0) {
+        reasons[reason] = (reasons[reason] || 0) + count;
+      }
+    }
+  }
+
+  const recent = Array.isArray(uptime?.recent_probes?.[component])
+    ? uptime.recent_probes[component]
+      .slice(-RECENT_PROBE_LIMIT)
+      .filter((sample) => typeof sample?.checked_at === "string")
+      .map((sample) => ({
+        checked_at: sample.checked_at,
+        ok: sample.ok === true,
+        status: ["healthy", "degraded", "down", "unknown"].includes(sample.status)
+          ? sample.status
+          : "unknown",
+        reason: !sample.ok && SAFE_FAILURE_REASON.test(sample.reason ?? "")
+          ? sample.reason
+          : null,
+      }))
+    : [];
+
+  return {
+    component,
+    windowDays,
+    hasHistory: observedDays > 0 || recent.length > 0,
+    failures,
+    reasons,
+    classifiedFailures: Object.values(reasons).reduce((sum, count) => sum + count, 0),
+    recent,
+  };
+}
+
+function shortProbeTime(value) {
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed)
+    ? new Date(parsed).toISOString().slice(5, 16).replace("T", " ")
+    : "time unknown";
+}
+
+function formatProbeEvidence(evidence) {
+  if (!evidence?.hasHistory) {
+    const component = evidence?.component || "objective component";
+    return `Probe evidence: no retained samples for ${component}; history starts with this deployment.`;
+  }
+
+  const causes = Object.entries(evidence.reasons)
+    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .slice(0, 3)
+    .map(([reason, count]) => `${reason}=${count}`)
+    .join(", ");
+  const classification = evidence.failures > evidence.classifiedFailures
+    ? `; ${evidence.failures - evidence.classifiedFailures} older/unclassified`
+    : "";
+  const recent = evidence.recent.length > 0
+    ? ` Recent: ${evidence.recent.map((sample) =>
+      `${shortProbeTime(sample.checked_at)} ${sample.ok
+        ? sample.status === "degraded" ? "degraded" : "ok"
+        : `fail/${sample.reason ?? "unknown"}`}`,
+    ).join(", ")}.`
+    : " Recent probe samples are not available yet.";
+  const causeText = causes ? `; causes ${causes}` : "";
+  return `Probe evidence (${evidence.component}, ${evidence.windowDays}d): ${evidence.failures} failed${causeText}${classification}.${recent}`
+    .slice(0, 210);
+}
+
+function formatConsolidatedEvidence(services, policy, uptime, now) {
+  const uniqueEvidence = new Map();
+  for (const entry of services) {
+    const objective = objectiveFor(entry, policy);
+    const evidence = probeEvidence(objective, uptime, now);
+    if (evidence.component && !uniqueEvidence.has(evidence.component)) {
+      uniqueEvidence.set(evidence.component, evidence);
+    }
+  }
+  const all = [...uniqueEvidence.values()];
+  if (all.length === 0) return "Probe evidence is not linked to these objectives yet.";
+
+  const failures = all.reduce((sum, evidence) => sum + evidence.failures, 0);
+  const reasons = {};
+  for (const evidence of all) {
+    for (const [reason, count] of Object.entries(evidence.reasons)) {
+      reasons[reason] = (reasons[reason] || 0) + count;
+    }
+  }
+  const causes = Object.entries(reasons)
+    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .slice(0, 3)
+    .map(([reason, count]) => `${reason}=${count}`)
+    .join(", ");
+  const recent = all.flatMap((evidence) => evidence.recent.map((sample) => ({
+    ...sample,
+    component: evidence.component,
+  })))
+    .sort((left, right) => Date.parse(right.checked_at) - Date.parse(left.checked_at))
+    .slice(0, 3)
+    .map((sample) => `${sample.component} ${shortProbeTime(sample.checked_at)} ${sample.ok
+      ? sample.status === "degraded" ? "degraded" : "ok"
+      : `fail/${sample.reason ?? "unknown"}`}`)
+    .join(", ");
+  return `Probe evidence: ${failures} failed across ${all.length} components${causes ? `; causes ${causes}` : ""}.${recent ? ` Recent: ${recent}.` : ""}`
+    .slice(0, 280);
+}
+
+function renderEvent(item, { policy, uptime, now }) {
   if (item.consolidated) {
+    const diagnostics = formatConsolidatedEvidence(item.services, policy, uptime, now);
     return {
       level: "warning",
       title: `Reliability: ${item.count} services degraded in one pass`,
       message:
-        "Broad degradation detected; individual notifications suppressed. " +
-        "One shared cause is likelier than many separate ones.",
+        diagnostics,
       fields: {
         services: item.services
           .map((entry) => `${entry.service_id}:${entry.state}`)
@@ -312,13 +447,14 @@ function renderEvent(item) {
     };
   }
   const entry = item.entry;
+  const objective = objectiveFor(entry, policy);
+  const diagnostics = formatProbeEvidence(probeEvidence(objective, uptime, now));
   if (item.kind === "recovery") {
     return {
       level: "success",
       title: `Reliability recovered: ${entry.service_id}`,
-      message:
-        `${entry.objective_id} is back to objective_met after measured recovery` +
-        ` from ${item.from_state}.`,
+      message: `${diagnostics} ${entry.objective_id} recovered from ${item.from_state}.`
+        .slice(0, 280),
       fields: {
         service: entry.service_id,
         objective: entry.objective_id,
@@ -330,7 +466,8 @@ function renderEvent(item) {
   return {
     level: LEVEL_BY_STATE[entry.state] ?? "warning",
     title: `Reliability: ${entry.service_id} is ${entry.state.replace(/_/g, " ")}`,
-    message: (entry.reasons ?? []).slice(0, 3).join("; ") || "state transition",
+    message: `${diagnostics} ${(entry.reasons ?? []).slice(0, 3).join("; ") || "state transition"}`
+      .slice(0, 280),
     fields: {
       service: entry.service_id,
       objective: entry.objective_id,
@@ -386,7 +523,7 @@ export async function runReliabilityPass(env, snapshot) {
     await env.ATLAS_PUBLIC_KV.put(STATE_KEY, JSON.stringify(plan.state));
     for (const item of plan.events) {
       item.evaluated_at = report.evaluated_at;
-      await notify(env, renderEvent(item), "reliability");
+      await notify(env, renderEvent(item, { policy: wrapper.document, uptime, now }), "reliability");
     }
     return report;
   } catch (err) {

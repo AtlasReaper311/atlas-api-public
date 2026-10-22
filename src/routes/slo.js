@@ -14,7 +14,12 @@
  */
 
 import { json, nowIso } from "../lib/http.js";
-import { readUptime, COMPONENTS } from "../lib/status.js";
+import {
+  readUptime,
+  COMPONENTS,
+  SAFE_FAILURE_REASON,
+  RECENT_PROBE_LIMIT,
+} from "../lib/status.js";
 
 export async function handleSlo(_request, env) {
   const doc = await readUptime(env);
@@ -28,6 +33,7 @@ export async function handleSlo(_request, env) {
       let total = 0;
       let msSum = 0;
       let msCount = 0;
+      const failureReasons = {};
       const dayKeys = Object.keys(days).sort();
       for (const key of dayKeys) {
         const bucket = days[key];
@@ -35,13 +41,36 @@ export async function handleSlo(_request, env) {
         total += bucket.total || 0;
         msSum += bucket.ms_sum || 0;
         msCount += bucket.ms_count || 0;
+        for (const [reason, count] of Object.entries(bucket.failures_by_reason ?? {})) {
+          if (SAFE_FAILURE_REASON.test(reason) && Number.isFinite(count) && count > 0) {
+            failureReasons[reason] = (failureReasons[reason] || 0) + count;
+          }
+        }
       }
+      const recentProbes = Array.isArray(doc.recent_probes?.[name])
+        ? doc.recent_probes[name]
+          .slice(-RECENT_PROBE_LIMIT)
+          .filter((sample) => typeof sample?.checked_at === "string")
+          .map((sample) => ({
+            checked_at: sample.checked_at,
+            ok: sample.ok === true,
+            status: ["healthy", "degraded", "down", "unknown"].includes(sample.status)
+              ? sample.status
+              : "unknown",
+            ...(!sample.ok && SAFE_FAILURE_REASON.test(sample.reason ?? "")
+              ? { reason: sample.reason }
+              : {}),
+          }))
+        : [];
       components[name] = {
         days,
         days_observed: dayKeys.length,
         first_day: dayKeys[0] || null,
         ok,
         total,
+        failures: Math.max(0, total - ok),
+        failure_reasons: failureReasons,
+        recent_probes: recentProbes,
         avg_ms: msCount > 0 ? Math.round(msSum / msCount) : null,
       };
     }
@@ -53,7 +82,7 @@ export async function handleSlo(_request, env) {
       measuring_since: doc?.started_at || null,
       window_days: doc?.window_days ?? Number(env.UPTIME_WINDOW_DAYS || "30"),
       components,
-      note: "per-day probe counters, one pass every ten minutes, pruned past the window; measurement began at first deploy and no older history exists",
+      note: "per-day probe counters, one pass every ten minutes, pruned past the window; failure categories and six recent samples begin with this deployment, so older failures have counts but no cause labels",
       generated_at: nowIso(),
     },
     200,

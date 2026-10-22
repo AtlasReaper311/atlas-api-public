@@ -14,7 +14,7 @@ export const META = {
     { method: "GET", path: "/v1/trace/services/{service_id}", description: "One public service proof chain" },
     { method: "GET", path: "/v1/search", description: "RAG search over the estate corpus (?q=)" },
     { method: "GET", path: "/v1/stats", description: "Estate stats: repos, components, measured uptime" },
-    { method: "GET", path: "/v1/slo", description: "Per-day probe counters for error budget maths; window labelled" },
+    { method: "GET", path: "/v1/slo", description: "Per-day probe counters, safe failure categories, and six recent samples; window labelled" },
     { method: "GET", path: "/v1/reliability", description: "Derived error budgets, burn rates, and explicit states" },
     { method: "GET", path: "/v1/reliability/services/{service_id}", description: "One service's derived reliability result" },
     { method: "GET", path: "/v1/reliability/objectives", description: "Active published reliability policy summary" },

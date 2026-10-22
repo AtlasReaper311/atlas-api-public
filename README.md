@@ -64,6 +64,7 @@ Unknown components fail closed.
 | `GET /v1/topology` | Declared public repository and component topology |
 | `GET /v1/search?q=` | Public corpus search projection |
 | `GET /v1/stats` | Public component verdicts and measured estate evidence |
+| `GET /v1/slo` | Per-day availability counters, safe failure categories, and recent probe samples |
 | `GET /v1/evidence/twin-impact` | Static public Twin impact projection |
 | `GET /v1/infra/status` | Bounded public infrastructure health projection |
 | `GET /v1/rag/stats` | Aggregate corpus query counts |
@@ -141,6 +142,8 @@ Evidence producers remain separate from this public read boundary. The API store
 **Rate limiting.** General and search routes use Cloudflare rate-limit bindings. Search is more constrained because each request performs real local embedding work.
 
 **Uptime honesty.** Reliability history begins when measurement begins. The API reports its evidence window rather than inventing pre-existing uptime.
+
+`GET /v1/slo` includes failure counts by fixed reason code and up to six recent probe samples per component. The recent sample history starts with the deployment that adds it. It stores no raw exception text or probed URL; reliability notifications use this evidence to explain a state change.
 
 **CSP.** Browser consumers require the API hostname in the site's `connect-src` policy. New public hostnames require an explicit site header review.
 

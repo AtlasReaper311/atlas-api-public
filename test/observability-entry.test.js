@@ -6,6 +6,7 @@ import {
   augmentStatsPayload,
   probeDora,
 } from "../src/observability-entry.js";
+import { buildOpenApi } from "../src/openapi.js";
 
 function statsFixture() {
   return {
@@ -72,7 +73,7 @@ test("probeDora fails closed when the binding is absent", async () => {
   assert.equal(result.measured_at, null);
 });
 
-test("augmentStatsPayload adds DORA without disturbing existing evidence", () => {
+test("augmentStatsPayload keeps DORA supplemental and preserves scored evidence", () => {
   const payload = statsFixture();
   const result = augmentStatsPayload(payload, {
     ok: true,
@@ -83,18 +84,43 @@ test("augmentStatsPayload adds DORA without disturbing existing evidence", () =>
     latency_ms: 12,
   });
 
-  assert.equal(result.estate.components.atlas_dora, true);
-  assert.deepEqual(result.estate.component_details.atlas_dora, {
+  assert.deepEqual(result.estate.supplemental_health.atlas_dora, {
     status: "healthy",
     detail: "health contract reports ok",
     latency_ms: 12,
     evidence_source: "service-binding:atlas-dora/dora/health",
     measured_at: "2026-07-25T12:01:00.000Z",
   });
-  assert.equal(result.estate.operational, 3);
-  assert.equal(result.estate.total_components, 3);
-  assert.equal(result.uptime.components.atlas_dora, null);
+  assert.deepEqual(result.estate.components, { registry: true, notify: true });
+  assert.deepEqual(result.estate.component_details, {
+    registry: {
+      status: "healthy",
+      detail: "http 200",
+      latency_ms: 10,
+      evidence_source: "service-binding:atlas-api-index/_meta",
+      measured_at: "2026-07-25T12:00:00.000Z",
+    },
+    notify: {
+      status: "healthy",
+      detail: "http 200",
+      latency_ms: 11,
+      evidence_source: "service-binding:atlas-notify/health",
+      measured_at: "2026-07-25T12:00:00.000Z",
+    },
+  });
+  assert.equal(result.estate.operational, 2);
+  assert.equal(result.estate.total_components, 2);
+  assert.deepEqual(result.uptime.components, { registry: 100, notify: 100 });
   assert.equal(result.estate.component_details.registry.detail, "http 200");
+});
+
+test("OpenAPI documents supplemental health outside scored components", () => {
+  const schema = buildOpenApi().paths["/v1/stats"].get.responses[200]
+    .content["application/json"].schema;
+  const estate = schema.properties.estate.properties;
+  assert.ok(estate.supplemental_health);
+  assert.equal(estate.total_components.type, "integer");
+  assert.match(estate.supplemental_health.description, /not members of the scored component roster/);
 });
 
 test("Wrangler delegates through the composition entry and binds atlas-dora", () => {

@@ -584,6 +584,47 @@ test("slo serves per-day counters with an honest window label", async () => {
   assert.equal(body.components.corpus.days_observed, 1);
   assert.ok(Number.isFinite(body.components.registry.avg_ms));
   assert.equal(body.components.machine.avg_ms, null);
+  assert.equal(body.components.corpus.failures, 0);
+  assert.deepEqual(body.components.corpus.failure_reasons, {});
+  assert.equal(body.components.corpus.recent_probes.length, 2);
+});
+
+test("slo records safe failure causes and only the latest six probe samples", async () => {
+  const env = makeEnv();
+  fetchHandler = (url) =>
+    url.pathname === "/health"
+      ? jsonResponse({ ok: false }, 503)
+      : jsonResponse({});
+  for (let pass = 0; pass < 8; pass += 1) await runCron(env);
+
+  const stored = JSON.parse(await env.ATLAS_PUBLIC_KV.get("uptime:days:v1"));
+  const today = new Date().toISOString().slice(0, 10);
+  assert.equal(stored.components.corpus[today].failures_by_reason.http_503, 8);
+  assert.equal(stored.recent_probes.corpus.length, 6);
+  assert.ok(stored.recent_probes.corpus.every((sample) => sample.reason === "http_503"));
+  assert.ok(!JSON.stringify(stored.recent_probes.corpus).includes("detail"));
+
+  const body = await (await call(env, "/v1/slo")).json();
+  assert.equal(body.components.corpus.failures, 8);
+  assert.equal(body.components.corpus.failure_reasons.http_503, 8);
+  assert.equal(body.components.corpus.recent_probes.length, 6);
+  assert.equal(body.components.corpus.recent_probes[0].status, "down");
+});
+
+test("probe history stores a safe category instead of raw error text", async () => {
+  const env = makeEnv();
+  fetchHandler = (url) => {
+    if (url.pathname === "/health") {
+      throw new Error("private-origin.example/internal trace");
+    }
+    return jsonResponse({});
+  };
+  await runCron(env);
+
+  const stored = await env.ATLAS_PUBLIC_KV.get("uptime:days:v1");
+  assert.match(stored, /probe_error/);
+  assert.ok(!stored.includes("private-origin.example/internal"));
+  assert.ok(!stored.includes("trace"));
 });
 
 test("slo answers honestly before any counters exist", async () => {

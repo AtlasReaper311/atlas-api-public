@@ -394,12 +394,29 @@ test("notification payloads carry runbooks and never carry secrets", async () =>
   assert.equal(env.notifications.length, 0);
 
   // Same policy, degraded counters: service-a exhausts its budget.
-  await env.ATLAS_PUBLIC_KV.put(UPTIME_KEY, JSON.stringify(freshCounters(130, 144)));
+  const degraded = freshCounters(130, 144);
+  for (const bucket of Object.values(degraded.components.alpha)) {
+    const failures = bucket.total - bucket.ok;
+    if (failures > 0) bucket.failures_by_reason = { http_503: failures };
+  }
+  degraded.recent_probes = {
+    alpha: Array.from({ length: 6 }, (_, index) => ({
+      checked_at: new Date(Date.now() - (5 - index) * 600000).toISOString(),
+      ok: index === 5,
+      status: index === 5 ? "healthy" : "down",
+      ...(index === 5 ? {} : { reason: "http_503" }),
+    })),
+  };
+  await env.ATLAS_PUBLIC_KV.put(UPTIME_KEY, JSON.stringify(degraded));
   await runReliabilityPass(env, { checked_at: new Date().toISOString() });
   assert.equal(env.notifications.length, 1);
   const payload = env.notifications[0];
   assert.equal(payload.signal_class, "reliability");
   assert.equal(payload.level, "failure");
+  assert.match(payload.message, /Probe evidence \(alpha, 30d\)/);
+  assert.match(payload.message, /http_503=/);
+  assert.match(payload.message, /Recent:/);
+  assert.ok(payload.message.length <= 280);
   assert.match(payload.fields.runbook, /reliability-budget-exhausted\.md$/);
   assert.match(payload.fields.dedup_key, /^reliability:service-a:/);
   const flat = JSON.stringify(payload).toLowerCase();
