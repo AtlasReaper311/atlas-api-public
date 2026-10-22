@@ -45,6 +45,9 @@
  * measured average instead of a per-visitor guess. Failed probes are
  * excluded on purpose; a 5000 ms timeout is a failure fact, not a
  * latency fact, and averaging it in would poison the number.
+ * Failure categories and a six-sample ring are added alongside the
+ * counters. They contain fixed reason codes only, never raw exceptions
+ * or probed URLs, and start accruing with the deployment that adds them.
  */
 
 import { nowIso } from "./http.js";
@@ -52,6 +55,9 @@ import { readState, staleAfterMs } from "../routes/infra.js";
 
 export const ESTATE_KEY = "estate:latest:v1";
 export const UPTIME_KEY = "uptime:days:v1";
+export const RECENT_PROBE_LIMIT = 6;
+export const SAFE_FAILURE_REASON =
+  /^(?:http_[1-5]\d\d|missing_binding|quota_breach|timeout|invalid_health_response|upstream_degraded|probe_error)$/;
 export const COMPONENTS = [
   "registry",
   "notify",
@@ -81,6 +87,27 @@ const WORKFLOW_COMPONENTS = Object.freeze({
 });
 
 const COMPONENT_STATUSES = new Set(["healthy", "degraded", "down", "unknown"]);
+
+function failureReason(result) {
+  const detail = String(result?.detail ?? "").toLowerCase();
+  if (detail.includes("binding missing")) return "missing_binding";
+  if (detail.includes("quota limits breached")) return "quota_breach";
+  const httpStatus = detail.match(/\bhttp\s+([1-5]\d\d)\b/);
+  if (httpStatus) return `http_${httpStatus[1]}`;
+  if (detail.includes("timeout") || detail.includes("timed out")) return "timeout";
+  if (
+    detail.includes("contract unavailable")
+    || detail.includes("contract is invalid")
+    || detail.includes("does not report ok")
+  ) return "invalid_health_response";
+  if (
+    detail.includes("degraded")
+    || detail.includes("offline")
+    || detail.includes("silent")
+    || detail.includes("failing")
+  ) return "upstream_degraded";
+  return "probe_error";
+}
 
 export function componentStatus(result) {
   if (COMPONENT_STATUSES.has(result?.status)) return result.status;
@@ -451,7 +478,7 @@ export async function runEstatePass(env) {
     checked_at: nowIso(),
   };
   await env.ATLAS_PUBLIC_KV.put(ESTATE_KEY, JSON.stringify(snapshot));
-  await accumulateUptime(env, components);
+  await accumulateUptime(env, components, snapshot.checked_at);
   return snapshot;
 }
 
@@ -464,7 +491,7 @@ export async function readEstate(env) {
   }
 }
 
-async function accumulateUptime(env, components) {
+async function accumulateUptime(env, components, checkedAt = nowIso()) {
   const windowDays = Number(env.UPTIME_WINDOW_DAYS || "30");
   let doc;
   try {
@@ -474,10 +501,13 @@ async function accumulateUptime(env, components) {
     doc = null;
   }
   if (!doc || typeof doc !== "object" || !doc.components) {
-    doc = { started_at: nowIso(), components: {} };
+    doc = { started_at: checkedAt, components: {} };
+  }
+  if (!doc.recent_probes || typeof doc.recent_probes !== "object") {
+    doc.recent_probes = {};
   }
 
-  const today = nowIso().slice(0, 10);
+  const today = checkedAt.slice(0, 10);
   const cutoff = new Date(Date.now() - windowDays * 86400000)
     .toISOString()
     .slice(0, 10);
@@ -493,6 +523,21 @@ async function accumulateUptime(env, components) {
         bucket.ms_sum = (bucket.ms_sum || 0) + result.ms;
         bucket.ms_count = (bucket.ms_count || 0) + 1;
       }
+    } else {
+      const reason = failureReason(result);
+      bucket.failures_by_reason ??= {};
+      bucket.failures_by_reason[reason] = (bucket.failures_by_reason[reason] || 0) + 1;
+    }
+
+    const recent = (doc.recent_probes[name] = doc.recent_probes[name] || []);
+    recent.push({
+      checked_at: checkedAt,
+      ok: result?.ok === true,
+      status: componentStatus(result),
+      ...(result?.ok === true ? {} : { reason: failureReason(result) }),
+    });
+    if (recent.length > RECENT_PROBE_LIMIT) {
+      recent.splice(0, recent.length - RECENT_PROBE_LIMIT);
     }
     for (const day of Object.keys(days)) {
       if (day < cutoff) delete days[day];

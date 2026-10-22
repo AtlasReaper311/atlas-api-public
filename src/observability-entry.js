@@ -102,27 +102,16 @@ export function augmentStatsPayload(payload, dora) {
   const estate = payload.estate;
   if (!estate || typeof estate !== "object") return payload;
 
-  estate.components = estate.components && typeof estate.components === "object"
-    ? estate.components
+  estate.supplemental_health = estate.supplemental_health && typeof estate.supplemental_health === "object"
+    ? estate.supplemental_health
     : {};
-  estate.component_details = estate.component_details && typeof estate.component_details === "object"
-    ? estate.component_details
-    : {};
-
-  estate.components[DORA_COMPONENT] = dora?.ok === true;
-  estate.component_details[DORA_COMPONENT] = {
+  estate.supplemental_health[DORA_COMPONENT] = {
     status: dora?.status ?? "unknown",
     detail: dora?.detail ?? "DORA health evidence unavailable",
     latency_ms: Number.isFinite(dora?.latency_ms) ? dora.latency_ms : null,
     evidence_source: dora?.evidence_source ?? DORA_SOURCE,
     measured_at: dora?.measured_at ?? null,
   };
-  estate.operational = Object.values(estate.components).filter((value) => value === true).length;
-  estate.total_components = Object.keys(estate.components).length;
-
-  if (payload.uptime?.components && typeof payload.uptime.components === "object") {
-    payload.uptime.components[DORA_COMPONENT] ??= null;
-  }
 
   return payload;
 }
