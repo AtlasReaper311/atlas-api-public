@@ -87,6 +87,8 @@ const WORKFLOW_COMPONENTS = Object.freeze({
 });
 
 const COMPONENT_STATUSES = new Set(["healthy", "degraded", "down", "unknown"]);
+const DEFAULT_BINDING_PROBE_TIMEOUT_MS = 5_000;
+const QUOTA_BINDING_PROBE_TIMEOUT_MS = 10_000;
 
 function failureReason(result) {
   const detail = String(result?.detail ?? "").toLowerCase();
@@ -120,7 +122,13 @@ function evidence(result, evidenceSource) {
   return { ...result, evidence_source: evidenceSource };
 }
 
-async function probeBinding(binding, url, judge, evidenceSource = url) {
+async function probeBinding(
+  binding,
+  url,
+  judge,
+  evidenceSource = url,
+  timeoutMs = DEFAULT_BINDING_PROBE_TIMEOUT_MS,
+) {
   if (!binding || typeof binding.fetch !== "function") {
     return evidence(
       { ok: false, status: "unknown", detail: "binding missing" },
@@ -130,7 +138,7 @@ async function probeBinding(binding, url, judge, evidenceSource = url) {
   const started = Date.now();
   try {
     const res = await binding.fetch(url, {
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     const verdict = await judge(res);
     verdict.ms = Date.now() - started;
@@ -392,6 +400,9 @@ export async function probeEstate(env) {
       "https://atlas-quota-watch/quota",
       judgeQuota,
       "service-binding:atlas-quota-watch/quota",
+      // The quota snapshot reads several Analytics datasets. Give only this
+      // slower probe extra room; it still fails closed after a bounded wait.
+      QUOTA_BINDING_PROBE_TIMEOUT_MS,
     ),
     probeBinding(
       env.RAMONE_EDGE,
